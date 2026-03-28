@@ -14,7 +14,11 @@ fastf1.Cache.enable_cache("cache")
 
 # Load 2026 China race
 print("Loading 2026 China Grand Prix...")
-laps_df, race_info = get_race_data(2026, "China")
+try:
+    laps_df, race_info = get_race_data(2026, "China")
+except Exception as e:
+    print(f"Failed to load race data: {e}")
+    raise
 
 print(f"\n✓ {race_info['event_name']} ({race_info['year']})")
 print(f"  Circuit: {race_info['circuit']}")
