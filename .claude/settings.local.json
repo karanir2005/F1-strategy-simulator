@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\rushi\\\\Desktop\\\\Folders\\\\Code\\\\F1-strategy-simulator\" -Force | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\) {'Directory'} else {'File'}}} | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\rushi\\\\Desktop\\\\Folders\\\\Code\\\\F1-strategy-simulator\\\\backend\" -Recurse | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\) {'Directory'} else {'File'}}} | Format-List)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\rushi\\\\Desktop\\\\Folders\\\\Code\\\\F1-strategy-simulator\" -File -Force | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\rushi\\\\Desktop\\\\Folders\\\\Code\\\\F1-strategy-simulator\\\\backend\\\\app\" -Recurse | ForEach-Object { $_.FullName.Replace\\('c:\\\\Users\\\\rushi\\\\Desktop\\\\Folders\\\\Code\\\\F1-strategy-simulator\\\\', ''\\) })",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\rushi\\\\Desktop\\\\Folders\\\\Code\\\\F1-strategy-simulator\\\\.github\" -Recurse 2>/dev/null | ForEach-Object { $_.Name })",
+      "Bash(grep -E '\\\\.\\(toml|txt|cfg|ini|yml|yaml|env\\)$')",
+      "Bash(pip list *)"
+    ]
+  }
+}
