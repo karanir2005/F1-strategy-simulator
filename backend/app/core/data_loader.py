@@ -37,6 +37,11 @@ def extract_laps_df(session: fastf1.core.Session) -> pd.DataFrame:
     - compound: Tire compound (SOFT, MEDIUM, HARD, INTERMEDIATE, WET)
     - tire_age: Number of laps on current tire set
     - pit_in_lap: Lap where pit stop occurred (NaN if not a pit lap)
+    - is_green_flag: True if the entire lap was run under green flag racing
+      (no safety car/VSC/yellow/red mixed in) -- FastF1's TrackStatus is a
+      string of every status code that occurred during the lap (e.g. "124"
+      means green, then yellow, then safety car all happened within that
+      one lap), so "1" exactly is the only clean-racing case.
     - position: Race position after lap (from telemetry/race info)
     """
     laps = session.laps.copy()
@@ -62,7 +67,11 @@ def extract_laps_df(session: fastf1.core.Session) -> pd.DataFrame:
     
     # Pit detection: identify pit laps
     laps["pit_in_lap"] = (~laps["PitInTime"].isna()).astype(int)
-    
+
+    # Track status: "1" means green flag for the whole lap; any other code
+    # mixed in (yellow/SC/VSC/red) means part of the lap wasn't clean racing
+    laps["is_green_flag"] = laps["TrackStatus"] == "1"
+
     # Select final columns
     output = laps[
         [
@@ -73,9 +82,10 @@ def extract_laps_df(session: fastf1.core.Session) -> pd.DataFrame:
             "compound",
             "tire_age",
             "pit_in_lap",
+            "is_green_flag",
         ]
     ].copy()
-    
+
     output.columns = [
         "driver",
         "driver_name",
@@ -84,9 +94,46 @@ def extract_laps_df(session: fastf1.core.Session) -> pd.DataFrame:
         "compound",
         "tire_age",
         "pit_in_lap",
+        "is_green_flag",
     ]
     
     return output.reset_index(drop=True)
+
+
+def extract_pit_stops(session: fastf1.core.Session) -> pd.DataFrame:
+    """
+    Extract real pit stop durations from a race session.
+
+    FastF1 sets `PitInTime` on the lap a driver crosses the pit entry line
+    and `PitOutTime` on the following lap, when they cross the pit exit
+    line -- so a stop's duration is the gap between one lap's PitInTime and
+    the *next* lap's PitOutTime for that driver. This is the standard
+    proxy for total pit-lane time loss (used to calibrate
+    race_simulator.py's DEFAULT_PIT_LOSS_SECONDS).
+
+    Returns DataFrame with columns:
+    - driver: Driver number
+    - lap_number: The in-lap (lap on which PitInTime was recorded)
+    - pit_duration_seconds: PitOutTime - PitInTime, in seconds
+    """
+    laps = session.laps.copy()
+    rows = []
+
+    for driver, driver_laps in laps.groupby("Driver"):
+        driver_laps = driver_laps.sort_values("LapNumber").reset_index(drop=True)
+        for i in range(len(driver_laps) - 1):
+            pit_in = driver_laps.loc[i, "PitInTime"]
+            pit_out = driver_laps.loc[i + 1, "PitOutTime"]
+            if pd.notna(pit_in) and pd.notna(pit_out):
+                rows.append(
+                    {
+                        "driver": driver,
+                        "lap_number": driver_laps.loc[i, "LapNumber"],
+                        "pit_duration_seconds": (pit_out - pit_in).total_seconds(),
+                    }
+                )
+
+    return pd.DataFrame(rows, columns=["driver", "lap_number", "pit_duration_seconds"])
 
 
 def get_race_data(year: int, gp: str) -> Tuple[pd.DataFrame, dict]:
