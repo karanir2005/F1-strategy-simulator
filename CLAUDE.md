@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 F1 race strategy simulator with a Monte Carlo engine. Models tire degradation, pit stop timing, safety cars, overtaking probabilities, and weather effects. Phase 2 adds an XGBoost ML model to predict race winners.
 
-**Current state:** Phase 1 in progress — data loading module exists, simulation engine not yet built.
+**Current state:** Phase 1 core simulation engine is built and validated: `data_loader.py`, `tire_model.py`, `race_simulator.py`, `monte_carlo.py`, and the `POST /simulate` API route all exist (see Build Order below). `backend/app/services/` is still empty. There is no `frontend/` directory yet -- per the build order, that comes next now that the engine is validated.
 
 ## Running the Project
 
@@ -14,24 +14,45 @@ F1 race strategy simulator with a Monte Carlo engine. Models tire degradation, p
 # Activate virtual environment (Python 3.14.2)
 .venv\Scripts\Activate.ps1
 
+# Install dependencies (requirements-dev.txt also pulls in requirements.txt)
+pip install -r requirements-dev.txt
+
 # Test the data pipeline
 python test_data_load.py
+
+# Run the API (from backend/)
+cd backend && uvicorn app.main:app --reload
+
+# Run tests (from repo root)
+pytest
 ```
 
-FastF1 caches data in `cache/` — first load of a session is slow (network download), subsequent loads are fast.
+Dependencies are pinned in `requirements.txt` (runtime: fastf1, pandas, numpy, fastapi, uvicorn, pydantic) and `requirements-dev.txt` (adds pytest, httpx for testing). If you add a new dependency, install it and add it to the appropriate file with its pinned version.
+
+FastF1 caches data in `cache/` — first load of a session is slow (network download), subsequent loads are fast. Do not delete this directory.
 
 ## Architecture
 
 ```
 backend/app/
-├── core/           # Simulation logic (data_loader.py exists; tire_model, race_simulator, monte_carlo to be built)
-├── api/            # FastAPI routes (empty — to be built)
-└── services/       # Service wrappers (empty — to be built)
-data/processed/     # Output CSVs from data pipeline
+├── main.py          # FastAPI app entrypoint (uvicorn app.main:app)
+├── core/
+│   ├── data_loader.py     # FastF1 session -> per-lap DataFrame (incl. is_green_flag); also extract_pit_stops() for real pit-lane durations
+│   ├── tire_model.py      # fits degradation + fuel-burn curves from data/processed/*.csv
+│   ├── race_simulator.py  # single-strategy lap loop -> total race time
+│   └── monte_carlo.py     # N noisy runs of race_simulator -> distribution + win_probability
+├── api/routes/
+│   └── simulation.py      # POST /simulate
+└── services/        # empty — not yet needed
+data/processed/     # Output CSVs from data pipeline (one per pulled race)
 cache/              # FastF1 local cache (do not delete)
 ```
 
-**Entry point for the data pipeline:** [test_data_load.py](test_data_load.py) → calls `get_race_data(year, gp)` from `backend/app/core/data_loader.py`.
+**Entry point for the data pipeline:** [test_data_load.py](test_data_load.py) → calls `get_race_data(year, gp)` from `backend/app/core/data_loader.py`, which loads a FastF1 race session, extracts per-lap driver/compound/tire-age/pit/track-status data into a DataFrame, and writes it to `data/processed/`. [pull_races.py](pull_races.py) does this for a whole list of races at once (used to build the tire model's training set).
+
+**Entry point for the API:** `backend/app/main.py` (run with `uvicorn app.main:app --reload` from `backend/`).
+
+**Validation:** [validate_replay.py](validate_replay.py) reconstructs a real driver's actual strategy from pulled race data, runs it through `race_simulator.py`, and compares simulated vs. actual total race time. Rerun this after any change to `tire_model.py` or `race_simulator.py` to check nothing regressed.
 
 ## Tech Stack
 
@@ -42,14 +63,16 @@ cache/              # FastF1 local cache (do not delete)
 
 ## Build Order (per project plan)
 
-The 4 core modules to build next, in order:
+The 4 core modules, all built:
 
-1. `backend/app/core/tire_model.py` — compound-specific polynomial degradation curves + cliff effects
-2. `backend/app/core/race_simulator.py` — lap loop with pit stop time loss
-3. `backend/app/core/monte_carlo.py` — N simulation runs with noise in degradation + pit duration
-4. `backend/app/api/routes/simulation.py` — `POST /simulate` endpoint
+1. `backend/app/core/tire_model.py` — compound-specific polynomial degradation curves + cliff effects. Fitted from `data/processed/*_laps.csv` (currently 10 races). See the module docstring for the safety-car-contamination bug that was found and fixed via `is_green_flag` filtering, and for `fit_shared_fuel_coef`'s known remaining gap. `COMPOUND_PACE_OFFSET_PLACEHOLDER` and `COMPOUND_CLIFF_PENALTY_PLACEHOLDER` are still literature-ballpark placeholders, not fitted from data — see their comments for why.
+2. `backend/app/core/race_simulator.py` — lap loop with tire degradation, fuel burn-off, and pit stop time loss. `DEFAULT_PIT_LOSS_SECONDS` (23.5s) is calibrated from real pit-lane duration data — see `calibrate_pit_loss.py` and the constant's comment.
+3. `backend/app/core/monte_carlo.py` — N simulation runs with noise in lap time and pit duration; both noise magnitudes (`DEFAULT_LAP_TIME_NOISE_STD` 0.8s, `DEFAULT_PIT_LOSS_NOISE_STD` 5.0s) are calibrated from real data — see `calibrate_lap_noise.py` / `calibrate_pit_loss.py` and the module docstring for the scope note on what `win_probability` does and doesn't mean.
+4. `backend/app/api/routes/simulation.py` — `POST /simulate` endpoint, wired into `backend/app/main.py`.
 
-Then add frontend only after the simulation engine is validated against historical data.
+Simulation parameters (degradation rates, pit loss, safety car frequency) should be calibrated from real FastF1 data via `data_loader.py`, not assumed — treat any parameter numbers from early planning notes as unvalidated starting guesses, not targets. Some are still placeholders; grep for "placeholder" across `backend/app/core/` to find them before trusting strategy comparisons in a real decision. `calibrate_pit_loss.py` and `calibrate_lap_noise.py` (repo root) are the calibration scripts for the ones that have been fitted — re-run them if the pulled race set in `pull_races.py` changes materially.
+
+The simulation was validated against historical race replays (`validate_replay.py`) before the API layer was added, per plan — current error is 0.50-2.96% vs. real race times across 3 test cases. Tests live in `backend/tests/` (`pytest` from repo root). The frontend comes next now that the engine is validated and tested.
 
 ## Key Design Decisions
 
@@ -57,11 +80,4 @@ Then add frontend only after the simulation engine is validated against historic
 - **XGBoost over neural networks** for ML predictor — better interpretability and handles F1's sparse historical data
 - **Time-series cross-validation** is mandatory for ML — never use future race data to predict past races
 - **Redis** for hot cache during Monte Carlo iterations (FastF1 fetching is slow)
-- Monte Carlo default: **10,000 simulations** per strategy; sample tire deg variance ±10%, pit stop time μ=22s σ=1.5s, SC events via Poisson process
-
-## Simulation Parameters (reference)
-
-- Tire degradation rates: SOFT ~0.08–0.12s/lap, MEDIUM ~0.04–0.07s/lap, HARD ~0.02–0.04s/lap
-- Safety car probability: ~1.5% per lap (SC), ~1% per lap (VSC)
-- Pit stop time loss: μ=22s, σ=1.5s
-- Target Monte Carlo output: mean position, win probability, p10/p50/p90 race times
+- Monte Carlo default: **10,000 simulations** per strategy; output mean position, win probability, p10/p50/p90 race times
