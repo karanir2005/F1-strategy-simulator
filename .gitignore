@@ -1,1 +1,13 @@
 Plan.md
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# FastF1 cache -- regenerable from the API, not worth tracking going
+# forward (cache/2024/* predates this and stays tracked as-is)
+cache/
+
+# local run logs
+*.log
