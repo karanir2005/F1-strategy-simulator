@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -35,16 +35,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { OptimizerResults } from "@/components/optimizer-results";
 import {
   MAX_RACE_LAPS,
   MAX_SIMULATIONS,
   MAX_START_AGE,
   MAX_STRATEGIES,
+  fetchTracks,
+  runOptimize,
   runSimulation,
   type Compound,
   type Strategy,
   type StrategyResult,
   type SimulateResponse,
+  type TrackOut,
+  type OptimizeResponse,
 } from "@/lib/api";
 
 let nextId = 0;
@@ -148,20 +153,42 @@ function parseNum(value: string): NumField {
   return Number.isNaN(n) ? "" : n;
 }
 
-function getValidationError(
+/** Checks for the editable race numbers (shown when overriding a track, or when no track is available). */
+function getNumbersError(
   baseLaptime: NumField,
+  totalLaps: NumField,
+  pitLossSeconds: NumField,
+): string | null {
+  if (baseLaptime === "" || baseLaptime <= 0 || baseLaptime > 300) {
+    return "Base lap time must be greater than 0 and at most 300 seconds.";
+  }
+  if (pitLossSeconds === "" || pitLossSeconds < 0 || pitLossSeconds > 120) {
+    return "Pit stop loss must be between 0 and 120 seconds.";
+  }
+  if (totalLaps === "" || !Number.isInteger(totalLaps) || totalLaps < 1 || totalLaps > MAX_RACE_LAPS) {
+    return `Total laps must be a whole number from 1 to ${MAX_RACE_LAPS}.`;
+  }
+  return null;
+}
+
+function getValidationError(
+  numbersEditable: boolean,
+  baseLaptime: NumField,
+  totalLaps: NumField,
   nSimulations: NumField,
   pitLossSeconds: NumField,
   strategies: StrategyRow[],
 ): string | null {
-  if (baseLaptime === "" || baseLaptime <= 0) return "Base lap time must be greater than 0.";
+  if (numbersEditable) {
+    const err = getNumbersError(baseLaptime, totalLaps, pitLossSeconds);
+    if (err) return err;
+  }
   if (nSimulations === "" || !Number.isInteger(nSimulations) || nSimulations <= 0) {
     return "Simulations per strategy must be a positive whole number.";
   }
   if (nSimulations > MAX_SIMULATIONS) {
     return `Simulations per strategy must be at most ${MAX_SIMULATIONS.toLocaleString("en-US")}.`;
   }
-  if (pitLossSeconds === "" || pitLossSeconds < 0) return "Pit stop loss must be 0 or more seconds.";
   if (strategies.length === 0) return "Add at least one strategy.";
   if (strategies.length > MAX_STRATEGIES) {
     return `At most ${MAX_STRATEGIES} strategies can be compared at once (you have ${strategies.length}).`;
@@ -245,12 +272,99 @@ export default function Home() {
   const [baseLaptime, setBaseLaptime] = useState<NumField>(90);
   const [nSimulations, setNSimulations] = useState<NumField>(2000);
   const [pitLossSeconds, setPitLossSeconds] = useState<NumField>(DEFAULT_PIT_LOSS_SECONDS);
+  const [totalLaps, setTotalLaps] = useState<NumField>(57);
+  const [tracks, setTracks] = useState<TrackOut[] | null>(null);
+  const [tracksError, setTracksError] = useState<string | null>(null);
+  const [trackId, setTrackId] = useState<string>("");
+  const [override, setOverride] = useState(false);
+  const [maxStops, setMaxStops] = useState(3);
+  const [optResult, setOptResult] = useState<OptimizeResponse | null>(null);
+  const [optLoading, setOptLoading] = useState(false);
+  const [optError, setOptError] = useState<string | null>(null);
   const [strategies, setStrategies] = useState<StrategyRow[]>(initialStrategies);
   const [results, setResults] = useState<SimulateResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const validationError = getValidationError(baseLaptime, nSimulations, pitLossSeconds, strategies);
+  const track = tracks?.find((t) => t.track_id === trackId) ?? null;
+  // numbers are typed by hand when overriding a track, or when no track is available at all
+  const numbersEditable = override || !track;
+  const validationError = getValidationError(
+    numbersEditable,
+    baseLaptime,
+    totalLaps,
+    nSimulations,
+    pitLossSeconds,
+    strategies,
+  );
+  const optValidationError = !track
+    ? "Pick a track to find an optimal strategy."
+    : override
+      ? getNumbersError(baseLaptime, totalLaps, pitLossSeconds)
+      : null;
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchTracks()
+      .then((list) => {
+        if (cancelled) return;
+        setTracks(list);
+        const first = list.find((t) => t.track_id === "austin") ?? list[0];
+        if (first) setTrackId(first.track_id);
+      })
+      .catch((err) => {
+        if (!cancelled) setTracksError(err instanceof Error ? err.message : "Could not load tracks");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function prefillFrom(t: TrackOut) {
+    setBaseLaptime(t.base_laptime_s);
+    setPitLossSeconds(t.pit_loss_s);
+    setTotalLaps(t.total_laps);
+  }
+
+  function selectTrack(id: string) {
+    setTrackId(id);
+    setOptResult(null);
+    setOptError(null);
+    const t = tracks?.find((x) => x.track_id === id);
+    if (t && override) prefillFrom(t);
+  }
+
+  function toggleOverride(on: boolean) {
+    setOverride(on);
+    if (on && track) prefillFrom(track);
+  }
+
+  async function handleOptimize() {
+    if (!track || optValidationError) return;
+    setOptLoading(true);
+    setOptError(null);
+    setOptResult(null);
+    try {
+      setOptResult(
+        await runOptimize({
+          track_id: track.track_id,
+          max_stops: maxStops,
+          top_n: 10, // ask for extra so client-side dedupe still leaves 5 distinct plans
+          ...(override
+            ? {
+                total_laps: totalLaps as number,
+                pit_loss_s: pitLossSeconds as number,
+                base_laptime_s: baseLaptime as number,
+              }
+            : {}),
+        }),
+      );
+    } catch (err) {
+      setOptError(err instanceof Error ? err.message : "Optimizer failed");
+    } finally {
+      setOptLoading(false);
+    }
+  }
 
   function addStrategy() {
     setStrategies((prev) => [
@@ -354,10 +468,13 @@ export default function Home() {
 
     try {
       const response = await runSimulation({
-        base_laptime: baseLaptime as number,
+        ...(track ? { track_id: track.track_id } : {}),
+        // track numbers come from the backend unless overriding (or there is no track)
+        ...(numbersEditable
+          ? { base_laptime: baseLaptime as number, pit_loss_seconds: pitLossSeconds as number }
+          : {}),
         strategies: payload,
         n_simulations: nSimulations as number,
-        pit_loss_seconds: pitLossSeconds as number,
       });
       setResults(response);
     } catch (err) {
@@ -385,51 +502,166 @@ export default function Home() {
         <CardHeader>
           <CardTitle className="text-base">Race Settings</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-        <div className="flex gap-4">
+        <CardContent className="flex flex-col gap-3">
           <div className="space-y-1">
-            <Label htmlFor="base-laptime">Base lap time (s)</Label>
-            <Input
-              id="base-laptime"
-              type="number"
-              step="0.1"
-              value={baseLaptime}
-              onChange={(e) => setBaseLaptime(parseNum(e.target.value))}
-              className="w-32"
-            />
+            <Label>Track</Label>
+            {tracksError ? (
+              <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
+                {tracksError}
+                <p className="mt-1 text-xs">
+                  Track selection and the optimizer are unavailable; enter the race numbers by hand below.
+                </p>
+              </div>
+            ) : !tracks ? (
+              <p className="text-sm text-muted-foreground">Loading tracks...</p>
+            ) : (
+              <Select
+                value={trackId}
+                onValueChange={(v) => {
+                  if (v) selectTrack(v);
+                }}
+              >
+                <SelectTrigger className="w-full max-w-sm" aria-label="Track">
+                  <SelectValue>
+                    {(v: string) => tracks.find((t) => t.track_id === v)?.name ?? "Select a track"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {tracks.map((t) => (
+                    <SelectItem key={t.track_id} value={t.track_id}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
-          <div className="space-y-1">
-            <Label htmlFor="n-sims">Simulations per strategy</Label>
-            <Input
-              id="n-sims"
-              type="number"
-              step="500"
-              value={nSimulations}
-              onChange={(e) => setNSimulations(parseNum(e.target.value))}
-              className="w-32"
-            />
+          {track && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline">{track.total_laps} laps</Badge>
+              <Badge variant="outline">pit loss {track.pit_loss_s.toFixed(1)}s</Badge>
+              <Badge variant="outline">base lap {track.base_laptime_s.toFixed(2)}s</Badge>
+              <Badge variant="outline">
+                {["SOFT", "MEDIUM", "HARD"]
+                  .map((c) => `${c[0]}=${track.compounds?.[c] ?? "?"}`)
+                  .join(" ")}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={track.source_season === 2026 ? "" : "border-amber-500 text-amber-700 dark:text-amber-400"}
+                title={track.notes ?? undefined}
+              >
+                {track.source_season ?? "?"} data
+                {track.source_season !== 2026 ? " (not 2026)" : ""}
+              </Badge>
+            </div>
+          )}
+          {track && (
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={override} onChange={(e) => toggleOverride(e.target.checked)} />
+              Override numbers
+            </label>
+          )}
+          <div className="flex flex-wrap gap-4">
+            {numbersEditable && (
+              <>
+                <div className="space-y-1">
+                  <Label htmlFor="base-laptime">Base lap time (s)</Label>
+                  <Input
+                    id="base-laptime"
+                    type="number"
+                    step="0.1"
+                    value={baseLaptime}
+                    onChange={(e) => setBaseLaptime(parseNum(e.target.value))}
+                    className="w-32"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="pit-loss">Pit stop loss (s)</Label>
+                  <Input
+                    id="pit-loss"
+                    type="number"
+                    step="0.5"
+                    value={pitLossSeconds}
+                    onChange={(e) => setPitLossSeconds(parseNum(e.target.value))}
+                    className="w-32"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="total-laps">Total laps (optimizer)</Label>
+                  <Input
+                    id="total-laps"
+                    type="number"
+                    step="1"
+                    value={totalLaps}
+                    onChange={(e) => setTotalLaps(parseNum(e.target.value))}
+                    className="w-32"
+                  />
+                </div>
+              </>
+            )}
+            <div className="space-y-1">
+              <Label htmlFor="n-sims">Simulations per strategy</Label>
+              <Input
+                id="n-sims"
+                type="number"
+                step="500"
+                value={nSimulations}
+                onChange={(e) => setNSimulations(parseNum(e.target.value))}
+                className="w-32"
+              />
+            </div>
           </div>
-          <div className="space-y-1">
-            <Label htmlFor="pit-loss">Pit stop loss (s)</Label>
-            <Input
-              id="pit-loss"
-              type="number"
-              step="0.5"
-              value={pitLossSeconds}
-              onChange={(e) => setPitLossSeconds(parseNum(e.target.value))}
-              className="w-32"
-            />
+          {track && !override && (
+            <p className="text-xs text-muted-foreground">
+              The track&apos;s base lap time and pit loss are used for the comparison below. Your strategies define
+              their own lap counts; they should add up to {track.total_laps} to match this race.
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Base lap time shifts every lap of every strategy by the same amount, so it
+            won&apos;t change which strategy wins if they run the same total lap count
+            (it will if their lap counts differ). The charts below auto-scale their
+            axes, so a base lap time change can look invisible there -- check the
+            Mean/p10/p50/p90 columns in the results table for the actual numbers.
+          </p>
+          <div className="flex flex-wrap items-center gap-3 border-t pt-3">
+            <div className="flex items-center gap-2">
+              <Label>Max stops</Label>
+              <Select value={String(maxStops)} onValueChange={(v) => v && setMaxStops(Number(v))}>
+                <SelectTrigger className="w-20" aria-label="Max stops">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleOptimize} disabled={optLoading || !!optValidationError}>
+              {optLoading && (
+                <span
+                  className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+                  aria-hidden="true"
+                />
+              )}
+              {optLoading ? "Searching..." : "Find optimal strategy"}
+            </Button>
+            {optValidationError && !optLoading && (
+              <span className="text-xs text-muted-foreground">{optValidationError}</span>
+            )}
           </div>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Base lap time shifts every lap of every strategy by the same amount, so it
-          won&apos;t change which strategy wins if they run the same total lap count
-          (it will if their lap counts differ). The charts below auto-scale their
-          axes, so a base lap time change can look invisible there -- check the
-          Mean/p10/p50/p90 columns in the results table for the actual numbers.
-        </p>
         </CardContent>
       </Card>
+
+      {optError && (
+        <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
+          <p className="font-medium">Optimizer failed</p>
+          <p className="mt-1">{optError}</p>
+        </div>
+      )}
+      {optResult && <OptimizerResults result={optResult} />}
 
       <div className="space-y-4">
         {strategies.map((strategy) => (

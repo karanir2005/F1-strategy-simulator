@@ -21,8 +21,9 @@ from typing import List, Literal, Optional
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from fastapi import APIRouter
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
+from app.api.deps import resolve_track
 from app.core.monte_carlo import (
     DEFAULT_LAP_TIME_NOISE_STD,
     DEFAULT_N_SIMULATIONS,
@@ -93,8 +94,21 @@ class StrategyIn(BaseModel):
 
 
 class SimulateRequest(BaseModel):
-    base_laptime: float = Field(
-        gt=0, description="Fresh-tire, low-fuel reference lap time, in seconds"
+    track_id: Optional[str] = Field(
+        default=None,
+        description=(
+            "Optional track from GET /tracks. Fills base_laptime, pit_loss_seconds and "
+            "(unless given) pit_loss_noise_std from the track when those are omitted; "
+            "explicit values win. Unknown id -> 404."
+        ),
+    )
+    base_laptime: Optional[float] = Field(
+        default=None,
+        gt=0,
+        description=(
+            "Fresh-tire, low-fuel reference lap time, in seconds. Required unless "
+            "track_id is given (then defaults to the track's base_laptime_s)"
+        ),
     )
     strategies: List[StrategyIn] = Field(
         min_length=1,
@@ -107,8 +121,21 @@ class SimulateRequest(BaseModel):
     n_simulations: int = Field(default=DEFAULT_N_SIMULATIONS, gt=0, le=50_000)
     lap_time_noise_std: float = Field(default=DEFAULT_LAP_TIME_NOISE_STD, ge=0)
     pit_loss_noise_std: float = Field(default=DEFAULT_PIT_LOSS_NOISE_STD, ge=0)
-    pit_loss_seconds: float = Field(default=DEFAULT_PIT_LOSS_SECONDS, ge=0)
+    pit_loss_seconds: Optional[float] = Field(
+        default=None,
+        ge=0,
+        description=(
+            f"Seconds lost per stop; default {DEFAULT_PIT_LOSS_SECONDS} "
+            "(or the track's pit_loss_s when track_id is given)"
+        ),
+    )
     seed: Optional[int] = None
+
+    @model_validator(mode="after")
+    def base_laptime_or_track(self):
+        if self.base_laptime is None and self.track_id is None:
+            raise ValueError("base_laptime is required unless track_id is given")
+        return self
 
     @field_validator("strategies")
     @classmethod
@@ -224,6 +251,25 @@ def get_tire_model() -> dict:
 def simulate(request: SimulateRequest) -> SimulateResponse:
     tire_model = get_tire_model()
 
+    # resolve defaults: explicit request value > track value > global default.
+    # Without track_id this is exactly the old behaviour.
+    base_laptime = request.base_laptime
+    pit_loss = request.pit_loss_seconds
+    pit_noise = request.pit_loss_noise_std
+    if request.track_id is not None:
+        track = resolve_track(request.track_id)
+        if base_laptime is None:
+            base_laptime = track["base_laptime_s"]
+        if pit_loss is None:
+            pit_loss = track["pit_loss_s"]
+        if (
+            "pit_loss_noise_std" not in request.model_fields_set
+            and track.get("pit_loss_noise_std_s") is not None
+        ):
+            pit_noise = track["pit_loss_noise_std_s"]
+    if pit_loss is None:
+        pit_loss = DEFAULT_PIT_LOSS_SECONDS
+
     strategies = {
         strategy.name: [Stint(s.compound, s.laps, s.start_age) for s in strategy.stints]
         for strategy in request.strategies
@@ -231,12 +277,12 @@ def simulate(request: SimulateRequest) -> SimulateResponse:
 
     summary = compare_strategies(
         strategies,
-        base_laptime=request.base_laptime,
+        base_laptime=base_laptime,
         tire_model=tire_model,
         n_simulations=request.n_simulations,
         lap_time_noise_std=request.lap_time_noise_std,
-        pit_loss_noise_std=request.pit_loss_noise_std,
-        pit_loss_seconds=request.pit_loss_seconds,
+        pit_loss_noise_std=pit_noise,
+        pit_loss_seconds=pit_loss,
         seed=request.seed,
     )
 
@@ -246,9 +292,9 @@ def simulate(request: SimulateRequest) -> SimulateResponse:
     traces = {
         name: simulate_race(
             stints,
-            base_laptime=request.base_laptime,
+            base_laptime=base_laptime,
             tire_model=tire_model,
-            pit_loss_seconds=request.pit_loss_seconds,
+            pit_loss_seconds=pit_loss,
         )
         for name, stints in strategies.items()
     }
