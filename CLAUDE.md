@@ -6,7 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 F1 race strategy simulator with a Monte Carlo engine. Models tire degradation, pit stop timing, safety cars, overtaking probabilities, and weather effects. Phase 2 adds an XGBoost ML model to predict race winners.
 
-**Current state:** Phase 1 core simulation engine is built and validated: `data_loader.py`, `tire_model.py`, `race_simulator.py`, `monte_carlo.py`, and the `POST /simulate` API route all exist (see Build Order below). `backend/app/services/` is still empty. There is no `frontend/` directory yet -- per the build order, that comes next now that the engine is validated.
+**Current state:** Phase 1 core simulation engine is built and validated: `data_loader.py`, `tire_model.py`, `race_simulator.py`, `monte_carlo.py`, and the `POST /simulate` API route all exist (see Build Order below). `backend/app/services/` is still empty. A first Next.js frontend exists in `frontend/` (single-page strategy comparison against `POST /simulate`).
+
+**Next:** the engine still simulates one car in isolation and can't meaningfully rank strategies yet. See `team/ROADMAP.md` for why, and the phased plan (full-grid sim, safety cars, per-track calibration, optimizer).
+
+## Agent team
+
+Work is split across subagents in `.claude/agents/` (researcher, data-scientist, backend-engineer, frontend-engineer, qa-engineer). The main session orchestrates. Protocol, lane ownership and the handoff template are in `team/README.md`, tasks are in `team/BOARD.md` (orchestrator-only edits), and handoffs and research notes go in `team/handoffs/` and `team/research/`. Every code task goes through `qa-engineer` before it's marked done.
 
 ## Running the Project
 
@@ -72,7 +78,9 @@ The 4 core modules, all built:
 
 Simulation parameters (degradation rates, pit loss, safety car frequency) should be calibrated from real FastF1 data via `data_loader.py`, not assumed — treat any parameter numbers from early planning notes as unvalidated starting guesses, not targets. Some are still placeholders; grep for "placeholder" across `backend/app/core/` to find them before trusting strategy comparisons in a real decision. `calibrate_pit_loss.py` and `calibrate_lap_noise.py` (repo root) are the calibration scripts for the ones that have been fitted — re-run them if the pulled race set in `pull_races.py` changes materially.
 
-The simulation was validated against historical race replays (`validate_replay.py`) before the API layer was added, per plan — current error is 0.50-2.96% vs. real race times across 3 test cases. Tests live in `backend/tests/` (`pytest` from repo root). The frontend comes next now that the engine is validated and tested.
+The simulation was validated against historical race replays (`validate_replay.py`) before the API layer was added, per plan — current error across 5 replays is 0.02–1.03% excluding SC/VSC/red laps (the engine has no safety cars yet), 0.0–4.7% including them. Note `validate_replay.py` uses the driver's own fastest lap as `base_laptime`, which leaks the answer; the non-leaky check is `validate_scorecard.py` (leave-one-race-out tyre fits, qualifying-based pace, results in `data/scorecard/latest.json`). Tests live in `backend/tests/` (`pytest` from repo root).
+
+**Data access:** FastF1 live timing has been paywalled since 2026-10-15 and FastF1 silently returns empty data, so new races come from OpenF1 (`api.openf1.org`) and Jolpica instead. See the DATA ACCESS INCIDENT section in `team/BOARD.md`. The race predictor (`predict_race.py`, `backend/app/core/predictor.py`) runs on Jolpica data.
 
 ## Key Design Decisions
 
