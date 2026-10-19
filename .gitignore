@@ -11,3 +11,7 @@ cache/
 
 # local run logs
 *.log
+
+# OpenF1 raw API cache (182 MB) -- free API, regenerable with pull_openf1.py;
+# the processed output in data/staging/ is tracked instead
+data/openf1/raw/

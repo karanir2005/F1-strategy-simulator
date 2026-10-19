@@ -1,0 +1,21 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+RUS,63,Mercedes,1.0,1.0,1,Finished,62.0,25.0,0.0,6022.367,89.928,89.562,89.158,2025,2025_regs,jolpica
+VER,1,Red Bull,2.0,2.0,2,Finished,62.0,18.0,5.4299999999993815,6027.797,90.02799999999999,89.572,89.34,2025,2025_regs,jolpica
+NOR,4,McLaren,5.0,3.0,3,Finished,62.0,15.0,6.0659999999998035,6028.433,89.932,89.809,89.586,2025,2025_regs,jolpica
+PIA,81,McLaren,3.0,4.0,4,Finished,62.0,12.0,8.14599999999973,6030.513,90.313,89.813,89.524,2025,2025_regs,jolpica
+ANT,12,Mercedes,4.0,5.0,5,Finished,62.0,10.0,33.680999999999585,6056.048,90.036,89.649,89.537,2025,2025_regs,jolpica
+LEC,16,Ferrari,7.0,6.0,6,Finished,62.0,8.0,45.996000000000095,6068.363,90.37,89.914,89.78399999999999,2025,2025_regs,jolpica
+ALO,14,Aston Martin,10.0,7.0,7,Finished,62.0,6.0,80.66699999999946,6103.034,90.745,90.054,89.955,2025,2025_regs,jolpica
+HAM,44,Ferrari,6.0,8.0,8,Finished,62.0,4.0,85.2510000000002,6107.618,89.765,89.936,89.688,2025,2025_regs,jolpica
+BEA,87,Haas F1 Team,9.0,9.0,9,Finished,62.0,2.0,93.52700000000004,6115.894,90.42,90.076,89.868,2025,2025_regs,jolpica
+SAI,55,Williams,18.0,10.0,10,Lapped,61.0,1.0,,,,,,2025,2025_regs,jolpica
+HAD,6,RB F1 Team,8.0,11.0,11,Lapped,61.0,0.0,,,90.214,90.01599999999999,89.846,2025,2025_regs,jolpica
+TSU,22,Red Bull,13.0,12.0,12,Lapped,61.0,0.0,,,90.574,90.35300000000001,,2025,2025_regs,jolpica
+STR,18,Aston Martin,15.0,13.0,13,Lapped,61.0,0.0,,,90.949,,,2025,2025_regs,jolpica
+ALB,23,Williams,20.0,14.0,14,Lapped,61.0,0.0,,,,,,2025,2025_regs,jolpica
+LAW,30,RB F1 Team,12.0,15.0,15,Lapped,61.0,0.0,,,90.681,90.32,,2025,2025_regs,jolpica
+COL,43,Alpine F1 Team,16.0,16.0,16,Lapped,61.0,0.0,,,90.982,,,2025,2025_regs,jolpica
+BOR,5,Sauber,14.0,17.0,17,Lapped,61.0,0.0,,,90.82,,,2025,2025_regs,jolpica
+OCO,31,Haas F1 Team,17.0,18.0,18,Lapped,61.0,0.0,,,90.989,,,2025,2025_regs,jolpica
+GAS,10,Alpine F1 Team,19.0,19.0,19,Lapped,61.0,0.0,,,91.261,,,2025,2025_regs,jolpica
+HUL,27,Sauber,11.0,20.0,20,Lapped,61.0,0.0,,,90.715,90.14099999999999,,2025,2025_regs,jolpica

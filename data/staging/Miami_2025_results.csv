@@ -1,0 +1,21 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+PIA,81,McLaren,4.0,1.0,1,Finished,57.0,25.0,0.0,5331.587,,,,2025,2025_regs,jolpica
+NOR,4,McLaren,2.0,2.0,2,Finished,57.0,18.0,4.6299999999992,5336.217,,,,2025,2025_regs,jolpica
+RUS,63,Mercedes,5.0,3.0,3,Finished,57.0,15.0,37.64399999999932,5369.231,,,,2025,2025_regs,jolpica
+VER,1,Red Bull,1.0,4.0,4,Finished,57.0,12.0,39.95599999999922,5371.543,,,,2025,2025_regs,jolpica
+ALB,23,Williams,7.0,5.0,5,Finished,57.0,10.0,48.06700000000001,5379.654,,,,2025,2025_regs,jolpica
+ANT,12,Mercedes,3.0,6.0,6,Finished,57.0,8.0,55.5019999999995,5387.089,,,,2025,2025_regs,jolpica
+LEC,16,Ferrari,8.0,7.0,7,Finished,57.0,6.0,57.03599999999915,5388.623,,,,2025,2025_regs,jolpica
+HAM,44,Ferrari,12.0,8.0,8,Finished,57.0,4.0,60.185999999999694,5391.773,,,,2025,2025_regs,jolpica
+SAI,55,Williams,6.0,9.0,9,Finished,57.0,2.0,60.576999999999316,5392.164,,,,2025,2025_regs,jolpica
+TSU,22,Red Bull,10.0,10.0,10,Finished,57.0,1.0,74.43399999999929,5406.021,,,,2025,2025_regs,jolpica
+HAD,6,RB F1 Team,11.0,11.0,11,Finished,57.0,0.0,74.60199999999986,5406.189,,,,2025,2025_regs,jolpica
+OCO,31,Haas F1 Team,9.0,12.0,12,Finished,57.0,0.0,82.0059999999994,5413.593,,,,2025,2025_regs,jolpica
+GAS,10,Alpine F1 Team,20.0,13.0,13,Finished,57.0,0.0,90.44499999999971,5422.032,,,,2025,2025_regs,jolpica
+HUL,27,Sauber,16.0,14.0,14,Lapped,56.0,0.0,,,,,,2025,2025_regs,jolpica
+ALO,14,Aston Martin,17.0,15.0,15,Lapped,56.0,0.0,,,,,,2025,2025_regs,jolpica
+STR,18,Aston Martin,18.0,16.0,16,Lapped,56.0,0.0,,,,,,2025,2025_regs,jolpica
+LAW,30,RB F1 Team,15.0,17.0,R,Retired,36.0,0.0,,,,,,2025,2025_regs,jolpica
+BOR,5,Sauber,13.0,18.0,R,Retired,30.0,0.0,,,,,,2025,2025_regs,jolpica
+BEA,87,Haas F1 Team,19.0,19.0,R,Retired,27.0,0.0,,,,,,2025,2025_regs,jolpica
+DOO,7,Alpine F1 Team,14.0,20.0,R,Retired,0.0,0.0,,,,,,2025,2025_regs,jolpica

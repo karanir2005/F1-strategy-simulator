@@ -37,12 +37,11 @@ RACES = [
     (2026, "Hungary"),
 ]
 
-# PENDING T-009 (user decision): (2026, "Spain") was meant to be Barcelona
-# but FastF1 resolves it to the 2026-09-13 Madrid "Spanish Grand Prix";
-# Barcelona is the "Barcelona Grand Prix" (2026-06-14). Neither is cached,
-# so it never produced a CSV. Removed from RACES until T-009 decides which
-# race(s) to pull -- leaving it in would trigger a network download (or,
-# offline, a guaranteed failure) on every re-run.
+# T-009 (2026-10-19): Spain/Barcelona/Madrid are NOT pulled here. FastF1 live
+# timing is now paywalled (401), so every race outside the 10 cached above
+# comes from OpenF1 + Jolpica via pull_openf1.py (-> data/staging/). Labels:
+# the 2026 "Spanish Grand Prix" is Madrid (round 14, label "Madrid");
+# Barcelona is the "Barcelona Grand Prix" (round 7, label "Barcelona").
 
 
 def main() -> None:

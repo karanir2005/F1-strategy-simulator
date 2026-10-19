@@ -1,0 +1,21 @@
+driver,driver_number,team,quali_position,q1_s,q2_s,q3_s,season,era,source
+PIA,81,McLaren,1,91.392,90.45400000000001,89.84100000000001,2025,2025_regs,jolpica
+RUS,63,Mercedes,2,91.494,90.664,90.009,2025,2025_regs,jolpica
+LEC,16,Ferrari,3,91.45400000000001,90.724,90.175,2025,2025_regs,jolpica
+ANT,12,Mercedes,4,91.41499999999999,90.71600000000001,90.213,2025,2025_regs,jolpica
+GAS,10,Alpine F1 Team,5,91.462,90.643,90.21600000000001,2025,2025_regs,jolpica
+NOR,4,McLaren,6,91.107,90.56,90.267,2025,2025_regs,jolpica
+VER,1,Red Bull,7,91.303,91.019,90.423,2025,2025_regs,jolpica
+SAI,55,Williams,8,91.59100000000001,90.844,90.68,2025,2025_regs,jolpica
+HAM,44,Ferrari,9,91.219,91.009,90.77199999999999,2025,2025_regs,jolpica
+TSU,22,Red Bull,10,91.751,91.22800000000001,91.303,2025,2025_regs,jolpica
+DOO,7,Alpine F1 Team,11,91.414,91.245,,2025,2025_regs,jolpica
+HAD,6,RB F1 Team,12,91.59100000000001,91.271,,2025,2025_regs,jolpica
+ALO,14,Aston Martin,13,91.634,91.886,,2025,2025_regs,jolpica
+OCO,31,Haas F1 Team,14,91.594,,,2025,2025_regs,jolpica
+ALB,23,Williams,15,92.03999999999999,,,2025,2025_regs,jolpica
+HUL,27,Sauber,16,92.06700000000001,,,2025,2025_regs,jolpica
+LAW,30,RB F1 Team,17,92.16499999999999,,,2025,2025_regs,jolpica
+BOR,5,Sauber,18,92.186,,,2025,2025_regs,jolpica
+STR,18,Aston Martin,19,92.283,,,2025,2025_regs,jolpica
+BEA,87,Haas F1 Team,20,92.37299999999999,,,2025,2025_regs,jolpica

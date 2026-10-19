@@ -1,0 +1,21 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+VER,1,Red Bull,1.0,1.0,1,Finished,58.0,25.0,0.0,5167.469,82.877,82.752,82.207,2025,2025_regs,jolpica
+PIA,81,McLaren,3.0,2.0,2,Finished,58.0,18.0,12.594000000000051,5180.063,82.605,83.021,82.437,2025,2025_regs,jolpica
+NOR,4,McLaren,2.0,3.0,3,Finished,58.0,15.0,16.572000000000116,5184.041,83.178,82.804,82.408,2025,2025_regs,jolpica
+LEC,16,Ferrari,5.0,4.0,4,Finished,58.0,12.0,23.27899999999954,5190.748,83.163,82.94800000000001,82.73,2025,2025_regs,jolpica
+RUS,63,Mercedes,4.0,5.0,5,Finished,58.0,10.0,48.5630000000001,5216.032,83.247,82.73,82.645,2025,2025_regs,jolpica
+ALO,14,Aston Martin,6.0,6.0,6,Finished,58.0,8.0,67.5619999999999,5235.031,83.071,82.861,82.902,2025,2025_regs,jolpica
+OCO,31,Haas F1 Team,8.0,7.0,7,Finished,58.0,6.0,69.8760000000002,5237.345,83.334,83.023,82.913,2025,2025_regs,jolpica
+HAM,44,Ferrari,16.0,8.0,8,Finished,58.0,4.0,72.67000000000007,5240.139,83.394,,,2025,2025_regs,jolpica
+HUL,27,Sauber,18.0,9.0,9,Finished,58.0,2.0,79.01400000000012,5246.483,83.45,,,2025,2025_regs,jolpica
+STR,18,Aston Martin,15.0,10.0,10,Finished,58.0,1.0,79.52300000000014,5246.992,83.316,83.09700000000001,,2025,2025_regs,jolpica
+BOR,5,Sauber,7.0,11.0,11,Finished,58.0,0.0,81.04299999999967,5248.512,83.374,82.874,82.904,2025,2025_regs,jolpica
+BEA,87,Haas F1 Team,11.0,12.0,12,Finished,58.0,0.0,81.16600000000017,5248.635,83.254,83.041,,2025,2025_regs,jolpica
+SAI,55,Williams,12.0,13.0,13,Finished,58.0,0.0,82.15800000000036,5249.627,83.187,83.042,,2025,2025_regs,jolpica
+TSU,22,Red Bull,10.0,14.0,14,Finished,58.0,0.0,83.79399999999987,5251.263,83.386,83.03399999999999,,2025,2025_regs,jolpica
+ANT,12,Mercedes,14.0,15.0,15,Finished,58.0,0.0,84.39900000000034,5251.868,82.894,83.08,,2025,2025_regs,jolpica
+ALB,23,Williams,17.0,16.0,16,Finished,58.0,0.0,90.32700000000023,5257.796,83.416,,,2025,2025_regs,jolpica
+HAD,6,RB F1 Team,9.0,17.0,17,Lapped,57.0,0.0,,,83.373,82.997,83.072,2025,2025_regs,jolpica
+LAW,30,RB F1 Team,13.0,18.0,18,Lapped,57.0,0.0,,,83.265,83.077,,2025,2025_regs,jolpica
+GAS,10,Alpine F1 Team,19.0,19.0,19,Lapped,57.0,0.0,,,83.468,,,2025,2025_regs,jolpica
+COL,43,Alpine F1 Team,20.0,20.0,20,Lapped,57.0,0.0,,,83.89,,,2025,2025_regs,jolpica

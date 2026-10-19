@@ -1,0 +1,21 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+VER,1,Red Bull,1.0,1.0,1,Finished,53.0,25.0,0.0,4404.325,79.455,79.14,78.792,2025,2025_regs,jolpica
+NOR,4,McLaren,2.0,2.0,2,Finished,53.0,18.0,19.207000000000335,4423.532,79.517,79.293,78.869,2025,2025_regs,jolpica
+PIA,81,McLaren,3.0,3.0,3,Finished,53.0,15.0,21.351000000000568,4425.676,79.711,79.286,78.982,2025,2025_regs,jolpica
+LEC,16,Ferrari,4.0,4.0,4,Finished,53.0,12.0,25.623999999999796,4429.949,79.689,79.31,79.007,2025,2025_regs,jolpica
+RUS,63,Mercedes,5.0,5.0,5,Finished,53.0,10.0,32.88100000000031,4437.206,79.414,79.287,79.157,2025,2025_regs,jolpica
+HAM,44,Ferrari,10.0,6.0,6,Finished,53.0,8.0,37.449000000000524,4441.774,79.765,79.371,79.124,2025,2025_regs,jolpica
+ALB,23,Williams,14.0,7.0,7,Finished,53.0,6.0,50.53700000000026,4454.862,79.837,79.583,,2025,2025_regs,jolpica
+BOR,5,Sauber,7.0,8.0,8,Finished,53.0,4.0,58.48400000000038,4462.809,79.688,79.32300000000001,79.39,2025,2025_regs,jolpica
+ANT,12,Mercedes,6.0,9.0,9,Finished,53.0,2.0,59.762000000000626,4464.087,79.747,79.245,79.2,2025,2025_regs,jolpica
+HAD,6,RB F1 Team,19.0,10.0,10,Finished,53.0,1.0,63.89100000000053,4468.216,79.917,,,2025,2025_regs,jolpica
+SAI,55,Williams,13.0,11.0,11,Finished,53.0,0.0,64.46900000000005,4468.794,79.644,79.52799999999999,,2025,2025_regs,jolpica
+BEA,87,Haas F1 Team,11.0,12.0,12,Finished,53.0,0.0,79.28800000000047,4483.613,79.688,79.446,,2025,2025_regs,jolpica
+TSU,22,Red Bull,9.0,13.0,13,Finished,53.0,0.0,80.70100000000002,4485.026,79.619,79.43299999999999,79.519,2025,2025_regs,jolpica
+LAW,30,RB F1 Team,18.0,14.0,14,Finished,53.0,0.0,82.35100000000057,4486.676,80.279,,,2025,2025_regs,jolpica
+OCO,31,Haas F1 Team,15.0,15.0,15,Lapped,52.0,0.0,,,79.816,79.707,,2025,2025_regs,jolpica
+GAS,10,Alpine F1 Team,20.0,16.0,16,Lapped,52.0,0.0,,,80.10300000000001,,,2025,2025_regs,jolpica
+COL,43,Alpine F1 Team,17.0,17.0,17,Lapped,52.0,0.0,,,79.992,,,2025,2025_regs,jolpica
+STR,18,Aston Martin,16.0,18.0,18,Lapped,52.0,0.0,,,79.94800000000001,,,2025,2025_regs,jolpica
+ALO,14,Aston Martin,8.0,19.0,R,Retired,24.0,0.0,,,79.658,79.362,79.424,2025,2025_regs,jolpica
+HUL,27,Sauber,12.0,20.0,W,Did not start,0.0,0.0,,,79.777,79.498,,2025,2025_regs,jolpica

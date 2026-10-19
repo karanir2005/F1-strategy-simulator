@@ -1,0 +1,23 @@
+driver,driver_number,team,quali_position,q1_s,q2_s,q3_s,season,era,source
+ANT,12,Mercedes,1,88.65299999999999,88.289,87.798,2026,2026_regs,jolpica
+VER,3,Red Bull,2,89.099,88.116,87.964,2026,2026_regs,jolpica
+LEC,16,Ferrari,3,88.938,88.315,88.143,2026,2026_regs,jolpica
+NOR,1,McLaren,4,89.18299999999999,88.92,88.18299999999999,2026,2026_regs,jolpica
+RUS,63,Mercedes,5,89.492,88.477,88.197,2026,2026_regs,jolpica
+HAM,44,Ferrari,6,89.483,88.477,88.319,2026,2026_regs,jolpica
+PIA,81,McLaren,7,89.92,88.332,88.5,2026,2026_regs,jolpica
+COL,43,Alpine F1 Team,8,89.584,88.975,88.762,2026,2026_regs,jolpica
+GAS,10,Alpine F1 Team,9,89.914,89.07,88.81,2026,2026_regs,jolpica
+HUL,27,Audi,10,89.645,89.439,,2026,2026_regs,jolpica
+LAW,30,RB F1 Team,11,89.595,89.499,,2026,2026_regs,jolpica
+BEA,87,Haas F1 Team,12,89.34,89.56700000000001,,2026,2026_regs,jolpica
+SAI,55,Williams,13,89.53999999999999,89.568,,2026,2026_regs,jolpica
+OCO,31,Haas F1 Team,14,89.838,89.77199999999999,,2026,2026_regs,jolpica
+ALB,23,Williams,15,89.72,89.946,,2026,2026_regs,jolpica
+LIN,41,RB F1 Team,16,90.133,,,2026,2026_regs,jolpica
+ALO,14,Aston Martin,17,91.098,,,2026,2026_regs,jolpica
+STR,18,Aston Martin,18,91.164,,,2026,2026_regs,jolpica
+BOT,77,Cadillac F1 Team,19,91.629,,,2026,2026_regs,jolpica
+PER,11,Cadillac F1 Team,20,91.967,,,2026,2026_regs,jolpica
+BOR,5,Audi,21,93.737,,,2026,2026_regs,jolpica
+HAD,6,Red Bull,22,,,,2026,2026_regs,jolpica

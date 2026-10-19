@@ -1,0 +1,21 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+NOR,4,McLaren,1.0,1.0,1,Finished,70.0,25.0,0.0,5027.693,64.672,64.41,63.971000000000004,2025,2025_regs,jolpica
+PIA,81,McLaren,3.0,2.0,2,Finished,70.0,18.0,2.694999999999709,5030.388,64.966,64.556,64.554,2025,2025_regs,jolpica
+LEC,16,Ferrari,2.0,3.0,3,Finished,70.0,15.0,19.81999999999971,5047.513,65.197,64.734,64.492,2025,2025_regs,jolpica
+HAM,44,Ferrari,4.0,4.0,4,Finished,70.0,12.0,29.019999999999527,5056.713,65.115,64.896,64.582,2025,2025_regs,jolpica
+RUS,63,Mercedes,5.0,5.0,5,Finished,70.0,10.0,62.39599999999973,5090.089,65.189,64.86,64.763,2025,2025_regs,jolpica
+LAW,30,RB F1 Team,6.0,6.0,6,Finished,70.0,8.0,67.7539999999999,5095.447,65.017,65.041,64.926,2025,2025_regs,jolpica
+ALO,14,Aston Martin,11.0,7.0,7,Lapped,69.0,6.0,,,65.197,65.128,,2025,2025_regs,jolpica
+BOR,5,Sauber,8.0,8.0,8,Lapped,69.0,4.0,,,65.123,64.846,65.132,2025,2025_regs,jolpica
+HUL,27,Sauber,20.0,9.0,9,Lapped,69.0,2.0,,,65.606,,,2025,2025_regs,jolpica
+OCO,31,Haas F1 Team,17.0,10.0,10,Lapped,69.0,1.0,,,65.364,,,2025,2025_regs,jolpica
+BEA,87,Haas F1 Team,15.0,11.0,11,Lapped,69.0,0.0,,,65.218,65.312,,2025,2025_regs,jolpica
+HAD,6,RB F1 Team,13.0,12.0,12,Lapped,69.0,0.0,,,65.063,65.226,,2025,2025_regs,jolpica
+GAS,10,Alpine F1 Team,10.0,13.0,13,Lapped,69.0,0.0,,,65.054,64.846,65.649,2025,2025_regs,jolpica
+STR,18,Aston Martin,16.0,14.0,14,Lapped,69.0,0.0,,,65.329,,,2025,2025_regs,jolpica
+COL,43,Alpine F1 Team,14.0,15.0,15,Lapped,69.0,0.0,,,65.278,65.288,,2025,2025_regs,jolpica
+TSU,22,Red Bull,18.0,16.0,16,Lapped,68.0,0.0,,,65.369,,,2025,2025_regs,jolpica
+ALB,23,Williams,12.0,17.0,R,Retired,15.0,0.0,,,65.143,65.205,,2025,2025_regs,jolpica
+VER,1,Red Bull,7.0,18.0,R,Retired,0.0,0.0,,,65.106,64.836,64.929,2025,2025_regs,jolpica
+ANT,12,Mercedes,9.0,19.0,R,Retired,0.0,0.0,,,65.178,65.05199999999999,65.276,2025,2025_regs,jolpica
+SAI,55,Williams,19.0,20.0,W,Did not start,0.0,0.0,,,65.582,,,2025,2025_regs,jolpica

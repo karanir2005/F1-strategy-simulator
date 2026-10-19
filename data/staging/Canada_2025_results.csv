@@ -1,0 +1,21 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+RUS,63,Mercedes,1.0,1.0,1,Finished,70.0,25.0,0.0,5512.688,72.075,71.57,70.899,2025,2025_regs,jolpica
+VER,1,Red Bull,2.0,2.0,2,Finished,70.0,18.0,0.22800000000006548,5512.916,72.054,71.638,71.059,2025,2025_regs,jolpica
+ANT,12,Mercedes,4.0,3.0,3,Finished,70.0,15.0,1.0140000000001237,5513.702,72.279,71.974,71.391,2025,2025_regs,jolpica
+PIA,81,McLaren,3.0,4.0,4,Finished,70.0,12.0,2.108999999999469,5514.797,71.939,71.715,71.12,2025,2025_regs,jolpica
+LEC,16,Ferrari,8.0,5.0,5,Finished,70.0,10.0,3.4420000000000073,5516.13,72.038,71.626,71.682,2025,2025_regs,jolpica
+HAM,44,Ferrari,5.0,6.0,6,Finished,70.0,8.0,10.712999999999738,5523.401,71.952,71.885,71.526,2025,2025_regs,jolpica
+ALO,14,Aston Martin,6.0,7.0,7,Finished,70.0,6.0,10.971999999999753,5523.66,72.07300000000001,71.805,71.586,2025,2025_regs,jolpica
+HUL,27,Sauber,11.0,8.0,8,Finished,70.0,4.0,15.363999999999578,5528.052,72.32300000000001,72.18299999999999,,2025,2025_regs,jolpica
+OCO,31,Haas F1 Team,14.0,9.0,9,Lapped,69.0,2.0,,,72.378,72.634,,2025,2025_regs,jolpica
+SAI,55,Williams,16.0,10.0,10,Lapped,69.0,1.0,,,72.398,,,2025,2025_regs,jolpica
+BEA,87,Haas F1 Team,13.0,11.0,11,Lapped,69.0,0.0,,,72.306,72.34,,2025,2025_regs,jolpica
+TSU,22,Red Bull,18.0,12.0,12,Lapped,69.0,0.0,,,72.334,72.102,,2025,2025_regs,jolpica
+COL,43,Alpine F1 Team,10.0,13.0,13,Lapped,69.0,0.0,,,72.234,72.142,,2025,2025_regs,jolpica
+BOR,5,Sauber,15.0,14.0,14,Lapped,69.0,0.0,,,72.385,,,2025,2025_regs,jolpica
+GAS,10,Alpine F1 Team,20.0,15.0,15,Lapped,69.0,0.0,,,72.667,,,2025,2025_regs,jolpica
+HAD,6,RB F1 Team,12.0,16.0,16,Lapped,69.0,0.0,,,72.211,72.003,71.867,2025,2025_regs,jolpica
+STR,18,Aston Martin,17.0,17.0,17,Lapped,69.0,0.0,,,72.517,,,2025,2025_regs,jolpica
+NOR,4,McLaren,7.0,18.0,18,Retired,66.0,0.0,,,71.826,71.599,71.625,2025,2025_regs,jolpica
+LAW,30,RB F1 Team,19.0,19.0,R,Retired,53.0,0.0,,,72.525,,,2025,2025_regs,jolpica
+ALB,23,Williams,9.0,20.0,R,Retired,46.0,0.0,,,72.09,71.892,71.907,2025,2025_regs,jolpica

@@ -1,0 +1,10 @@
+time_s,status,message,season,era,source
+-2595.881,1,AllClear,2025,2025_regs,openf1
+212.119,2,Yellow,2025,2025_regs,openf1
+391.119,1,AllClear,2025,2025_regs,openf1
+454.119,2,Yellow,2025,2025_regs,openf1
+457.119,1,AllClear,2025,2025_regs,openf1
+5698.119,2,Yellow,2025,2025_regs,openf1
+5760.119,6,VSCDeployed,2025,2025_regs,openf1
+5848.119,7,VSCEnding,2025,2025_regs,openf1
+5860.119,1,AllClear,2025,2025_regs,openf1

@@ -1,0 +1,42 @@
+{
+  "year": 2026,
+  "season": 2026,
+  "era": "2026_regs",
+  "gp": "Australia",
+  "event_name": "Australian Grand Prix",
+  "round": 1,
+  "circuit": "Melbourne",
+  "event_date": "2026-03-08",
+  "event_format": "unknown",
+  "total_laps": 58,
+  "num_laps": 58,
+  "num_drivers": 20,
+  "compound_map": {
+    "HARD": "C3",
+    "MEDIUM": "C4",
+    "SOFT": "C5"
+  },
+  "compound_map_source": "T-001 research note \u00a73.2 (team/Pirelli previews)",
+  "openf1_session_key": 11234,
+  "source": "openf1+jolpica",
+  "data_quality": {
+    "self_coverage": 0.997,
+    "jolpica_ratio": 0.997,
+    "inner_missing_laps": 3,
+    "drivers_with_gaps": [
+      "HAM",
+      "LEC",
+      "RUS"
+    ],
+    "finishers_no_final_time": 17,
+    "post_race_rows_trimmed": 0,
+    "lap_time_nan_frac": 0.023,
+    "usable": false,
+    "pit_vs_jolpica": {
+      "jolpica_stops": 32,
+      "matched": 32,
+      "match_rate": 1.0,
+      "openf1_only": 3
+    }
+  }
+}

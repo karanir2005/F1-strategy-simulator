@@ -1,0 +1,38 @@
+{
+  "year": 2026,
+  "season": 2026,
+  "era": "2026_regs",
+  "gp": "Netherlands",
+  "event_name": "Dutch Grand Prix",
+  "round": 12,
+  "circuit": "Zandvoort",
+  "event_date": "2026-08-23",
+  "event_format": "unknown",
+  "total_laps": 72,
+  "num_laps": 72,
+  "num_drivers": 21,
+  "compound_map": null,
+  "compound_map_source": null,
+  "openf1_session_key": 11353,
+  "source": "openf1+jolpica",
+  "data_quality": {
+    "self_coverage": 0.9978,
+    "jolpica_ratio": 0.9978,
+    "inner_missing_laps": 3,
+    "drivers_with_gaps": [
+      "HUL",
+      "NOR",
+      "TSU"
+    ],
+    "finishers_no_final_time": 0,
+    "post_race_rows_trimmed": 6,
+    "lap_time_nan_frac": 0.0007,
+    "usable": true,
+    "pit_vs_jolpica": {
+      "jolpica_stops": 65,
+      "matched": 65,
+      "match_rate": 1.0,
+      "openf1_only": 0
+    }
+  }
+}

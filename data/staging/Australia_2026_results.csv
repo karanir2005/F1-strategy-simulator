@@ -1,0 +1,23 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+RUS,63,Mercedes,1.0,1.0,1,Finished,58.0,25.0,0.0,4986.801,79.507,78.934,78.518,2026,2026_regs,jolpica
+ANT,12,Mercedes,2.0,2.0,2,Finished,58.0,18.0,2.9739999999992506,4989.775,80.12,79.435,78.811,2026,2026_regs,jolpica
+LEC,16,Ferrari,4.0,3.0,3,Finished,58.0,15.0,15.518999999999323,5002.32,80.226,79.357,79.327,2026,2026_regs,jolpica
+HAM,44,Ferrari,7.0,4.0,4,Finished,58.0,12.0,16.143999999999323,5002.945,79.811,79.92099999999999,79.47800000000001,2026,2026_regs,jolpica
+NOR,1,McLaren,6.0,5.0,5,Finished,58.0,10.0,51.740999999999985,5038.542,80.01,79.882,79.475,2026,2026_regs,jolpica
+VER,3,Red Bull,20.0,6.0,6,Finished,58.0,8.0,54.61699999999928,5041.418,,,,2026,2026_regs,jolpica
+BEA,87,Haas F1 Team,12.0,7.0,7,Lapped,57.0,6.0,,,81.247,80.311,,2026,2026_regs,jolpica
+LIN,41,RB F1 Team,9.0,8.0,8,Lapped,57.0,4.0,,,80.40899999999999,79.971,81.247,2026,2026_regs,jolpica
+BOR,5,Audi,10.0,9.0,9,Lapped,57.0,2.0,,,80.495,80.221,,2026,2026_regs,jolpica
+GAS,10,Alpine F1 Team,14.0,10.0,10,Lapped,57.0,1.0,,,81.138,80.501,,2026,2026_regs,jolpica
+OCO,31,Haas F1 Team,13.0,11.0,11,Lapped,57.0,0.0,,,80.759,80.491,,2026,2026_regs,jolpica
+ALB,23,Williams,15.0,12.0,12,Lapped,57.0,0.0,,,81.051,80.941,,2026,2026_regs,jolpica
+LAW,30,RB F1 Team,8.0,13.0,13,Lapped,57.0,0.0,,,80.491,80.144,79.994,2026,2026_regs,jolpica
+COL,43,Alpine F1 Team,16.0,14.0,14,Lapped,56.0,0.0,,,81.2,81.27,,2026,2026_regs,jolpica
+SAI,55,Williams,21.0,15.0,15,Lapped,56.0,0.0,,,,,,2026,2026_regs,jolpica
+PER,11,Cadillac F1 Team,18.0,16.0,16,Lapped,55.0,0.0,,,82.605,,,2026,2026_regs,jolpica
+STR,18,Aston Martin,22.0,17.0,R,Lapped,43.0,0.0,,,,,,2026,2026_regs,jolpica
+ALO,14,Aston Martin,17.0,18.0,R,Retired,21.0,0.0,,,81.969,,,2026,2026_regs,jolpica
+BOT,77,Cadillac F1 Team,19.0,19.0,R,Retired,15.0,0.0,,,83.244,,,2026,2026_regs,jolpica
+HAD,6,Red Bull,3.0,20.0,R,Retired,10.0,0.0,,,80.023,79.65299999999999,79.303,2026,2026_regs,jolpica
+PIA,81,McLaren,5.0,21.0,W,Did not start,0.0,0.0,,,79.664,79.525,79.38,2026,2026_regs,jolpica
+HUL,27,Audi,11.0,22.0,W,Did not start,0.0,0.0,,,81.024,80.303,,2026,2026_regs,jolpica
