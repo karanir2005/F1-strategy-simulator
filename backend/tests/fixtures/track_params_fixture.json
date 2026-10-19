@@ -1,0 +1,34 @@
+[
+  {
+    "track_id": "testring",
+    "name": "Test GP (Testring)",
+    "circuit": "Testring",
+    "total_laps": 56,
+    "pit_loss_s": 21.3,
+    "pit_loss_noise_std_s": 3.1,
+    "base_laptime_s": 98.4,
+    "compounds": {"HARD": "C1", "MEDIUM": "C3", "SOFT": "C4"},
+    "max_stint_laps": {"SOFT": 25, "MEDIUM": 35, "HARD": 45},
+    "source_season": 2025,
+    "source_races": ["Testring_2025"],
+    "on_2026_calendar": true,
+    "already_raced_2026": false,
+    "notes": "fixture"
+  },
+  {
+    "track_id": "shortring",
+    "name": "Short GP",
+    "circuit": "Shortring",
+    "total_laps": 30,
+    "pit_loss_s": 25.0,
+    "pit_loss_noise_std_s": null,
+    "base_laptime_s": 80.0,
+    "compounds": null,
+    "max_stint_laps": {"SOFT": 12, "MEDIUM": 20, "HARD": 30},
+    "source_season": 2026,
+    "source_races": [],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": ""
+  }
+]

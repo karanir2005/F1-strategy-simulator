@@ -1,0 +1,557 @@
+[
+  {
+    "track_id": "australia",
+    "name": "Australian GP (Australia)",
+    "circuit": "Albert Park Circuit",
+    "total_laps": 58,
+    "pit_loss_s": 19.06,
+    "pit_loss_noise_std_s": 7.11,
+    "base_laptime_s": 81.36,
+    "compounds": {
+      "HARD": "C3",
+      "MEDIUM": "C4",
+      "SOFT": "C5"
+    },
+    "max_stint_laps": {
+      "SOFT": 24,
+      "MEDIUM": 28,
+      "HARD": 46
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Australia_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Australia_2025 excluded (wet race). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (148 laps, race_simulator convention); pit stops n=8."
+  },
+  {
+    "track_id": "china",
+    "name": "Chinese GP (China)",
+    "circuit": "Shanghai International Circuit",
+    "total_laps": 56,
+    "pit_loss_s": 22.95,
+    "pit_loss_noise_std_s": 5.29,
+    "base_laptime_s": 94.38,
+    "compounds": {
+      "HARD": "C2",
+      "MEDIUM": "C3",
+      "SOFT": "C4"
+    },
+    "max_stint_laps": {
+      "SOFT": 9,
+      "MEDIUM": 23,
+      "HARD": 47
+    },
+    "source_season": 2026,
+    "source_races": [
+      "China_2026",
+      "China_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Only 10 clean green-flag stops in China_2026; pit loss pooled with China_2025 (pit lane is a track property). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (140 laps, race_simulator convention); pit stops n=35."
+  },
+  {
+    "track_id": "japan",
+    "name": "Japanese GP (Japan)",
+    "circuit": "Suzuka Circuit",
+    "total_laps": 53,
+    "pit_loss_s": 23.52,
+    "pit_loss_noise_std_s": 0.9,
+    "base_laptime_s": 92.34,
+    "compounds": {
+      "HARD": "C1",
+      "MEDIUM": "C2",
+      "SOFT": "C3"
+    },
+    "max_stint_laps": {
+      "SOFT": 20,
+      "MEDIUM": 33,
+      "HARD": 37
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Japan_2026",
+      "Japan_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Only 12 clean green-flag stops in Japan_2026; pit loss pooled with Japan_2025 (pit lane is a track property). SOFT stints not run in Japan_2026; max_stint_laps filled from Japan_2025. base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (137 laps, race_simulator convention); pit stops n=33."
+  },
+  {
+    "track_id": "miami",
+    "name": "Miami GP (Miami)",
+    "circuit": "Miami International Autodrome",
+    "total_laps": 57,
+    "pit_loss_s": 23.18,
+    "pit_loss_noise_std_s": 2.5,
+    "base_laptime_s": 91.07,
+    "compounds": {
+      "HARD": "C3",
+      "MEDIUM": "C4",
+      "SOFT": "C5"
+    },
+    "max_stint_laps": {
+      "SOFT": 19,
+      "MEDIUM": 41,
+      "HARD": 51
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Miami_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (128 laps, race_simulator convention); pit stops n=19."
+  },
+  {
+    "track_id": "canada",
+    "name": "Canadian GP (Canada)",
+    "circuit": "Circuit Gilles Villeneuve",
+    "total_laps": 68,
+    "pit_loss_s": 24.91,
+    "pit_loss_noise_std_s": 3.41,
+    "base_laptime_s": 74.2,
+    "compounds": {
+      "HARD": "C3",
+      "MEDIUM": "C4",
+      "SOFT": "C5"
+    },
+    "max_stint_laps": {
+      "SOFT": 37,
+      "MEDIUM": 48,
+      "HARD": 37
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Canada_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (138 laps, race_simulator convention); pit stops n=16."
+  },
+  {
+    "track_id": "monaco",
+    "name": "Monaco GP (Monaco)",
+    "circuit": "Circuit de Monaco",
+    "total_laps": 78,
+    "pit_loss_s": 25.43,
+    "pit_loss_noise_std_s": 1.73,
+    "base_laptime_s": 74.14,
+    "compounds": {
+      "HARD": "C3",
+      "MEDIUM": "C4",
+      "SOFT": "C5"
+    },
+    "max_stint_laps": {
+      "SOFT": 32,
+      "MEDIUM": 59,
+      "HARD": 72
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Monaco_2026",
+      "Monaco_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "max_stint_laps from Monaco_2025 (Monaco_2026 red-flag stints unreliable). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (178 laps, race_simulator convention); pit stops n=20."
+  },
+  {
+    "track_id": "barcelona",
+    "name": "Barcelona GP (Barcelona)",
+    "circuit": "Circuit de Barcelona-Catalunya",
+    "total_laps": 66,
+    "pit_loss_s": 22.63,
+    "pit_loss_noise_std_s": 1.15,
+    "base_laptime_s": 80.2,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 21,
+      "MEDIUM": 26,
+      "HARD": 31
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Barcelona_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (158 laps, race_simulator convention); pit stops n=42."
+  },
+  {
+    "track_id": "austria",
+    "name": "Austrian GP (Austria)",
+    "circuit": "Red Bull Ring",
+    "total_laps": 71,
+    "pit_loss_s": 21.58,
+    "pit_loss_noise_std_s": 1.42,
+    "base_laptime_s": 69.76,
+    "compounds": {
+      "HARD": "C3",
+      "MEDIUM": "C4",
+      "SOFT": "C5"
+    },
+    "max_stint_laps": {
+      "SOFT": 25,
+      "MEDIUM": 27,
+      "HARD": 36
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Austria_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (173 laps, race_simulator convention); pit stops n=36."
+  },
+  {
+    "track_id": "britain",
+    "name": "British GP (Britain)",
+    "circuit": "Silverstone Circuit",
+    "total_laps": 52,
+    "pit_loss_s": 29.47,
+    "pit_loss_noise_std_s": 4.95,
+    "base_laptime_s": 92.29,
+    "compounds": {
+      "HARD": "C1",
+      "MEDIUM": "C2",
+      "SOFT": "C3"
+    },
+    "max_stint_laps": {
+      "SOFT": 12,
+      "MEDIUM": 35,
+      "HARD": 34
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Britain_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Britain_2025 excluded (wet race). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (114 laps, race_simulator convention); pit stops n=27."
+  },
+  {
+    "track_id": "belgium",
+    "name": "Belgian GP (Belgium)",
+    "circuit": "Circuit de Spa-Francorchamps",
+    "total_laps": 44,
+    "pit_loss_s": 24.74,
+    "pit_loss_noise_std_s": 3.37,
+    "base_laptime_s": 108.91,
+    "compounds": {
+      "HARD": "C2",
+      "MEDIUM": "C3",
+      "SOFT": "C4"
+    },
+    "max_stint_laps": {
+      "SOFT": 26,
+      "MEDIUM": 20,
+      "HARD": 31
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Belgium_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Belgium_2025 excluded (wet start, phantom lap-2 tyre changes). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (99 laps, race_simulator convention); pit stops n=11."
+  },
+  {
+    "track_id": "hungary",
+    "name": "Hungarian GP (Hungary)",
+    "circuit": "Hungaroring",
+    "total_laps": 70,
+    "pit_loss_s": 22.0,
+    "pit_loss_noise_std_s": 1.25,
+    "base_laptime_s": 82.61,
+    "compounds": {
+      "HARD": "C3",
+      "MEDIUM": "C4",
+      "SOFT": "C5"
+    },
+    "max_stint_laps": {
+      "SOFT": 34,
+      "MEDIUM": 29,
+      "HARD": 49
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Hungary_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (156 laps, race_simulator convention); pit stops n=38."
+  },
+  {
+    "track_id": "netherlands",
+    "name": "Dutch GP (Netherlands)",
+    "circuit": "Circuit Zandvoort",
+    "total_laps": 72,
+    "pit_loss_s": 18.0,
+    "pit_loss_noise_std_s": 1.54,
+    "base_laptime_s": 74.13,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 32,
+      "MEDIUM": 31,
+      "HARD": 37
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Netherlands_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (150 laps, race_simulator convention); pit stops n=39."
+  },
+  {
+    "track_id": "italy",
+    "name": "Italian GP (Italy)",
+    "circuit": "Autodromo Nazionale Monza",
+    "total_laps": 53,
+    "pit_loss_s": 24.97,
+    "pit_loss_noise_std_s": 3.45,
+    "base_laptime_s": 83.38,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 24,
+      "MEDIUM": 50,
+      "HARD": 50
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Italy_2026",
+      "Italy_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Only 2 clean green-flag stops in Italy_2026; pit loss pooled with Italy_2025 (pit lane is a track property). Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (116 laps, race_simulator convention); pit stops n=21."
+  },
+  {
+    "track_id": "madrid",
+    "name": "Spanish GP (Madrid)",
+    "circuit": "Madring",
+    "total_laps": 57,
+    "pit_loss_s": 31.4,
+    "pit_loss_noise_std_s": 4.01,
+    "base_laptime_s": 96.12,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 23,
+      "MEDIUM": 20,
+      "HARD": 55
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Madrid_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (180 laps, race_simulator convention); pit stops n=14."
+  },
+  {
+    "track_id": "azerbaijan",
+    "name": "Azerbaijan GP (Azerbaijan)",
+    "circuit": "Baku City Circuit",
+    "total_laps": 51,
+    "pit_loss_s": 20.55,
+    "pit_loss_noise_std_s": 1.36,
+    "base_laptime_s": 106.12,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 31,
+      "MEDIUM": 32,
+      "HARD": 49
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Azerbaijan_2026",
+      "Azerbaijan_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Only 2 clean green-flag stops in Azerbaijan_2026; pit loss pooled with Azerbaijan_2025 (pit lane is a track property). HARD stints not run in Azerbaijan_2026; max_stint_laps filled from Azerbaijan_2025. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (113 laps, race_simulator convention); pit stops n=20."
+  },
+  {
+    "track_id": "malaysia",
+    "name": "Bahrain GP in Malaysia (Malaysia)",
+    "circuit": "Sepang International Circuit",
+    "total_laps": 55,
+    "pit_loss_s": 29.1,
+    "pit_loss_noise_std_s": 4.34,
+    "base_laptime_s": 100.44,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 25,
+      "MEDIUM": 30,
+      "HARD": 21
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Malaysia_2026"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (97 laps, race_simulator convention); pit stops n=20."
+  },
+  {
+    "track_id": "singapore",
+    "name": "Singapore GP (Singapore)",
+    "circuit": "Marina Bay Street Circuit",
+    "total_laps": 62,
+    "pit_loss_s": 24.4,
+    "pit_loss_noise_std_s": 1.26,
+    "base_laptime_s": 95.7,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 44,
+      "MEDIUM": 39,
+      "HARD": 48
+    },
+    "source_season": 2026,
+    "source_races": [
+      "Singapore_2026",
+      "Singapore_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": true,
+    "notes": "HARD stints not run in Singapore_2026; max_stint_laps filled from Singapore_2025. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (171 laps, race_simulator convention); pit stops n=18."
+  },
+  {
+    "track_id": "austin",
+    "name": "United States GP (Austin)",
+    "circuit": "Circuit of the Americas",
+    "total_laps": 56,
+    "pit_loss_s": 24.03,
+    "pit_loss_noise_std_s": 0.76,
+    "base_laptime_s": 98.11,
+    "compounds": {
+      "HARD": "C1",
+      "MEDIUM": "C3",
+      "SOFT": "C4"
+    },
+    "max_stint_laps": {
+      "SOFT": 28,
+      "MEDIUM": 34,
+      "HARD": 28
+    },
+    "source_season": 2025,
+    "source_races": [
+      "Austin_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": false,
+    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. compounds from T-010 research note (2025 allocation). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (156 laps, race_simulator convention); pit stops n=20."
+  },
+  {
+    "track_id": "mexico",
+    "name": "Mexico City GP (Mexico)",
+    "circuit": "Autodromo Hermanos Rodriguez",
+    "total_laps": 71,
+    "pit_loss_s": 22.7,
+    "pit_loss_noise_std_s": 3.68,
+    "base_laptime_s": 80.5,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 37,
+      "MEDIUM": 44,
+      "HARD": 48
+    },
+    "source_season": 2025,
+    "source_races": [
+      "Mexico_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": false,
+    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (212 laps, race_simulator convention); pit stops n=26."
+  },
+  {
+    "track_id": "brazil",
+    "name": "Brazilian GP (Brazil)",
+    "circuit": "Autodromo Jose Carlos Pace (Interlagos)",
+    "total_laps": 71,
+    "pit_loss_s": 23.49,
+    "pit_loss_noise_std_s": 3.35,
+    "base_laptime_s": 72.42,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 35,
+      "MEDIUM": 52,
+      "HARD": 29
+    },
+    "source_season": 2025,
+    "source_races": [
+      "Brazil_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": false,
+    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (219 laps, race_simulator convention); pit stops n=33."
+  },
+  {
+    "track_id": "las_vegas",
+    "name": "Las Vegas GP (LasVegas)",
+    "circuit": "Las Vegas Strip Circuit",
+    "total_laps": 50,
+    "pit_loss_s": 21.44,
+    "pit_loss_noise_std_s": 3.69,
+    "base_laptime_s": 93.84,
+    "compounds": null,
+    "max_stint_laps": {
+      "MEDIUM": 27,
+      "HARD": 48
+    },
+    "source_season": 2025,
+    "source_races": [
+      "LasVegas_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": false,
+    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. No observed stints for ['SOFT']; omitted from max_stint_laps. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (163 laps, race_simulator convention); pit stops n=18."
+  },
+  {
+    "track_id": "qatar",
+    "name": "Qatar GP (Qatar)",
+    "circuit": "Lusail International Circuit",
+    "total_laps": 57,
+    "pit_loss_s": 28.54,
+    "pit_loss_noise_std_s": 3.84,
+    "base_laptime_s": 83.57,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 25,
+      "MEDIUM": 25,
+      "HARD": 25
+    },
+    "source_season": 2025,
+    "source_races": [
+      "Qatar_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": false,
+    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (155 laps, race_simulator convention); pit stops n=22."
+  },
+  {
+    "track_id": "abudhabi",
+    "name": "Abu Dhabi GP (AbuDhabi)",
+    "circuit": "Yas Marina Circuit",
+    "total_laps": 58,
+    "pit_loss_s": 21.8,
+    "pit_loss_noise_std_s": 1.65,
+    "base_laptime_s": 86.73,
+    "compounds": null,
+    "max_stint_laps": {
+      "SOFT": 8,
+      "MEDIUM": 27,
+      "HARD": 44
+    },
+    "source_season": 2025,
+    "source_races": [
+      "AbuDhabi_2025"
+    ],
+    "on_2026_calendar": true,
+    "already_raced_2026": false,
+    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (204 laps, race_simulator convention); pit stops n=27."
+  }
+]

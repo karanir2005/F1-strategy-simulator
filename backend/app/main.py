@@ -17,6 +17,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes.simulation import router as simulation_router
+from app.api.routes.tracks import router as tracks_router
 
 app = FastAPI(title="F1 Strategy Simulator")
 
@@ -29,6 +30,7 @@ app.add_middleware(
 )
 
 app.include_router(simulation_router)
+app.include_router(tracks_router)
 
 
 @app.get("/health")
