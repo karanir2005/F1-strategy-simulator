@@ -1,0 +1,6 @@
+time_utc,lap,category,message,status,flag,scope,sector,racing_number,season,era,source
+2025-04-06 04:20:00,1,Flag,GREEN LIGHT - PIT EXIT OPEN,,GREEN,Track,,,2025,2025_regs,openf1
+2025-04-06 05:03:47,1,Flag,GREEN LIGHT - PIT EXIT OPEN,,GREEN,Track,,,2025,2025_regs,openf1
+2025-04-06 06:13:43,45,Flag,WAVED BLUE FLAG FOR CAR 18 (STR) TIMED AT 15:13:43,,BLUE,Driver,,18.0,2025,2025_regs,openf1
+2025-04-06 06:13:51,46,Flag,WAVED BLUE FLAG FOR CAR 18 (STR) TIMED AT 15:13:50,,BLUE,Driver,,18.0,2025,2025_regs,openf1
+2025-04-06 06:25:53,53,Flag,CHEQUERED FLAG,,CHEQUERED,Track,,,2025,2025_regs,openf1

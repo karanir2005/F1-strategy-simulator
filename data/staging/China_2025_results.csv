@@ -1,0 +1,21 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+PIA,81,McLaren,1.0,1.0,1,Finished,56.0,25.0,0.0,5455.026,91.59100000000001,91.2,90.64099999999999,2025,2025_regs,jolpica
+NOR,4,McLaren,3.0,2.0,2,Finished,56.0,18.0,9.748000000000502,5464.774,90.983,90.787,90.793,2025,2025_regs,jolpica
+RUS,63,Mercedes,2.0,3.0,3,Finished,56.0,15.0,11.096999999999753,5466.123,91.295,91.307,90.723,2025,2025_regs,jolpica
+VER,1,Red Bull,4.0,4.0,4,Finished,56.0,12.0,16.65599999999995,5471.682,91.424,91.142,90.81700000000001,2025,2025_regs,jolpica
+OCO,31,Haas F1 Team,11.0,5.0,5,Finished,56.0,10.0,49.96900000000005,5504.995,91.876,91.625,,2025,2025_regs,jolpica
+ANT,12,Mercedes,8.0,6.0,6,Finished,56.0,8.0,53.7480000000005,5508.774,91.676,91.59,91.10300000000001,2025,2025_regs,jolpica
+ALB,23,Williams,10.0,7.0,7,Finished,56.0,6.0,56.32099999999991,5511.347,91.503,91.595,91.706,2025,2025_regs,jolpica
+BEA,87,Haas F1 Team,17.0,8.0,8,Finished,56.0,4.0,61.302999999999884,5516.329,92.018,,,2025,2025_regs,jolpica
+STR,18,Aston Martin,14.0,9.0,9,Finished,56.0,2.0,70.20399999999972,5525.23,91.923,91.773,,2025,2025_regs,jolpica
+SAI,55,Williams,15.0,10.0,10,Finished,56.0,1.0,76.38699999999972,5531.413,91.628,91.84,,2025,2025_regs,jolpica
+HAD,6,RB F1 Team,7.0,11.0,11,Finished,56.0,0.0,78.875,5533.901,91.162,91.253,91.07900000000001,2025,2025_regs,jolpica
+LAW,30,Red Bull,20.0,12.0,12,Finished,56.0,0.0,81.14699999999993,5536.173,92.174,,,2025,2025_regs,jolpica
+DOO,7,Alpine F1 Team,18.0,13.0,13,Finished,56.0,0.0,88.40099999999984,5543.427,92.092,,,2025,2025_regs,jolpica
+BOR,5,Sauber,19.0,14.0,14,Lapped,55.0,0.0,,,92.14099999999999,,,2025,2025_regs,jolpica
+HUL,27,Sauber,12.0,15.0,15,Lapped,55.0,0.0,,,91.92099999999999,91.632,,2025,2025_regs,jolpica
+TSU,22,RB F1 Team,9.0,16.0,16,Lapped,55.0,0.0,,,91.238,91.26,91.638,2025,2025_regs,jolpica
+ALO,14,Aston Martin,13.0,17.0,R,Retired,4.0,0.0,,,91.719,91.688,,2025,2025_regs,jolpica
+LEC,16,Ferrari,6.0,18.0,D,Disqualified,0.0,0.0,,,91.57900000000001,91.45,91.021,2025,2025_regs,jolpica
+HAM,44,Ferrari,5.0,19.0,D,Disqualified,0.0,0.0,,,91.69,91.501,90.92699999999999,2025,2025_regs,jolpica
+GAS,10,Alpine F1 Team,16.0,20.0,D,Disqualified,0.0,0.0,,,91.992,,,2025,2025_regs,jolpica

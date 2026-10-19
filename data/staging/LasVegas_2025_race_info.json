@@ -1,0 +1,34 @@
+{
+  "year": 2025,
+  "season": 2025,
+  "era": "2025_regs",
+  "gp": "LasVegas",
+  "event_name": "Las Vegas Grand Prix",
+  "round": 22,
+  "circuit": "Las Vegas",
+  "event_date": "2025-11-23",
+  "event_format": "unknown",
+  "total_laps": 50,
+  "num_laps": 50,
+  "num_drivers": 19,
+  "compound_map": null,
+  "compound_map_source": null,
+  "openf1_session_key": 9858,
+  "source": "openf1+jolpica",
+  "data_quality": {
+    "self_coverage": 1.0,
+    "jolpica_ratio": 1.0,
+    "inner_missing_laps": 0,
+    "drivers_with_gaps": [],
+    "finishers_no_final_time": 0,
+    "post_race_rows_trimmed": 3,
+    "lap_time_nan_frac": 0.0,
+    "usable": true,
+    "pit_vs_jolpica": {
+      "jolpica_stops": 23,
+      "matched": 23,
+      "match_rate": 1.0,
+      "openf1_only": 0
+    }
+  }
+}

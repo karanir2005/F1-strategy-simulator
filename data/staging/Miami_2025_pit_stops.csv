@@ -1,0 +1,13 @@
+driver,in_lap,out_lap,pit_lane_s,is_tyre_change,is_pit_pass_no_change,pit_under_sc,pit_under_vsc,pit_under_red,compound_before,compound_after,start_age_after,stop_duration_s,season,era,source
+ALB,26,27,21.906,False,False,False,False,False,MEDIUM,MEDIUM,50.0,2.5,2025,2025_regs,openf1
+ALO,28,29,23.602,False,False,False,True,False,HARD,HARD,49.0,3.6,2025,2025_regs,openf1
+GAS,32,33,22.06,True,False,False,True,False,HARD,MEDIUM,1.0,2.3,2025,2025_regs,openf1
+HAM,28,29,23.104,False,False,False,True,False,HARD,HARD,48.0,3.4,2025,2025_regs,openf1
+HUL,36,37,22.108,True,False,False,False,False,HARD,MEDIUM,1.0,2.5,2025,2025_regs,openf1
+LAW,28,29,22.439,False,False,False,True,False,HARD,HARD,48.0,2.5,2025,2025_regs,openf1
+LEC,29,30,22.183,False,False,False,True,False,MEDIUM,MEDIUM,50.0,2.3,2025,2025_regs,openf1
+NOR,29,30,22.044,False,False,False,True,False,MEDIUM,MEDIUM,50.0,2.3,2025,2025_regs,openf1
+PIA,29,30,22.106,False,False,False,True,False,MEDIUM,MEDIUM,50.0,2.2,2025,2025_regs,openf1
+RUS,29,30,24.257,False,False,False,True,False,HARD,HARD,50.0,4.5,2025,2025_regs,openf1
+TSU,27,28,22.56,False,False,False,False,False,MEDIUM,MEDIUM,50.0,2.3,2025,2025_regs,openf1
+VER,26,27,22.501,False,False,False,False,False,MEDIUM,MEDIUM,50.0,2.7,2025,2025_regs,openf1

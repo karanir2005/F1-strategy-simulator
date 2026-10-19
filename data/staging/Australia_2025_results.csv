@@ -1,0 +1,21 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+NOR,4,McLaren,1.0,1.0,1,Finished,57.0,25.0,0.0,6126.304,75.912,75.41499999999999,75.096,2025,2025_regs,jolpica
+VER,1,Red Bull,3.0,2.0,2,Finished,57.0,18.0,0.8949999999995271,6127.199,76.018,75.565,75.481,2025,2025_regs,jolpica
+RUS,63,Mercedes,4.0,3.0,3,Finished,57.0,15.0,8.480999999999767,6134.785,75.971,75.798,75.54599999999999,2025,2025_regs,jolpica
+ANT,12,Mercedes,16.0,4.0,4,Finished,57.0,12.0,10.135000000000218,6136.439,76.525,,,2025,2025_regs,jolpica
+ALB,23,Williams,6.0,5.0,5,Finished,57.0,10.0,12.773000000000138,6139.077,76.245,76.017,75.737,2025,2025_regs,jolpica
+STR,18,Aston Martin,13.0,6.0,6,Finished,57.0,8.0,17.412999999999556,6143.717,76.369,76.483,,2025,2025_regs,jolpica
+HUL,27,Sauber,17.0,7.0,7,Finished,57.0,6.0,18.422999999999774,6144.727,76.57900000000001,,,2025,2025_regs,jolpica
+LEC,16,Ferrari,7.0,8.0,8,Finished,57.0,4.0,19.826000000000022,6146.13,76.029,75.827,75.755,2025,2025_regs,jolpica
+PIA,81,McLaren,2.0,9.0,9,Finished,57.0,2.0,20.44800000000032,6146.752,76.062,75.468,75.18,2025,2025_regs,jolpica
+HAM,44,Ferrari,8.0,10.0,10,Finished,57.0,1.0,22.472999999999956,6148.777,76.213,75.919,75.973,2025,2025_regs,jolpica
+GAS,10,Alpine F1 Team,9.0,11.0,11,Finished,57.0,0.0,26.501999999999498,6152.806,76.328,76.112,75.98,2025,2025_regs,jolpica
+TSU,22,RB F1 Team,5.0,12.0,12,Finished,57.0,0.0,29.884000000000015,6156.188,76.225,76.009,75.67,2025,2025_regs,jolpica
+OCO,31,Haas F1 Team,19.0,13.0,13,Finished,57.0,0.0,33.16100000000006,6159.465,77.14699999999999,,,2025,2025_regs,jolpica
+BEA,87,Haas F1 Team,20.0,14.0,14,Finished,57.0,0.0,40.35099999999966,6166.655,,,,2025,2025_regs,jolpica
+LAW,30,Red Bull,18.0,15.0,R,Retired,46.0,0.0,,,77.094,,,2025,2025_regs,jolpica
+BOR,5,Sauber,15.0,16.0,R,Retired,45.0,0.0,,,76.51599999999999,77.52,,2025,2025_regs,jolpica
+ALO,14,Aston Martin,12.0,17.0,R,Retired,32.0,0.0,,,76.288,76.453,,2025,2025_regs,jolpica
+SAI,55,Williams,10.0,18.0,R,Retired,0.0,0.0,,,76.36,75.931,76.062,2025,2025_regs,jolpica
+DOO,7,Alpine F1 Team,14.0,19.0,R,Retired,0.0,0.0,,,76.315,76.863,,2025,2025_regs,jolpica
+HAD,6,RB F1 Team,11.0,20.0,R,Retired,0.0,0.0,,,76.354,76.175,,2025,2025_regs,jolpica

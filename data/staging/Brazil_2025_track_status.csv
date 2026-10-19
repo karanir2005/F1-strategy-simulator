@@ -1,0 +1,11 @@
+time_s,status,message,season,era,source
+-2814.078,1,AllClear,2025,2025_regs,openf1
+-623.078,2,Yellow,2025,2025_regs,openf1
+-619.078,1,AllClear,2025,2025_regs,openf1
+61.922,2,Yellow,2025,2025_regs,openf1
+103.922,4,SCDeployed,2025,2025_regs,openf1
+507.922,1,AllClear,2025,2025_regs,openf1
+564.922,2,Yellow,2025,2025_regs,openf1
+616.922,6,VSCDeployed,2025,2025_regs,openf1
+791.922,7,VSCEnding,2025,2025_regs,openf1
+803.922,1,AllClear,2025,2025_regs,openf1

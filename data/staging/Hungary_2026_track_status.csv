@@ -1,0 +1,12 @@
+time_s,status,message,season,era,source
+-2598.36,1,AllClear,2026,2026_regs,openf1
+-2351.36,2,Yellow,2026,2026_regs,openf1
+-1951.36,1,AllClear,2026,2026_regs,openf1
+3318.64,2,Yellow,2026,2026_regs,openf1
+3321.64,1,AllClear,2026,2026_regs,openf1
+4280.64,2,Yellow,2026,2026_regs,openf1
+4282.64,1,AllClear,2026,2026_regs,openf1
+4762.64,2,Yellow,2026,2026_regs,openf1
+4776.64,6,VSCDeployed,2026,2026_regs,openf1
+4854.64,7,VSCEnding,2026,2026_regs,openf1
+4865.64,1,AllClear,2026,2026_regs,openf1
