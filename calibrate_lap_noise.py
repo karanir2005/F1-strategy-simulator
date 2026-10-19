@@ -9,6 +9,14 @@ race pace / track-position/traffic effects aren't modeled -- only the
 lap-to-lap wobble around their own trend is what we want here).
 
 Run this from project root with: python calibrate_lap_noise.py
+
+T-002 (2026-10-19): laps CSVs now keep rows with no LapTime (SC laps), so
+the lap filter is tire_model.clean_laps() -- the same filter the tire
+model is fitted on (also drops lap 1, out-laps on new AND used sets, and
+restart laps). With the old filter (green + not an in-lap) this script
+gives std 2.76 s on the pre-T-002 data and 2.80 s on the new data; with
+clean_laps it gives 1.03 s. Neither reproduces the 0.8 s currently in
+monte_carlo.DEFAULT_LAP_TIME_NOISE_STD -- see team/handoffs/T-002-data-scientist.md.
 """
 
 import sys
@@ -20,7 +28,13 @@ import glob
 import numpy as np
 import pandas as pd
 
-from app.core.tire_model import build_tire_model, compound_pace_offset, fuel_effect, predict_delta
+from app.core.tire_model import (
+    build_tire_model,
+    clean_laps,
+    compound_pace_offset,
+    fuel_effect,
+    predict_delta,
+)
 
 tire_model = build_tire_model()
 
@@ -28,11 +42,7 @@ residuals = []
 
 for path in glob.glob("data/processed/*_laps.csv"):
     laps = pd.read_csv(path)
-    clean = laps[
-        (laps["is_green_flag"])
-        & (laps["pit_in_lap"] == 0)
-        & (laps["compound"].isin(["SOFT", "MEDIUM", "HARD"]))
-    ]
+    clean = clean_laps(laps.assign(race_file=path))
 
     for driver, driver_laps in clean.groupby("driver"):
         driver_laps = driver_laps.sort_values("lap_number")

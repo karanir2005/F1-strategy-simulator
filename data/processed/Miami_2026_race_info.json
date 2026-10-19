@@ -1,0 +1,17 @@
+{
+  "year": 2026,
+  "gp": "Miami",
+  "event_name": "Miami Grand Prix",
+  "circuit": "Miami Gardens",
+  "event_format": "sprint_qualifying",
+  "event_date": "2026-05-03",
+  "total_laps": 57,
+  "num_laps": 57,
+  "num_drivers": 22,
+  "compound_map": {
+    "HARD": "C3",
+    "MEDIUM": "C4",
+    "SOFT": "C5"
+  },
+  "compound_map_source": "secondary (Coffee Corner Motorsport preview)"
+}

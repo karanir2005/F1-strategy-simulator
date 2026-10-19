@@ -3,12 +3,45 @@ Monte Carlo layer: runs a strategy (or several, for comparison) through
 race_simulator.py thousands of times with randomized lap-time and pit-stop
 noise, then summarizes the resulting distribution of race times.
 
+All simulations are evaluated at once with numpy (see simulate_totals),
+and strategies being compared share common random numbers (same draws
+for every strategy within an iteration).
+
 SCOPE NOTE: this simulates one car's strategy in isolation, not a full
 20-car grid -- there's no opponent modeling yet. "win_probability" here
 means "probability this strategy beats the OTHER STRATEGIES PASSED IN TO
 compare_strategies", not "probability of winning the actual race" (that
 would need per-driver pace and a modeled field of opponents, which is a
 bigger future step, not this module).
+
+CAVEATS that apply to every number compare_strategies returns (read
+these before putting a percentage in front of a user):
+  - ONE CAR IN ISOLATION: no traffic, no safety cars, no opponents, no
+    reactive pit calls. Strategies only interact with the random draws,
+    never with each other.
+  - ADDITIVE NOISE ONLY: lap-time and pit-loss noise are iid Gaussian
+    terms added on top of a deterministic race; they never feed back
+    into degradation, fuel or pit timing (see simulate_totals).
+  - COMMON RANDOM NUMBERS: every strategy in a comparison sees the same
+    draws (lap j shares lap j's draw, the k-th stop shares the k-th pit
+    draw). Combined with additive noise, two strategies of the same race
+    length and stop count differ by the SAME constant in every
+    iteration, so their win_probability is 0 or 1 regardless of how
+    small that gap is (a 0.3s edge reads as ~100%). Only pit draws for
+    stops one strategy makes and the other doesn't add any spread.
+    win_probability is therefore close to "which mean is lowest" and
+    carries little uncertainty information under the current model.
+  - The paired delta (delta_mean / delta_p10 / delta_p90 from
+    compare_strategies: this strategy's total minus the best-by-mean
+    strategy's total, iteration by iteration) is the honest headline:
+    it shows how big the gap is, not just who is ahead. Even so, it is
+    the gap *under this model*; validate_replay.py errors against real
+    races are tens of seconds, so sub-second deltas are not meaningful
+    differences.
+  - Comparisons are only meaningful between strategies of the same
+    total race laps (a shorter race always "wins" under CRN), so
+    compare_strategies rejects unequal totals. simulate_totals, the
+    low-level primitive, does not check.
 """
 
 import sys
@@ -58,6 +91,94 @@ class MonteCarloResult:
         return float(np.percentile(self.total_times, p))
 
 
+def _draw_noise(
+    rng: np.random.Generator,
+    n_simulations: int,
+    n_columns: int,
+    std: float,
+) -> np.ndarray:
+    """
+    (n_simulations, n_columns) Gaussian noise matrix, or exact zeros when
+    std == 0 (so the noise-off path consumes no random draws and adds
+    exactly nothing to the deterministic total).
+    """
+    if std and n_columns:
+        return rng.normal(0.0, std, size=(n_simulations, n_columns))
+    return np.zeros((n_simulations, n_columns))
+
+
+def simulate_totals(
+    strategies: Dict[str, List[Stint]],
+    base_laptime: float,
+    tire_model: dict,
+    n_simulations: int = DEFAULT_N_SIMULATIONS,
+    lap_time_noise_std: float = DEFAULT_LAP_TIME_NOISE_STD,
+    pit_loss_noise_std: float = DEFAULT_PIT_LOSS_NOISE_STD,
+    pit_loss_seconds: float = DEFAULT_PIT_LOSS_SECONDS,
+    seed: Optional[int] = None,
+) -> Dict[str, np.ndarray]:
+    """
+    Vectorized Monte Carlo core: returns {name: array of n_simulations
+    total race times} for every strategy, using common random numbers.
+
+    VECTORIZATION: in race_simulator.py's model both noise terms are
+    purely additive -- a lap's noise doesn't feed back into degradation,
+    fuel or pit timing. So a noisy total is exactly
+        deterministic total + sum(lap noise) + sum(pit noise)
+    and the deterministic part only needs computing ONCE per strategy
+    (via simulate_race, which stays the single-run reference), with the
+    noise summed across all simulations at once in numpy. If the engine
+    ever gets noise that interacts with state (e.g. random safety cars
+    that change pit timing), this decomposition stops being valid and
+    must be revisited rather than silently reused.
+
+    COMMON RANDOM NUMBERS: one (n_simulations, max_laps) lap-noise matrix
+    and one (n_simulations, max_stops) pit-noise matrix are drawn per
+    call and SHARED by every strategy. Within an iteration, lap index j
+    gets the same noise draw in every strategy and the k-th pit stop gets
+    the same pit-noise draw in every strategy. Differences between
+    strategies then reflect the strategies, not which one happened to
+    get luckier draws -- the standard variance-reduction choice for
+    comparing alternatives under simulation. Consequences worth knowing:
+      - for strategies of the same race length, lap noise cancels out of
+        every pairwise comparison entirely; only pit-noise draws for
+        stops the other strategy doesn't make can flip a ranking. This is
+        the honest result of the current model (iid symmetric lap noise
+        carries no strategy information -- team/ROADMAP.md point 3), not
+        a bug; it changes once noise interacts with race state.
+      - two identical strategies produce identical totals, so a tie is
+        broken toward the strategy listed first (see compare_strategies).
+    Draw order is lap noise first, then pit noise, from one Generator
+    seeded by `seed` -- the same seed reproduces the same results.
+    """
+    rng = np.random.default_rng(seed)
+
+    deterministic = {
+        name: simulate_race(
+            stints, base_laptime, tire_model, pit_loss_seconds=pit_loss_seconds
+        )
+        for name, stints in strategies.items()
+    }
+    max_laps = max((len(r.lap_times) for r in deterministic.values()), default=0)
+    max_stops = max((len(r.pit_laps) for r in deterministic.values()), default=0)
+
+    # cumulative sums so "noise summed over the first n laps / stops" is a
+    # single column lookup per strategy; a leading zero column handles
+    # n == 0 (e.g. a no-stop strategy) without special-casing
+    lap_noise = _draw_noise(rng, n_simulations, max_laps, lap_time_noise_std)
+    pit_noise = _draw_noise(rng, n_simulations, max_stops, pit_loss_noise_std)
+    zeros = np.zeros((n_simulations, 1))
+    lap_cum = np.hstack([zeros, np.cumsum(lap_noise, axis=1)])
+    pit_cum = np.hstack([zeros, np.cumsum(pit_noise, axis=1)])
+
+    return {
+        name: result.total_time
+        + lap_cum[:, len(result.lap_times)]
+        + pit_cum[:, len(result.pit_laps)]
+        for name, result in deterministic.items()
+    }
+
+
 def run_monte_carlo(
     strategy: List[Stint],
     base_laptime: float,
@@ -70,20 +191,17 @@ def run_monte_carlo(
     strategy_name: str = "strategy",
 ) -> MonteCarloResult:
     """Run one strategy n_simulations times with randomized noise; return the resulting time distribution."""
-    rng = np.random.default_rng(seed)
-    total_times = np.empty(n_simulations)
-    for i in range(n_simulations):
-        result = simulate_race(
-            strategy,
-            base_laptime,
-            tire_model,
-            pit_loss_seconds=pit_loss_seconds,
-            lap_time_noise_std=lap_time_noise_std,
-            pit_loss_noise_std=pit_loss_noise_std,
-            rng=rng,
-        )
-        total_times[i] = result.total_time
-    return MonteCarloResult(strategy_name=strategy_name, total_times=total_times)
+    totals = simulate_totals(
+        {strategy_name: strategy},
+        base_laptime,
+        tire_model,
+        n_simulations=n_simulations,
+        lap_time_noise_std=lap_time_noise_std,
+        pit_loss_noise_std=pit_loss_noise_std,
+        pit_loss_seconds=pit_loss_seconds,
+        seed=seed,
+    )
+    return MonteCarloResult(strategy_name=strategy_name, total_times=totals[strategy_name])
 
 
 def compare_strategies(
@@ -99,41 +217,87 @@ def compare_strategies(
     """
     Run several candidate strategies through Monte Carlo, and on each
     iteration record which one had the lowest total time. Returns
-    per-strategy stats (mean/std/p10/p50/p90) plus win_probability -- see
-    module docstring for what that probability is (and isn't) relative to.
+    {name: stats} where stats has:
+      - mean / std / p10 / p50 / p90: the strategy's own total race time
+        distribution, seconds
+      - win_probability: share of iterations in which this strategy had
+        the lowest total (exact ties go to the strategy listed first)
+      - delta_mean / delta_p10 / delta_p90: PAIRED comparison against the
+        reference strategy, seconds. For each iteration i,
+        delta[i] = total[i] - reference_total[i] (same draws, thanks to
+        CRN); these are the mean and 10th/90th percentiles of that
+        array. Positive = slower than the reference. The reference's own
+        deltas are exactly 0.
+      - delta_reference: name of the reference strategy -- the one with
+        the lowest MEAN total (ties -> first listed). Same for every
+        entry.
+
+    Caveats (also in the module docstring, read it): one car in
+    isolation, additive noise only, and common random numbers -- all
+    strategies share the same draws within an iteration (see
+    simulate_totals for exactly what is shared). Under that model,
+    same-length same-stop-count strategies differ by a constant every
+    iteration, so win_probability collapses to 0/1 even for a 0.3s gap.
+    Prefer the paired delta as the headline number: it says how large
+    the gap is, and its p10-p90 spread shows how much of it pit-stop
+    noise can swing.
+
+    Raises ValueError if the strategies don't all cover the same total
+    number of laps: under CRN the shorter race shares the longer one's
+    first-N lap draws and simply skips the rest, so it "wins" every
+    iteration -- a meaningless comparison. (run_monte_carlo, for a single
+    strategy, has no such constraint.)
     """
-    rng = np.random.default_rng(seed)
+    total_laps = {name: sum(s.laps for s in stints) for name, stints in strategies.items()}
+    if len(set(total_laps.values())) > 1:
+        raise ValueError(
+            "compare_strategies needs every strategy to cover the same total "
+            f"number of laps, got {total_laps}"
+        )
+
+    times = simulate_totals(
+        strategies,
+        base_laptime,
+        tire_model,
+        n_simulations=n_simulations,
+        lap_time_noise_std=lap_time_noise_std,
+        pit_loss_noise_std=pit_loss_noise_std,
+        pit_loss_seconds=pit_loss_seconds,
+        seed=seed,
+    )
     names = list(strategies.keys())
-    times = {name: np.empty(n_simulations) for name in names}
+    stacked = np.vstack([times[name] for name in names])  # (n_strategies, n_sims)
 
-    for i in range(n_simulations):
-        for name in names:
-            result = simulate_race(
-                strategies[name],
-                base_laptime,
-                tire_model,
-                pit_loss_seconds=pit_loss_seconds,
-                lap_time_noise_std=lap_time_noise_std,
-                pit_loss_noise_std=pit_loss_noise_std,
-                rng=rng,
-            )
-            times[name][i] = result.total_time
+    # np.argmin returns the first minimum, matching the old
+    # min(names, key=...) tie-break toward the earlier-listed strategy
+    winners = np.argmin(stacked, axis=0)
+    wins = np.bincount(winners, minlength=len(names))
 
-    wins = {name: 0 for name in names}
-    for i in range(n_simulations):
-        winner = min(names, key=lambda n: times[n][i])
-        wins[winner] += 1
+    # reference for the paired delta = best strategy by mean (same
+    # first-listed tie-break). Paired, not a difference of the two
+    # marginal distributions: subtracting row-by-row keeps the CRN
+    # pairing, so lap noise both strategies share cancels exactly and
+    # what's left is the strategy effect plus only the unshared draws.
+    means = stacked.mean(axis=1)
+    ref_idx = int(np.argmin(means))
+    deltas = stacked - stacked[ref_idx]
 
     summary = {}
-    for name in names:
-        arr = times[name]
+    for idx, name in enumerate(names):
+        arr = stacked[idx]
+        p10, p50, p90 = np.percentile(arr, [10, 50, 90])
+        d10, d90 = np.percentile(deltas[idx], [10, 90])
         summary[name] = {
-            "mean": float(np.mean(arr)),
+            "mean": float(means[idx]),
             "std": float(np.std(arr)),
-            "p10": float(np.percentile(arr, 10)),
-            "p50": float(np.percentile(arr, 50)),
-            "p90": float(np.percentile(arr, 90)),
-            "win_probability": wins[name] / n_simulations,
+            "p10": float(p10),
+            "p50": float(p50),
+            "p90": float(p90),
+            "win_probability": int(wins[idx]) / n_simulations,
+            "delta_mean": float(np.mean(deltas[idx])),
+            "delta_p10": float(d10),
+            "delta_p90": float(d90),
+            "delta_reference": names[ref_idx],
         }
     return summary
 
@@ -167,4 +331,4 @@ if __name__ == "__main__":
             f"  p10={stats['p10']:.1f}s  p50={stats['p50']:.1f}s  p90={stats['p90']:.1f}s"
         )
         print(f"  win_probability={stats['win_probability']:.1%}")
-    print(f"\n({DEFAULT_N_SIMULATIONS} sims/strategy in {elapsed:.1f}s)")
+    print(f"\n({DEFAULT_N_SIMULATIONS} sims/strategy in {elapsed:.3f}s)")

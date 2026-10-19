@@ -103,3 +103,72 @@ def test_noise_actually_perturbs_the_result(toy_tire_model):
         rng=np.random.default_rng(1),
     )
     assert noisy.total_time != pytest.approx(deterministic.total_time)
+
+
+# --- T-004: used tyre sets (Stint.start_age) ---
+
+
+def test_start_age_defaults_to_new_set(toy_tire_model):
+    default = simulate_race([Stint("MEDIUM", 10)], base_laptime=90.0, tire_model=toy_tire_model)
+    explicit = simulate_race(
+        [Stint("MEDIUM", 10, start_age=1)], base_laptime=90.0, tire_model=toy_tire_model
+    )
+    assert default.lap_times == explicit.lap_times
+
+
+def test_used_set_runs_tire_ages_from_start_age(toy_tire_model):
+    """
+    MEDIUM in the toy model is linear (0.05 s/lap, cliff at 20, relative
+    to age 2), and fuel/pace offsets are identical lap-by-lap across the
+    two runs, so starting on a 4-lap-old set should make every lap exactly
+    0.05 * 3 = 0.15s slower than the new-set run (ages 4..13 vs 1..10).
+    """
+    new = simulate_race([Stint("MEDIUM", 10)], base_laptime=90.0, tire_model=toy_tire_model)
+    used = simulate_race(
+        [Stint("MEDIUM", 10, start_age=4)], base_laptime=90.0, tire_model=toy_tire_model
+    )
+    for new_lap, used_lap in zip(new.lap_times, used.lap_times):
+        assert used_lap - new_lap == pytest.approx(0.15)
+
+
+def test_used_set_crosses_the_cliff_at_the_right_lap(toy_tire_model):
+    """SOFT's toy cliff is at age 10: a set starting at age 8 should hit it on its 3rd lap."""
+    from app.core.tire_model import predict_delta
+
+    used = simulate_race(
+        [Stint("SOFT", 5, start_age=8)], base_laptime=90.0, tire_model=toy_tire_model
+    )
+    new = simulate_race([Stint("SOFT", 5)], base_laptime=90.0, tire_model=toy_tire_model)
+    for i in range(5):
+        expected_gap = predict_delta(toy_tire_model, "SOFT", 8 + i) - predict_delta(
+            toy_tire_model, "SOFT", 1 + i
+        )
+        assert used.lap_times[i] - new.lap_times[i] == pytest.approx(expected_gap)
+    # past the cliff the per-lap loss grows faster than the 0.10 s/lap slope
+    assert used.lap_times[4] - used.lap_times[3] > 0.10
+
+
+def test_pit_loss_still_charged_when_stopping_onto_a_used_set(toy_tire_model):
+    strategy = [Stint("MEDIUM", 5), Stint("SOFT", 5, start_age=3)]
+    with_pit = simulate_race(
+        strategy, base_laptime=90.0, tire_model=toy_tire_model, pit_loss_seconds=22.0
+    )
+    without_pit = simulate_race(
+        strategy, base_laptime=90.0, tire_model=toy_tire_model, pit_loss_seconds=0.0
+    )
+    assert with_pit.pit_laps == [6]
+    assert with_pit.total_time - without_pit.total_time == pytest.approx(22.0)
+
+
+def test_used_first_stint_is_not_charged_a_pit_stop(toy_tire_model):
+    result = simulate_race(
+        [Stint("SOFT", 5, start_age=3), Stint("HARD", 5)],
+        base_laptime=90.0,
+        tire_model=toy_tire_model,
+    )
+    assert result.pit_laps == [6]
+
+
+def test_start_age_below_one_is_rejected():
+    with pytest.raises(ValueError):
+        Stint("SOFT", 5, start_age=0)

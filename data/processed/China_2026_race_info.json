@@ -1,0 +1,17 @@
+{
+  "year": 2026,
+  "gp": "China",
+  "event_name": "Chinese Grand Prix",
+  "circuit": "Shanghai",
+  "event_format": "sprint_qualifying",
+  "event_date": "2026-03-15",
+  "total_laps": 56,
+  "num_laps": 56,
+  "num_drivers": 18,
+  "compound_map": {
+    "HARD": "C2",
+    "MEDIUM": "C3",
+    "SOFT": "C4"
+  },
+  "compound_map_source": "T-001 research note \u00a73.2 (team/Pirelli previews)"
+}

@@ -28,7 +28,8 @@ RACES = [
     (2026, "Britain"),
     (2026, "Miami"),
     (2026, "Canada"),
-    (2026, "Spain"),
+    # (2026, "Spain") removed with pull_races.py's (T-002): it resolves to
+    # the uncached Madrid race and would trigger a network pull. T-009.
     (2026, "Austria"),
     (2026, "Belgium"),
     (2026, "Hungary"),
