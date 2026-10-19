@@ -1,40 +1,79 @@
 """
 Pull multiple races into data/processed/ for tire model calibration.
-Run this from project root with: python pull_races.py
+Run this from project root with: python pull_races.py [--online] [--out DIR]
+
+Writes, per race: {gp}_{year}_laps.csv (the only file the tire model
+reads) plus results / weather / track_status / rcm / pit_stops sidecar
+CSVs and a race_info.json (incl. the event's C-compound mapping). See
+backend/app/core/data_loader.py for the column definitions.
+
+OFFLINE BY DEFAULT (T-002, 2026-10-19): every race below is already in
+cache/, so re-extracting should never touch the network. FastF1's offline
+mode makes that a guarantee -- a race missing from the cache fails loudly
+instead of silently starting a slow download. Pass --online to allow
+network pulls (needed for any new race, e.g. T-009).
 """
 
+import argparse
 import sys
+
 sys.path.insert(0, "backend")
 
 import fastf1
-from app.core.data_loader import get_race_data
-
-fastf1.Cache.enable_cache("cache")
+from app.core.data_loader import get_race_tables, save_race_tables
 
 # (year, gp) pairs — picked for variety in circuit character, since tire
 # degradation behaves differently on street circuits vs high-speed tracks.
 RACES = [
-    (2026, "China"),      # already pulled, re-run is harmless (cache hits)
+    (2026, "China"),
     (2026, "Australia"),  # semi-street, medium abrasion
     (2026, "Japan"),      # classic high-speed, historically hard on tires
     (2026, "Monaco"),     # low-speed street circuit, low degradation
     (2026, "Britain"),    # high-speed, high lateral load, high degradation
     (2026, "Miami"),
     (2026, "Canada"),
-    (2026, "Spain"),      # Barcelona
     (2026, "Austria"),
     (2026, "Belgium"),    # Spa
     (2026, "Hungary"),
 ]
 
-for year, gp in RACES:
-    print(f"\nLoading {year} {gp} Grand Prix...")
-    try:
-        laps_df, race_info = get_race_data(year, gp)
-    except Exception as e:
-        print(f"  Failed to load {gp}: {e}")
-        continue
+# PENDING T-009 (user decision): (2026, "Spain") was meant to be Barcelona
+# but FastF1 resolves it to the 2026-09-13 Madrid "Spanish Grand Prix";
+# Barcelona is the "Barcelona Grand Prix" (2026-06-14). Neither is cached,
+# so it never produced a CSV. Removed from RACES until T-009 decides which
+# race(s) to pull -- leaving it in would trigger a network download (or,
+# offline, a guaranteed failure) on every re-run.
 
-    out_path = f"data/processed/{gp}_{year}_laps.csv"
-    laps_df.to_csv(out_path, index=False)
-    print(f"  {race_info['event_name']}: {laps_df.shape[0]} laps -> {out_path}")
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[1])
+    parser.add_argument("--online", action="store_true", help="allow network downloads")
+    parser.add_argument("--out", default="data/processed", help="output directory")
+    args = parser.parse_args()
+
+    fastf1.Cache.enable_cache("cache")
+    if not args.online:
+        fastf1.Cache.offline_mode(True)
+
+    for year, gp in RACES:
+        print(f"\nLoading {year} {gp} Grand Prix...")
+        try:
+            tables = get_race_tables(year, gp)
+        except Exception as e:
+            print(f"  Failed to load {gp}: {e}")
+            continue
+
+        written = save_race_tables(tables, args.out, gp, year)
+        laps = tables["laps"]
+        info = tables["race_info"]
+        print(
+            f"  {info['event_name']}: {len(laps)} lap rows "
+            f"({laps['lap_time_seconds'].isna().sum()} without LapTime), "
+            f"{int(laps['is_tyre_change'].sum())} tyre changes, "
+            f"{int(laps['is_pit_pass_no_change'].sum())} same-tyre pit passes, "
+            f"compounds {info['compound_map']} -> {written['laps']}"
+        )
+
+
+if __name__ == "__main__":
+    main()

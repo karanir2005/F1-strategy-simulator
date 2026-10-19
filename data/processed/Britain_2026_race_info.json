@@ -1,0 +1,17 @@
+{
+  "year": 2026,
+  "gp": "Britain",
+  "event_name": "British Grand Prix",
+  "circuit": "Silverstone",
+  "event_format": "sprint_qualifying",
+  "event_date": "2026-07-05",
+  "total_laps": 52,
+  "num_laps": 52,
+  "num_drivers": 22,
+  "compound_map": {
+    "HARD": "C1",
+    "MEDIUM": "C2",
+    "SOFT": "C3"
+  },
+  "compound_map_source": "T-001 research note \u00a73.2 (team/Pirelli previews)"
+}

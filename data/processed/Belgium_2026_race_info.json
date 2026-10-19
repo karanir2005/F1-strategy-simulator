@@ -1,0 +1,17 @@
+{
+  "year": 2026,
+  "gp": "Belgium",
+  "event_name": "Belgian Grand Prix",
+  "circuit": "Spa-Francorchamps",
+  "event_format": "conventional",
+  "event_date": "2026-07-19",
+  "total_laps": 44,
+  "num_laps": 44,
+  "num_drivers": 21,
+  "compound_map": {
+    "HARD": "C2",
+    "MEDIUM": "C3",
+    "SOFT": "C4"
+  },
+  "compound_map_source": "T-001 research note \u00a73.2 (team/Pirelli previews)"
+}

@@ -36,10 +36,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
+  MAX_RACE_LAPS,
+  MAX_SIMULATIONS,
+  MAX_START_AGE,
+  MAX_STRATEGIES,
   runSimulation,
   type Compound,
   type Strategy,
   type StrategyResult,
+  type SimulateResponse,
 } from "@/lib/api";
 
 let nextId = 0;
@@ -51,10 +56,17 @@ const newId = () => `${Date.now()}-${nextId++}`;
 // results since the backend keys them by name
 let nextStrategyNumber = 3;
 
+/** A numeric text field: "" while the user has cleared it (validated before run). */
+type NumField = number | "";
+
 interface StintRow {
   id: string;
   compound: Compound;
-  laps: number;
+  laps: NumField;
+  /** Used-set flag, kept separate from startAge so typing "15" can't collapse the input. */
+  usedSet: boolean;
+  /** Tyre age on the stint's first lap; only sent when usedSet. 1 = new set. */
+  startAge: NumField;
 }
 
 interface StrategyRow {
@@ -68,17 +80,17 @@ const initialStrategies: StrategyRow[] = [
     id: newId(),
     name: "1-stop",
     stints: [
-      { id: newId(), compound: "MEDIUM", laps: 25 },
-      { id: newId(), compound: "HARD", laps: 32 },
+      { id: newId(), compound: "MEDIUM", laps: 25, usedSet: false, startAge: 2 },
+      { id: newId(), compound: "HARD", laps: 32, usedSet: false, startAge: 2 },
     ],
   },
   {
     id: newId(),
     name: "2-stop",
     stints: [
-      { id: newId(), compound: "SOFT", laps: 15 },
-      { id: newId(), compound: "MEDIUM", laps: 20 },
-      { id: newId(), compound: "HARD", laps: 22 },
+      { id: newId(), compound: "SOFT", laps: 15, usedSet: false, startAge: 2 },
+      { id: newId(), compound: "MEDIUM", laps: 20, usedSet: false, startAge: 2 },
+      { id: newId(), compound: "HARD", laps: 22, usedSet: false, startAge: 2 },
     ],
   },
 ];
@@ -99,7 +111,7 @@ interface DotProps {
 /** Renders an invisible dot on every lap, except a highlighted marker on pit-stop laps. */
 function makePitStopDot(pitLaps: number[], color: string) {
   const pitSet = new Set(pitLaps);
-  return (props: DotProps) => {
+  const PitStopDot = (props: DotProps) => {
     const lap = (props.index ?? 0) + 1;
     if (pitSet.has(lap)) {
       return (
@@ -116,6 +128,7 @@ function makePitStopDot(pitLaps: number[], color: string) {
     }
     return <circle key={props.key} cx={props.cx} cy={props.cy} r={0} />;
   };
+  return PitStopDot;
 }
 
 function buildLapChartData(results: StrategyResult[]) {
@@ -129,14 +142,30 @@ function buildLapChartData(results: StrategyResult[]) {
   });
 }
 
+function parseNum(value: string): NumField {
+  if (value === "") return "";
+  const n = Number(value);
+  return Number.isNaN(n) ? "" : n;
+}
+
 function getValidationError(
-  baseLaptime: number,
-  nSimulations: number,
+  baseLaptime: NumField,
+  nSimulations: NumField,
+  pitLossSeconds: NumField,
   strategies: StrategyRow[],
 ): string | null {
-  if (baseLaptime <= 0) return "Base lap time must be greater than 0.";
-  if (nSimulations <= 0) return "Simulations per strategy must be greater than 0.";
+  if (baseLaptime === "" || baseLaptime <= 0) return "Base lap time must be greater than 0.";
+  if (nSimulations === "" || !Number.isInteger(nSimulations) || nSimulations <= 0) {
+    return "Simulations per strategy must be a positive whole number.";
+  }
+  if (nSimulations > MAX_SIMULATIONS) {
+    return `Simulations per strategy must be at most ${MAX_SIMULATIONS.toLocaleString("en-US")}.`;
+  }
+  if (pitLossSeconds === "" || pitLossSeconds < 0) return "Pit stop loss must be 0 or more seconds.";
   if (strategies.length === 0) return "Add at least one strategy.";
+  if (strategies.length > MAX_STRATEGIES) {
+    return `At most ${MAX_STRATEGIES} strategies can be compared at once (you have ${strategies.length}).`;
+  }
   const names = strategies.map((s) => s.name.trim());
   const seen = new Set<string>();
   for (const name of names) {
@@ -149,10 +178,36 @@ function getValidationError(
       return `"${strategy.name}" needs at least one stint.`;
     }
     for (const stint of strategy.stints) {
-      if (!Number.isInteger(stint.laps) || stint.laps <= 0) {
-        return `"${strategy.name}" has a stint with an invalid lap count -- must be a positive whole number.`;
+      if (stint.laps === "" || !Number.isInteger(stint.laps) || stint.laps <= 0) {
+        return `"${strategy.name}" has a stint with a missing or invalid lap count -- must be a positive whole number.`;
+      }
+      if (stint.laps > MAX_RACE_LAPS) {
+        return `"${strategy.name}" has a stint of ${stint.laps} laps -- the limit is ${MAX_RACE_LAPS} per stint.`;
+      }
+      if (stint.usedSet) {
+        if (
+          stint.startAge === "" ||
+          !Number.isInteger(stint.startAge) ||
+          stint.startAge < 1 ||
+          stint.startAge > MAX_START_AGE
+        ) {
+          return `"${strategy.name}" has a used set with a missing or invalid starting tyre age -- must be a whole number from 1 to ${MAX_START_AGE} (1 = new set).`;
+        }
       }
     }
+  }
+  const totals = strategies.map((s) => ({
+    name: s.name.trim(),
+    total: s.stints.reduce((sum, st) => sum + (st.laps as number), 0),
+  }));
+  const tooLong = totals.find((t) => t.total > MAX_RACE_LAPS);
+  if (tooLong) {
+    return `"${tooLong.name}" totals ${tooLong.total} laps -- the limit is ${MAX_RACE_LAPS} laps per strategy.`;
+  }
+  if (totals.some((t) => t.total !== totals[0].total)) {
+    return `All strategies must cover the same total race laps to be compared (${totals
+      .map((t) => `"${t.name}": ${t.total}`)
+      .join(", ")}).`;
   }
   return null;
 }
@@ -163,6 +218,22 @@ const COMPOUND_COLOR: Record<Compound, string> = {
   HARD: "bg-neutral-400",
 };
 
+const DELTA_HELP =
+  "Paired gap vs the reference (lowest-mean) strategy: per simulation, this strategy's total minus the reference's total in the same simulation. Reported as the mean and the p10 to p90 range.";
+
+function formatDelta(seconds: number): string {
+  return `${seconds >= 0 ? "+" : "-"}${Math.abs(seconds).toFixed(2)}s`;
+}
+
+function formatDeltaRange(p10: number, p90: number): string {
+  // same stop count -> shared draws -> a single value, not a range
+  if (Math.abs(p90 - p10) < 0.005) return `constant ${formatDelta(p10)}`;
+  return `${formatDelta(p10)} to ${formatDelta(p90)}`;
+}
+
+const WIN_PROB_HELP =
+  "Secondary. Share of simulations in which this strategy beat the other strategies compared, under the current model (one car in isolation; no safety cars or traffic yet). Not a race-win chance. Often near 0% / 100% even for tiny gaps -- use the time-vs-reference column.";
+
 const CHART_COLORS = ["#2563eb", "#16a34a", "#dc2626", "#9333ea", "#ea580c"];
 
 // mirrors race_simulator.py's DEFAULT_PIT_LOSS_SECONDS -- kept editable
@@ -171,15 +242,15 @@ const CHART_COLORS = ["#2563eb", "#16a34a", "#dc2626", "#9333ea", "#ea580c"];
 const DEFAULT_PIT_LOSS_SECONDS = 23.5;
 
 export default function Home() {
-  const [baseLaptime, setBaseLaptime] = useState(90);
-  const [nSimulations, setNSimulations] = useState(2000);
-  const [pitLossSeconds, setPitLossSeconds] = useState(DEFAULT_PIT_LOSS_SECONDS);
+  const [baseLaptime, setBaseLaptime] = useState<NumField>(90);
+  const [nSimulations, setNSimulations] = useState<NumField>(2000);
+  const [pitLossSeconds, setPitLossSeconds] = useState<NumField>(DEFAULT_PIT_LOSS_SECONDS);
   const [strategies, setStrategies] = useState<StrategyRow[]>(initialStrategies);
-  const [results, setResults] = useState<StrategyResult[] | null>(null);
+  const [results, setResults] = useState<SimulateResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const validationError = getValidationError(baseLaptime, nSimulations, strategies);
+  const validationError = getValidationError(baseLaptime, nSimulations, pitLossSeconds, strategies);
 
   function addStrategy() {
     setStrategies((prev) => [
@@ -187,7 +258,7 @@ export default function Home() {
       {
         id: newId(),
         name: `strategy-${nextStrategyNumber++}`,
-        stints: [{ id: newId(), compound: "MEDIUM", laps: 20 }],
+        stints: [{ id: newId(), compound: "MEDIUM", laps: 20, usedSet: false, startAge: 2 }],
       },
     ]);
   }
@@ -206,7 +277,7 @@ export default function Home() {
     setStrategies((prev) =>
       prev.map((s) =>
         s.id === strategyId
-          ? { ...s, stints: [...s.stints, { id: newId(), compound: "MEDIUM", laps: 10 }] }
+          ? { ...s, stints: [...s.stints, { id: newId(), compound: "MEDIUM", laps: 10, usedSet: false, startAge: 2 }] }
           : s,
       ),
     );
@@ -225,7 +296,7 @@ export default function Home() {
   function updateStint(
     strategyId: string,
     stintId: string,
-    field: "compound" | "laps",
+    field: "compound" | "laps" | "startAge",
     value: string,
   ) {
     setStrategies((prev) =>
@@ -237,8 +308,25 @@ export default function Home() {
                 st.id === stintId
                   ? {
                       ...st,
-                      [field]: field === "laps" ? Number(value) || 0 : value,
+                      [field]: field === "compound" ? value : parseNum(value),
                     }
+                  : st,
+              ),
+            }
+          : s,
+      ),
+    );
+  }
+
+  function setUsedSet(strategyId: string, stintId: string, usedSet: boolean) {
+    setStrategies((prev) =>
+      prev.map((s) =>
+        s.id === strategyId
+          ? {
+              ...s,
+              stints: s.stints.map((st) =>
+                st.id === stintId
+                  ? { ...st, usedSet, startAge: usedSet && st.startAge === "" ? 2 : st.startAge }
                   : st,
               ),
             }
@@ -256,17 +344,22 @@ export default function Home() {
 
     const payload: Strategy[] = strategies.map((s) => ({
       name: s.name,
-      stints: s.stints.map((st) => ({ compound: st.compound, laps: st.laps })),
+      stints: s.stints.map((st) => ({
+        compound: st.compound,
+        laps: st.laps as number,
+        // only sent for used sets; omitted = new set (backend default 1)
+        ...(st.usedSet && st.startAge !== 1 ? { start_age: st.startAge as number } : {}),
+      })),
     }));
 
     try {
       const response = await runSimulation({
-        base_laptime: baseLaptime,
+        base_laptime: baseLaptime as number,
         strategies: payload,
-        n_simulations: nSimulations,
-        pit_loss_seconds: pitLossSeconds,
+        n_simulations: nSimulations as number,
+        pit_loss_seconds: pitLossSeconds as number,
       });
-      setResults(response.results);
+      setResults(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Simulation failed");
     } finally {
@@ -275,8 +368,9 @@ export default function Home() {
   }
 
   const sortedResults = results
-    ? [...results].sort((a, b) => a.mean - b.mean)
+    ? [...results.results].sort((a, b) => a.mean - b.mean)
     : null;
+  const referenceName = results?.reference_strategy ?? null;
 
   return (
     <div className="mx-auto max-w-4xl p-8 space-y-6">
@@ -300,7 +394,7 @@ export default function Home() {
               type="number"
               step="0.1"
               value={baseLaptime}
-              onChange={(e) => setBaseLaptime(Number(e.target.value) || 0)}
+              onChange={(e) => setBaseLaptime(parseNum(e.target.value))}
               className="w-32"
             />
           </div>
@@ -311,7 +405,7 @@ export default function Home() {
               type="number"
               step="500"
               value={nSimulations}
-              onChange={(e) => setNSimulations(Number(e.target.value) || 0)}
+              onChange={(e) => setNSimulations(parseNum(e.target.value))}
               className="w-32"
             />
           </div>
@@ -322,7 +416,7 @@ export default function Home() {
               type="number"
               step="0.5"
               value={pitLossSeconds}
-              onChange={(e) => setPitLossSeconds(Number(e.target.value) || 0)}
+              onChange={(e) => setPitLossSeconds(parseNum(e.target.value))}
               className="w-32"
             />
           </div>
@@ -357,7 +451,7 @@ export default function Home() {
             </CardHeader>
             <CardContent className="space-y-2">
               {strategy.stints.map((stint) => (
-                <div key={stint.id} className="flex items-center gap-2">
+                <div key={stint.id} className="flex flex-wrap items-center gap-2">
                   <Badge className={`${COMPOUND_COLOR[stint.compound]} text-white w-16 justify-center`}>
                     {stint.compound[0]}
                   </Badge>
@@ -378,6 +472,9 @@ export default function Home() {
                   </Select>
                   <Input
                     type="number"
+                    min={1}
+                    max={MAX_RACE_LAPS}
+                    aria-label="Stint laps"
                     value={stint.laps}
                     onChange={(e) =>
                       updateStint(strategy.id, stint.id, "laps", e.target.value)
@@ -385,6 +482,32 @@ export default function Home() {
                     className="w-24"
                   />
                   <span className="text-sm text-muted-foreground">laps</span>
+                  <label className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={stint.usedSet}
+                      onChange={(e) => setUsedSet(strategy.id, stint.id, e.target.checked)}
+                    />
+                    used set
+                  </label>
+                  {stint.usedSet && (
+                    <>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={MAX_START_AGE}
+                        step={1}
+                        aria-label="Starting tyre age (laps)"
+                        title="Tyre age on the stint's first lap. A set already run N laps = N + 1."
+                        value={stint.startAge}
+                        onChange={(e) =>
+                          updateStint(strategy.id, stint.id, "startAge", e.target.value)
+                        }
+                        className="w-20"
+                      />
+                      <span className="text-sm text-muted-foreground">start age</span>
+                    </>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -401,7 +524,11 @@ export default function Home() {
             </CardContent>
           </Card>
         ))}
-        <Button variant="outline" onClick={addStrategy}>
+        <Button
+          variant="outline"
+          onClick={addStrategy}
+          disabled={strategies.length >= MAX_STRATEGIES}
+        >
           + Add strategy
         </Button>
       </div>
@@ -512,11 +639,13 @@ export default function Home() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Strategy</TableHead>
+                    <TableHead title={DELTA_HELP}>Time vs reference</TableHead>
+                    <TableHead title={DELTA_HELP}>Gap p10 to p90</TableHead>
                     <TableHead>Mean</TableHead>
                     <TableHead>p10</TableHead>
                     <TableHead>p50</TableHead>
                     <TableHead>p90</TableHead>
-                    <TableHead>Win probability</TableHead>
+                    <TableHead title={WIN_PROB_HELP}>Win probability*</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -525,6 +654,19 @@ export default function Home() {
                       <TableCell className="font-medium">
                         {i === 0 && "🏆 "}
                         {r.name}
+                        {r.name === referenceName && (
+                          <Badge variant="outline" className="ml-2">
+                            reference
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-semibold">
+                        {r.name === referenceName
+                          ? "reference"
+                          : `${formatDelta(r.delta_mean)} vs ${referenceName}`}
+                      </TableCell>
+                      <TableCell>
+                        {r.name === referenceName ? "--" : formatDeltaRange(r.delta_p10, r.delta_p90)}
                       </TableCell>
                       <TableCell>{formatTime(r.mean)}</TableCell>
                       <TableCell>{formatTime(r.p10)}</TableCell>
@@ -536,9 +678,23 @@ export default function Home() {
                 </TableBody>
               </Table>
               <p className="mt-2 text-xs text-muted-foreground">
-                Win probability is relative to the strategies compared here, not a
-                probability of winning the actual race against a full grid of
-                opponents.
+                Time vs reference is the paired gap: for each simulation, this
+                strategy&apos;s total minus the reference strategy&apos;s total in the
+                same simulation (the reference is the strategy with the lowest mean
+                time). Strategies with the same stop count share their random draws,
+                so their gap is a single number rather than a range. A negative p10
+                means the strategy beat the reference in at least 10% of simulations.
+                Gaps of about a second or less are well inside the model&apos;s error
+                (replays of real races are off by tens of seconds), so treat them as
+                no meaningful difference.
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                *Win probability is the share of simulations in which this strategy
+                beat the other strategies compared, under the current model (one car
+                in isolation; no safety cars or traffic yet). It is not a race-win
+                chance. All strategies share the same random draws, so strategies with
+                the same stop count can show exactly 0% / 100% even when the time gap
+                is a fraction of a second -- read the time-vs-reference gap first.
               </p>
             </CardContent>
           </Card>

@@ -1,0 +1,17 @@
+{
+  "year": 2026,
+  "gp": "Australia",
+  "event_name": "Australian Grand Prix",
+  "circuit": "Melbourne",
+  "event_format": "conventional",
+  "event_date": "2026-03-08",
+  "total_laps": 58,
+  "num_laps": 58,
+  "num_drivers": 20,
+  "compound_map": {
+    "HARD": "C3",
+    "MEDIUM": "C4",
+    "SOFT": "C5"
+  },
+  "compound_map_source": "T-001 research note \u00a73.2 (team/Pirelli previews)"
+}

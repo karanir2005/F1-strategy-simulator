@@ -33,11 +33,85 @@ traffic-confounded sample -- see its docstring. build_tire_model() uses
 COMPOUND_PACE_OFFSET_PLACEHOLDER (literature ballpark) instead, wired
 into race_simulator.py's lap_time calculation. Revisit
 fit_compound_pace_offsets once there's traffic/gap data to correct for.
+
+UPDATE (2026-10-19, T-002): data + estimator rework. Three changes, each
+measured with a leave-one-race-out (LORO) check -- fit on 9 races,
+predict the within-stint lap-time shape (fuel + wear, stint-demeaned) of
+every >=6-lap clean stint in the 10th:
+
+1. Stints / cleaning. data_loader.py now emits real tyre stints
+   (tyre_stint), out-lap flags and per-character track-status flags.
+   clean_laps() drops out-laps on ANY set (the old tire_age == 1 rule let
+   the out-laps of all 57 used-set stops -- which include part of the
+   pit lane -- into the fit), lap 1, the first green lap after a
+   SC/VSC/red (restart laps: +0.23 s median, +0.44 s mean vs. the
+   driver's neighbouring green laps), NaN lap times, and laps with
+   unknown tyre data. Local-yellow-only laps stay EXCLUDED: measured
+   against the same neighbouring green laps they are +0.09 s median but
+   +0.84 s mean / +1.56 s p90 (green: -0.00 / +0.10 / +0.82), i.e. mostly
+   mild with a heavy incident tail, and they'd add only ~4% more laps.
+   Cleaning alone did NOT fix the flat SOFT curve (old estimator on new
+   data: SOFT still ~0 until age ~28).
+
+2. Estimator (the actual N-3 root cause). The old fit regressed each
+   compound separately on [1, lap_number, age, age^2], then THREW AWAY
+   that compound's own lap_number (fuel) coefficient and simulated with
+   a different, shared one from fit_fuel_coef_from_fresh_laps (-0.054
+   vs. per-compound -0.026..-0.038). Fuel and wear are only separable
+   *jointly*, so the wear curves were fitted against a fuel slope the
+   simulator never uses. LORO: the old model under-predicted MEDIUM/HARD
+   within-stint slopes by 0.03-0.04 s/lap (too little degradation) and
+   SOFT's quadratic absorbed the fuel trend outright (age_coef -0.055 ==
+   minus the fuel slope -> flat after the monotone clamp).
+   fit_joint_model() replaces it with ONE regression, with driver-race
+   fixed effects (within transformation), compound dummies, a
+   lap_number slope PER RACE (fuel burn + that race's track evolution --
+   Canada/Monaco evolve very differently from Austria/Hungary) and
+   per-compound wear terms. The simulator's _fuel_coef is the lap-weighted
+   mean of those per-race slopes, so wear and fuel are now fitted and
+   simulated consistently.
+   LORO within-stint RMSE, full pipeline (outlier removal, cliffs and
+   placeholder extrapolation included): BEFORE (old code, old data)
+   1.311 s -> AFTER (joint, linear) 1.157 s [joint quadratic: 1.163 s];
+   slope bias (pred - actual) MEDIUM -0.024 -> -0.003, HARD -0.038 ->
+   -0.003 s/lap. Estimator-only comparison on identical cleaned data, no
+   cliffs: old 1.003 s -> joint quadratic 0.985 s -> joint linear 0.979 s.
+   (Old code on the new CSVs gives exactly the BEFORE numbers: the old
+   pipeline never used stint ids, so the stint fix alone can't move it.)
+   Linear wear (age2_coef = 0) wins out of sample, so it's the default
+   (build_tire_model(quadratic=True) restores the curve).
+
+3. SOFT (T-004 QA N-3). The joint linear fit gives SOFT wear +0.0105
+   s/lap (MEDIUM +0.038, HARD +0.050): it now increases with age, so a
+   used SOFT set is slower than a new one. Be clear what that rests on:
+   the joint QUADRATIC fit still has SOFT getting faster for ~13 laps and
+   only rising after ~age 25 (U-shape), and LORO says held-out SOFT
+   stints get faster than either model predicts (slope bias +0.11 s/lap,
+   was +0.17). Per-race joint fits show why: SOFT wear is +0.04..+0.08
+   s/lap at Australia, Austria, Belgium and Hungary, but ~0 / negative at
+   Monaco (+0.015: short post-red-flag sprints in a train), Canada
+   (-0.023 -- MEDIUM is negative there too, i.e. non-linear track
+   evolution the per-race linear term can't absorb) and Miami (-0.012,
+   49 laps), and Canada + Monaco hold ~half of all clean SOFT laps (SOFT
+   is C5 at both). Fixing that properly needs per-track terms (ROADMAP
+   Phase 3); a median-of-races pooling was tried and was worse out of
+   sample (estimator-only LORO 0.989 s vs 0.979 s), so it's documented
+   here rather than hacked around. A clean-air filter (road gap >= 1,
+   1.5, 2 s) was also tried and barely moved any curve.
+
+Compound pace offsets stay on COMPOUND_PACE_OFFSET_PLACEHOLDER: the joint
+fit still says SOFT (+0.38 s) and MEDIUM (+0.18 s) are SLOWER than HARD,
+and keying on Pirelli C-number instead of the S/M/H label doesn't help
+(C1 -0.47, C2 -0.28, C4 +0.18, C5 +0.25 s vs C3). Since that survives
+the stint fix, out-lap/restart cleaning, per-race fuel and C-number
+keying, it is not a data-cleaning artefact; candidates are traffic /
+stint-situation selection and 2026 tyre/energy management. The fitted
+values are exposed as model["_compound_offsets_fitted"] (diagnostic only).
 """
 
 import glob
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -63,10 +137,13 @@ COMPOUND_PACE_OFFSET_PLACEHOLDER = {"SOFT": -0.5, "MEDIUM": -0.2, "HARD": 0.0}
 COMPOUND_CLIFF_PENALTY_PLACEHOLDER = {"SOFT": 1.0, "MEDIUM": 0.5, "HARD": 0.2}
 
 
+DRY_COMPOUNDS = ("SOFT", "MEDIUM", "HARD")
+
+
 def load_all_laps(pattern: str = f"{PROCESSED_DIR}/*_laps.csv") -> pd.DataFrame:
     """Combine every pulled race into one DataFrame, tagged by source file."""
     frames = []
-    for path in glob.glob(pattern):
+    for path in sorted(glob.glob(pattern)):
         df = pd.read_csv(path)
         df["race_file"] = path
         frames.append(df)
@@ -75,9 +152,27 @@ def load_all_laps(pattern: str = f"{PROCESSED_DIR}/*_laps.csv") -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
+def _has_t002_schema(laps: pd.DataFrame) -> bool:
+    """True for laps CSVs written by the T-002 data_loader (real tyre stints + flags)."""
+    return {"tyre_stint", "pit_out_lap", "is_neutralised"}.issubset(laps.columns)
+
+
 def assign_stint_ids(laps: pd.DataFrame) -> pd.DataFrame:
-    """Tag each lap with a stint id; a new stint starts when tire_age resets to 1."""
+    """
+    Tag each lap with a per-driver stint number (stint_id) that only
+    changes on a REAL tyre change.
+
+    T-002 files carry data_loader's tyre_stint (FastF1 Stint split into
+    real tyre changes vs same-tyre pit-lane passes), which is used as-is.
+    Legacy pre-T-002 files only have tire_age, so they fall back to the
+    old "new stint when tire_age == 1" rule -- which silently merges every
+    stop onto a used set into the previous stint (57 of 343 real tyre
+    changes in the 2026 data). Re-extract with pull_races.py to fix.
+    """
     laps = laps.sort_values(["race_file", "driver", "lap_number"]).copy()
+    if "tyre_stint" in laps.columns:
+        laps["stint_id"] = laps["tyre_stint"].astype(int)
+        return laps
     is_new_stint = laps["tire_age"] == 1
     laps["stint_id"] = is_new_stint.groupby(
         [laps["race_file"], laps["driver"]]
@@ -87,22 +182,125 @@ def assign_stint_ids(laps: pd.DataFrame) -> pd.DataFrame:
 
 def clean_laps(laps: pd.DataFrame) -> pd.DataFrame:
     """
-    Drop out laps (tire_age == 1, cold tires), in laps (pit_in_lap == 1,
-    slowed for pit entry), and any lap not run entirely under green flag
-    (safety car/VSC/yellow/red mixed in -- those laps are artificially
-    slow for reasons that have nothing to do with tires or fuel, and
-    previously contaminated the fuel-effect fit badly enough to flip its
-    sign, see fit_shared_fuel_coef's docstring). Also removes each car's
-    own race-average pace so laps from different circuits/cars can be
-    pooled together.
+    Keep only laps that measure tyre + fuel pace (see the module docstring's
+    2026-10-19 UPDATE for the measurements behind each rule):
+      - lap time known, dry compound, tyre age known
+      - not lap 1 (standing start)
+      - not an in-lap (pit_in_lap) or out-lap (pit_out_lap -- on ANY set,
+        new or used, and including same-tyre pit-lane passes)
+      - whole lap green (is_green_flag, TrackStatus == "1"). Local-yellow
+        laps stay excluded on purpose: heavy-tailed (+0.84 s mean).
+      - not the first lap after a SC/VSC/red-flag lap (restart lap)
+    Also removes each car's own race-average pace (laptime_demeaned) for
+    the legacy per-compound fitters; fit_joint_model does its own exact
+    within-driver-race transformation.
+
+    Legacy (pre-T-002) files fall back to the old rule: tire_age > 1 as
+    the out-lap proxy, which misses used-set out-laps.
     """
-    clean = laps[
-        (laps["tire_age"] > 1) & (laps["pit_in_lap"] == 0) & laps["is_green_flag"]
-    ].copy()
+    laps = laps.sort_values(["race_file", "driver", "lap_number"])
+    keep = (
+        laps["lap_time_seconds"].notna()
+        & laps["tire_age"].notna()
+        & laps["compound"].isin(DRY_COMPOUNDS)
+        & (laps["pit_in_lap"] == 0)
+        & laps["is_green_flag"].astype(bool)
+    )
+    if _has_t002_schema(laps):
+        prev_neutralised = (
+            laps.groupby(["race_file", "driver"])["is_neutralised"]
+            .shift(1)
+            .astype("boolean")
+            .fillna(False)
+            .astype(bool)
+        )
+        keep &= (
+            (laps["lap_number"] > 1)
+            & (laps["pit_out_lap"] == 0)
+            & ~prev_neutralised
+        )
+        if "tyre_data_missing" in laps.columns:
+            keep &= ~laps["tyre_data_missing"].astype(bool)
+    else:
+        keep &= laps["tire_age"] > 1
+    clean = laps[keep].copy()
     clean["laptime_demeaned"] = clean["lap_time_seconds"] - clean.groupby(
         ["race_file", "driver"]
     )["lap_time_seconds"].transform("mean")
     return clean
+
+
+def _joint_design(clean: pd.DataFrame, quadratic: bool) -> Tuple[pd.DataFrame, list]:
+    """Design matrix for fit_joint_model (before the within transformation)."""
+    X = pd.DataFrame(index=clean.index)
+    for compound in ("SOFT", "MEDIUM"):  # HARD is the reference level
+        X[f"off_{compound}"] = (clean["compound"] == compound).astype(float)
+    for race in sorted(clean["race_file"].unique()):
+        X[f"fuel_{race}"] = (clean["race_file"] == race) * clean["lap_number"].astype(float)
+    for compound in DRY_COMPOUNDS:
+        is_c = (clean["compound"] == compound).astype(float)
+        X[f"age_{compound}"] = is_c * clean["tire_age"]
+        if quadratic:
+            X[f"age2_{compound}"] = is_c * clean["tire_age"] ** 2
+    X = X.loc[:, X.abs().sum() > 0]  # drop compounds/races absent from this sample
+    return X, list(X.columns)
+
+
+def fit_joint_model(clean: pd.DataFrame, quadratic: bool = False) -> dict:
+    """
+    One least-squares fit of lap time on
+        driver-race fixed effect                       (car/driver/track pace)
+      + compound offset (SOFT, MEDIUM vs HARD)         (fresh-tyre pace)
+      + per-race slope * lap_number                    (fuel burn + track evolution)
+      + per-compound wear: age_coef * age [+ age2_coef * age^2]
+    The fixed effects are removed exactly by demeaning y AND every
+    regressor within (race_file, driver) -- unlike the legacy fitters,
+    which demeaned y only. Wear is identified from tyre age resetting at
+    each stop while lap_number doesn't; see the module docstring for why
+    this replaced the per-compound fits (T-002, N-3).
+
+    Returns {"coef": {name: value}, "fuel_coef": lap-weighted mean of the
+    per-race lap_number slopes, "fuel_by_race": {...}, "offsets": {...},
+    "wear": {compound: (age_coef, age2_coef)}, "residual": Series of the
+    full-model residual per lap, "partial_wear_residual": Series of
+    y - FE - offsets - fuel (i.e. what's left for the wear curve)}.
+    """
+    X, cols = _joint_design(clean, quadratic)
+    groups = [clean["race_file"], clean["driver"]]
+    y = clean["lap_time_seconds"].astype(float)
+    Xw = X - X.groupby(groups).transform("mean")
+    yw = y - y.groupby(groups).transform("mean")
+    beta, *_ = np.linalg.lstsq(Xw.values, yw.values, rcond=None)
+    coef = dict(zip(cols, beta))
+
+    fitted = X.values @ beta
+    fe = (y - fitted).groupby(groups).transform("mean")
+    residual = y - fitted - fe
+    wear_cols = [c for c in cols if c.startswith("age")]
+    wear_part = X[wear_cols].values @ np.array([coef[c] for c in wear_cols])
+    partial_wear_residual = residual + wear_part
+
+    fuel_by_race = {c[len("fuel_"):]: coef[c] for c in cols if c.startswith("fuel_")}
+    race_laps = clean["race_file"].value_counts()
+    fuel_coef = float(
+        np.average(list(fuel_by_race.values()), weights=[race_laps[r] for r in fuel_by_race])
+    )
+    offsets = {"HARD": 0.0}
+    for compound in ("SOFT", "MEDIUM"):
+        offsets[compound] = float(coef.get(f"off_{compound}", 0.0))
+    wear = {
+        compound: (float(coef.get(f"age_{compound}", 0.0)), float(coef.get(f"age2_{compound}", 0.0)))
+        for compound in DRY_COMPOUNDS
+    }
+    return {
+        "coef": coef,
+        "fuel_coef": fuel_coef,
+        "fuel_by_race": fuel_by_race,
+        "offsets": offsets,
+        "wear": wear,
+        "residual": residual,
+        "partial_wear_residual": partial_wear_residual,
+    }
 
 
 def fit_fuel_and_tire_model(clean: pd.DataFrame, compound: str) -> dict:
@@ -266,7 +464,7 @@ def fit_compound_pace_offsets(clean: pd.DataFrame, model: dict) -> dict:
         return (
             row["lap_time_seconds"]
             - fuel_coef * row["lap_number"]
-            - predict_delta(model, row["compound"], row["tire_age"])
+            - predict_delta(model, row["compound"], int(row["tire_age"]))
         )
 
     sub["adjusted_pace"] = sub.apply(adjusted_pace, axis=1)
@@ -289,57 +487,92 @@ def compound_pace_offset(model: dict, compound: str) -> float:
     return model["_compound_offsets"][compound]
 
 
-def build_tire_model(min_samples_per_age: int = 3) -> dict:
+def _drop_residual_outliers(
+    clean: pd.DataFrame, residual: pd.Series, z_thresh: float = 2.5
+) -> pd.DataFrame:
     """
-    Full pipeline: load -> clean -> fit fuel+tire model -> refit on
-    outlier-free data -> detect cliff, per compound. Also fits one shared
-    fuel_coef across all compounds (see fit_fuel_coef_from_fresh_laps).
+    Drop laps whose joint-model residual is a z-score outlier within its
+    (compound, tire_age) bucket -- same rule as remove_outliers(), applied
+    to the joint fit. Buckets with an undefined std keep every lap.
+    """
+    df = clean.assign(_residual=residual)
+    grouped = df.groupby(["compound", "tire_age"])["_residual"]
+    mean = grouped.transform("mean")
+    std = grouped.transform("std")
+    z = (df["_residual"] - mean).abs() / std
+    keep = (std == 0) | std.isna() | (z < z_thresh)
+    return df[keep].drop(columns="_residual")
+
+
+def build_tire_model(
+    min_samples_per_age: int = 3,
+    quadratic: bool = False,
+    laps: Optional[pd.DataFrame] = None,
+) -> dict:
+    """
+    Full pipeline: load -> stints -> clean -> joint fit (fit_joint_model)
+    -> drop residual outliers and tyre ages with < min_samples_per_age
+    laps (per compound) -> refit -> detect cliff per compound.
+
+    quadratic: fit age + age^2 wear (the pre-T-002 functional form)
+        instead of linear wear. Linear is the default because it predicts
+        held-out races better (LORO, see module docstring).
+    laps: optional pre-loaded laps (load_all_laps() format, needs a
+        race_file column) -- for leave-one-race-out validation and tests.
 
     Returns e.g.:
     {
-        "SOFT": {"age_coef": ..., "age2_coef": ..., "cliff_age": 12},
+        "SOFT": {"age_coef": ..., "age2_coef": ..., "cliff_age": None,
+                 "max_reliable_age": 30},
         ...,
-        "_fuel_coef": -0.045,  # seconds of laptime per lap_number, shared
-        "_compound_offsets": {"SOFT": -0.5, "MEDIUM": -0.2, "HARD": 0.0},
+        "_fuel_coef": -0.045,  # s of laptime per lap_number (fuel + mean track evolution)
+        "_fuel_coef_by_race": {"China_2026_laps.csv": ..., ...},   # diagnostic
+        "_compound_offsets": {"SOFT": -0.5, "MEDIUM": -0.2, "HARD": 0.0},  # PLACEHOLDER, used
+        "_compound_offsets_fitted": {...},   # joint-fit estimate, diagnostic only (inverted)
+        "_cliff_penalties": {...},           # PLACEHOLDER
+        "_n_laps_fitted": 8700,
     }
     """
-    laps = load_all_laps()
+    if laps is None:
+        laps = load_all_laps()
     laps = assign_stint_ids(laps)
     clean = clean_laps(laps)
 
+    first = fit_joint_model(clean, quadratic=quadratic)
+    filtered = _drop_residual_outliers(clean, first["residual"])
+    counts = filtered.groupby(["compound", "tire_age"])["lap_number"].transform("size")
+    filtered = filtered[counts >= min_samples_per_age]
+
+    final = fit_joint_model(filtered, quadratic=quadratic)
+
     model = {}
-    for compound in clean["compound"].dropna().unique():
-        # dry slicks only: rain compounds (INTERMEDIATE/WET) need their own
-        # model (different degradation physics entirely) and this dataset
-        # has far too few rain laps to fit anything from yet
-        if compound not in ("SOFT", "MEDIUM", "HARD"):
+    # dry slicks only: rain compounds (INTERMEDIATE/WET) need their own
+    # model (different degradation physics entirely) and this dataset has
+    # far too few rain laps to fit anything from yet
+    for compound in DRY_COMPOUNDS:
+        sub = filtered[filtered["compound"] == compound]
+        if sub.empty:
             continue
-
-        first_fit = fit_fuel_and_tire_model(clean, compound)
-        residual = tire_only_residual(clean, compound, first_fit)
-        filtered = remove_outliers(clean[clean["compound"] == compound], residual)
-
-        counts = filtered.groupby("tire_age").size()
-        valid_ages = counts[counts >= min_samples_per_age].index
-        if valid_ages.empty:
-            continue
-        filtered = filtered[filtered["tire_age"].isin(valid_ages)]
-
-        final_fit = fit_fuel_and_tire_model(filtered, compound)
-        final_residual = tire_only_residual(filtered, compound, final_fit)
-        filtered = filtered.assign(residual=final_residual)
-        cliff_age = detect_cliff(filtered, final_fit)
-
+        age_coef, age2_coef = final["wear"][compound]
+        fit = {"age_coef": age_coef, "age2_coef": age2_coef}
+        cliff_age = detect_cliff(
+            sub.assign(residual=final["partial_wear_residual"].loc[sub.index]), fit
+        )
         model[compound] = {
-            "age_coef": final_fit["age_coef"],
-            "age2_coef": final_fit["age2_coef"],
+            "age_coef": age_coef,
+            "age2_coef": age2_coef,
             "cliff_age": cliff_age,
-            "max_reliable_age": int(valid_ages.max()),
+            "max_reliable_age": int(sub["tire_age"].max()),
         }
 
-    model["_fuel_coef"] = fit_fuel_coef_from_fresh_laps(clean)
+    model["_fuel_coef"] = final["fuel_coef"]
+    model["_fuel_coef_by_race"] = {
+        Path(race).name: float(v) for race, v in final["fuel_by_race"].items()
+    }
     model["_compound_offsets"] = dict(COMPOUND_PACE_OFFSET_PLACEHOLDER)
+    model["_compound_offsets_fitted"] = dict(final["offsets"])
     model["_cliff_penalties"] = dict(COMPOUND_CLIFF_PENALTY_PLACEHOLDER)
+    model["_n_laps_fitted"] = int(len(filtered))
     return model
 
 
@@ -402,13 +635,21 @@ def predict_delta(
 
 if __name__ == "__main__":
     model = build_tire_model()
-    print(f"shared fuel_coef: {model['_fuel_coef']:.4f} s per lap_number")
-    print(f"compound offsets: {model['_compound_offsets']}\n")
-    for compound in ("SOFT", "MEDIUM", "HARD"):
+    print(f"shared fuel_coef: {model['_fuel_coef']:.4f} s per lap_number (fuel + mean track evolution)")
+    print("  per race: " + ", ".join(
+        f"{race.split('_')[0]} {v:+.3f}" for race, v in model["_fuel_coef_by_race"].items()
+    ))
+    print(f"compound offsets used (PLACEHOLDER): {model['_compound_offsets']}")
+    print("compound offsets fitted (diagnostic, not used): " + ", ".join(
+        f"{c} {v:+.3f}" for c, v in model["_compound_offsets_fitted"].items()
+    ))
+    print(f"laps fitted: {model['_n_laps_fitted']}\n")
+    for compound in DRY_COMPOUNDS:
         params = model[compound]
         print(
             f"{compound}: age_coef={params['age_coef']:.4f}, "
-            f"age2_coef={params['age2_coef']:.5f}, cliff_age={params['cliff_age']}"
+            f"age2_coef={params['age2_coef']:.5f}, cliff_age={params['cliff_age']}, "
+            f"max_reliable_age={params['max_reliable_age']}"
         )
         for age in [5, 10, 15, 20, 25, 30]:
             print(f"  age {age:>2}: +{predict_delta(model, compound, age):.2f}s")
