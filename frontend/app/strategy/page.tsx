@@ -79,7 +79,10 @@ export default function StrategyPage() {
         if (cancelled) return;
         setTracks(list);
         const first = list.find((t) => t.track_id === "austin") ?? list[0];
-        if (first) setTrackId(first.track_id);
+        if (first) {
+          setTrackId(first.track_id);
+          setStrategies((rows) => fitToRaceLaps(rows, first.total_laps));
+        }
       })
       .catch((err) => {
         if (!cancelled) setTracksError(err instanceof Error ? err.message : "Could not load tracks");
@@ -88,6 +91,18 @@ export default function StrategyPage() {
       cancelled = true;
     };
   }, []);
+
+  // keep the manual plans at the selected track's race distance: absorb any difference in the last stint
+  function fitToRaceLaps(rows: StrategyRow[], laps: number): StrategyRow[] {
+    return rows.map((s) => {
+      const sum = s.stints.reduce((a, st) => a + (typeof st.laps === "number" ? st.laps : 0), 0);
+      const last = s.stints[s.stints.length - 1];
+      if (!last || sum === laps || typeof last.laps !== "number") return s;
+      const adjusted = last.laps + (laps - sum);
+      if (adjusted < 1) return s;
+      return { ...s, stints: [...s.stints.slice(0, -1), { ...last, laps: adjusted }] };
+    });
+  }
 
   function prefillFrom(t: TrackOut) {
     setBaseLaptime(t.base_laptime_s);
@@ -101,6 +116,7 @@ export default function StrategyPage() {
     setOptError(null);
     const t = tracks?.find((x) => x.track_id === id);
     if (t && override) prefillFrom(t);
+    if (t) setStrategies((rows) => fitToRaceLaps(rows, t.total_laps));
   }
 
   function toggleOverride(on: boolean) {

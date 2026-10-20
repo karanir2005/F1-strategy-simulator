@@ -103,7 +103,7 @@ export function OptimizerResults({ result, topShown = 5 }: { result: OptimizeRes
         <div role="note" className="flex gap-3 rounded-panel border border-warn/50 bg-warn/10 p-4 text-sm">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warn" aria-hidden />
           <div className="min-w-0">
-            <p className="font-medium text-fg">The tyre trade-offs here rest on placeholder numbers</p>
+            <p className="font-medium text-fg">Some tyre inputs are still rough estimates, so treat compound trade-offs as indicative</p>
             {placeholders.map((a, i) => (
               <p key={i} className="mt-1 text-muted-fg [overflow-wrap:anywhere]">
                 {a}
