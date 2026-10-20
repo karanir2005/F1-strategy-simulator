@@ -95,7 +95,7 @@ def main() -> None:
 
         res = optimize(
             model, t["total_laps"], t["pit_loss_s"], t["base_laptime_s"], t["max_stint_laps"],
-            max_stops=args.stops, n_sims=args.n_sims, top_n=3,
+            typical_stint_laps=t.get("typical_stint_laps"), max_stops=args.stops, n_sims=args.n_sims, top_n=3,
         )
         best = res.plans[0]
         plan = [(s["compound"], s["laps"]) for s in best["stints"]]

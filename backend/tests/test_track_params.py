@@ -12,7 +12,7 @@ SCHEDULE = ROOT / "data" / "jolpica" / "derived" / "schedule.csv"
 
 KEYS = {
     "track_id", "name", "circuit", "total_laps", "pit_loss_s", "pit_loss_noise_std_s",
-    "base_laptime_s", "compounds", "max_stint_laps", "source_season", "source_races",
+    "base_laptime_s", "compounds", "max_stint_laps", "typical_stint_laps", "source_season", "source_races",
     "on_2026_calendar", "already_raced_2026", "notes",
 }
 DRY = {"SOFT", "MEDIUM", "HARD"}
