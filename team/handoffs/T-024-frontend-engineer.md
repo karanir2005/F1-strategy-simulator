@@ -1,0 +1,40 @@
+# T-024 — frontend-engineer — two-page redesign (/predict, /strategy)
+
+**Status:** done, ready for QA
+**Next owner:** qa-engineer
+
+## What I did
+- Shared shell: sticky nav (Predict / Strategy) with a `layoutId` sliding underline, dark-default theme with a light theme and persisted toggle (inline pre-paint script), footer with data-source and disclaimer line, skip link, enter-only page transition (`app/template.tsx`), `MotionConfig reducedMotion="user"` plus `LazyMotion domMax strict` with `m.*` from `motion/react-m`. Nav race chip reads the shared prediction cache only (never triggers the slow request), amber dot when stale.
+- Tokens: oklch channel triples in `app/globals.css`, mapped in `tailwind.config.ts` with alpha support, shadcn names kept. The single accent is the user's red-orange (dark `oklch(0.65 0.22 35)`, about #F84713 after sRGB gamut clipping; light is deeper, `0.56 0.22 33`). Purple (best) and green (good) timing semantics and the tyre colours are unchanged. Fonts: Archivo (wdth axis, condensed numerals/headings), Geist (existing local file), JetBrains Mono via `next/font`.
+- `/` redirects to `/predict`. `/predict`: race header (name, circuit, date, countdown or "qualifying done" text, pre-quali/grid mode badge), hero with the winner as an animated percentage, frequency phrasing, lead over the runner-up, a 100-dot simulated-races plot, podium blocks (height = own p_podium, with a note that this is not the trio probability), ranked driver table (Win/Podium/Top 10 segmented control re-sorts with layout animation, neutral bars with a 3 px team strip, DNF, expected position, expandable detail), evidence panel (log-loss dumbbell on a zero-based axis, relative gap, sample-size caveat, API notes verbatim), "How it did in 2026" from `/predict/history` (summary counts, per-race table, latest 6 with expand), stale banner, API disclaimer, loading skeleton, error + retry, empty state.
+- `/strategy`: same features as the old page (track select with meta, override toggle, optimizer, manual comparison with used-set start age, paired delta as primary column), restyled. New: optimal plan hero strip, top-plans strips in tyre colours, p10-p90 range plot of the paired gap on a shared axis, "within noise" flag below 5 s, stint-limits table (observed max vs `effective_max_stint_laps`) and `min_stint_laps`, a warn banner whenever an API assumption mentions "placeholder", "What this model ignores" panel, total-time range plot. Removed the trophy emoji and the Recharts bar chart (the lap-time line chart stays in Recharts, animation off).
+- Deps: added `motion` pinned at exactly `14.4.0`; removed `tw-animate-css` (never imported; Tailwind 3 uses `tailwindcss-animate`). `shadcn` (CLI package) left alone. Deleted unused `components/ui/card.tsx` and `table.tsx` (Tailwind-4-only classes). Rewrote `button/input/label/badge/select` class strings to valid Tailwind 3.4.
+
+## Files changed
+- Modified: `frontend/app/globals.css`, `app/layout.tsx`, `app/page.tsx`, `tailwind.config.ts`, `lib/api.ts`, `components/ui/{button,input,label,badge,select}.tsx`, `package.json`, `package-lock.json`.
+- Deleted: `components/optimizer-results.tsx`, `components/ui/card.tsx`, `components/ui/table.tsx`.
+- New: `app/{template.tsx,predict/{page,layout}.tsx,strategy/{page,layout}.tsx}`, `components/shell/*`, `components/predict/*`, `components/strategy/*`, `components/viz/*` (pct-ticker, prob-bar, stint-strip, range-plot, states), `lib/{format,teams,strategy-form,use-api}.ts`.
+
+## Verification
+- `npm run lint`: clean. `npm run build`: passes (`/predict` 149 kB first load, `/strategy` 280 kB, mostly Recharts).
+- Browser: the Chrome MCP tools were not available to me (no ToolSearch), so I drove headless Edge over the DevTools protocol against the live backend (port 8001) and `next dev`. Checked at 1280 px and 400 px: both pages, dark and light themes, row expand, metric re-sort, optimize flow, manual simulation, track select, keyboard focus ring (Tab), theme toggle class, nav client-side navigation and the cached return, `/` redirect, backend-unreachable error states on both pages, a mocked stale + grid-mode response (banner, badge, amber chip), reduced-motion emulation. Console: no errors or React warnings in normal runs (only the reduced-motion notice from motion when emulating it).
+- Found and fixed: unbroken `COMPOUND_PACE_OFFSET_PLACEHOLDER` identifier text caused 31 px horizontal overflow at 400 px on /strategy; overlapping cells in the mobile history rows; excess podium whitespace on mobile; light-theme button text contrast. After the fixes I re-ran lint and build but did **not** re-screenshot the mobile history rows or the strategy overflow (the dev server was stopped to run the build).
+- Contrast (WCAG, computed from the oklch tokens): dark theme body 17.9:1, muted 8.0:1, faint 5.9:1, accent text 7.2:1, accent button text 5.6:1, status colours 6.8 to 10.6:1. Light theme muted 7.1:1, faint 5.8:1, accent text 6.3:1, accent button text 5.0:1, status colours 5.3 to 6.3:1. Hairline borders are decorative (about 1.8:1 by design); interactive controls also have text or a focus ring.
+- Not verified: iOS/Safari rendering, screen-reader pass, the 2-column `<ol>` re-sort animation under real scroll with many rows, `prefers-reduced-motion` visual check beyond "no errors".
+- Teams: 2026 hexes are FastF1's official 2026 table (`fastf1/plotting/constants.json` in the repo venv), matched to the API's team strings (e.g. "RB F1 Team", "Alpine F1 Team", "Cadillac F1 Team", "Audi"). Cadillac's listed #444444 is invisible on dark, so I lightened it to #8a8f98 for strips and dots only. Audi is #ff2d00, which is close to the accent colour; it appears only as a thin strip or dot.
+
+## Interface / contract changes
+- `lib/api.ts` now mirrors `routes/predict.py` (RaceInfo, DriverPrediction, Headline, WalkForward, Evidence, PredictionResponse, HistoryRow, HistoryResponse) field by field, plus `fetchPredictionNext` / `fetchPredictionHistory`, and `ParamsUsed.effective_max_stint_laps?: Record<string, number> | null` and `min_stint_laps?: number | null`.
+- Local env: `frontend/.env.local` (gitignored) points the API at `http://127.0.0.1:8001`. Backend CORS only allows `http://localhost:3000`; I tested with web security disabled in my throwaway browser profile because port 3000 was held by another dev server.
+- That other server (an existing `next dev` for this folder on port 3000) shares `.next` with my builds and returned 500 while I worked; restart it. I did not stop it.
+
+## Requests for other roles
+- backend-engineer: (1) add a `within_noise` flag or a noise-floor value to `/optimize` so the 5 s threshold is not hard-coded in `lib/strategy-form.ts` (`NOISE_FLOOR_S`); (2) in `/predict/history`, a `source`/`mode` note per row is not needed, but the race name "Bahrain Grand Prix in Malaysia" for round 16 looks like a data labelling issue; (3) allow `http://127.0.0.1:3000` and a configurable origin list in CORS.
+- data-scientist: the optimizer's compound offsets and cliff penalties are still placeholders; the UI shows a visible warning whenever the API assumptions say so.
+- qa-engineer: please check the mobile history rows and the /strategy overflow fix, and the empty-field and 503 paths of `/predict/next` (I only simulated network failure and stale).
+
+## Open questions / risks
+- The history view shows that in grid mode the model's pick was the pole sitter in all 17 races, so "winner called 12/17" equals "pole sitter won 12/17". The UI says so in a conditional sentence; the product may want to reframe this panel.
+- The headline evidence for pre-quali mode is 0.1133 vs 0.1176 log-loss over 16 races; the UI calls this a modest signal. Wording is a judgement call for the orchestrator.
+- The lap-time-by-lap chart is dominated by pit-lap spikes (as before); it is labelled "for shape only". A truncated y-axis would hide the pit markers, so I left it.
+- No race-chip fetch on /strategy until /predict has been visited (by design, to avoid triggering the slow prediction).

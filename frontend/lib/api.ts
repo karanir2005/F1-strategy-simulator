@@ -144,6 +144,10 @@ export interface ParamsUsed {
   pit_loss_s: number;
   base_laptime_s: number;
   n_sims: number;
+  /** T-021. Stint cap per compound actually used: observed max floored to 15 and clipped to race laps. */
+  effective_max_stint_laps?: Record<string, number> | null;
+  /** T-021. Minimum laps for every stint in the plan search. */
+  min_stint_laps?: number | null;
 }
 
 export interface OptimizeResponse {
@@ -195,5 +199,99 @@ export async function runOptimize(request: OptimizeRequest): Promise<OptimizeRes
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request),
   });
+  return response.json();
+}
+
+// ---------------------------------------------------------------------------
+// Race prediction (backend/app/api/routes/predict.py, T-023). Probabilities are fractions 0-1.
+// ---------------------------------------------------------------------------
+
+export interface RaceInfo {
+  round: number;
+  name: string;
+  circuit: string;
+  /** ISO date, YYYY-MM-DD */
+  date: string;
+  quali_date: string | null;
+}
+
+export interface DriverPrediction {
+  code: string;
+  name: string;
+  team: string;
+  /** null in pre_quali mode; 0 = pit-lane start. */
+  grid: number | null;
+  p_win: number;
+  p_podium: number;
+  p_top10: number;
+  exp_pos: number;
+  p_dnf: number;
+}
+
+export interface Headline {
+  winner: string;
+  /** Top 3 by p_podium (not an ordered finish). */
+  podium: string[];
+}
+
+export interface WalkForward {
+  races: number;
+  win_logloss: number;
+  baseline_win_logloss: number;
+  /** "grid" | "prequali" */
+  mode: string;
+}
+
+export interface Evidence {
+  walk_forward: WalkForward | null;
+  notes: string[];
+}
+
+export interface PredictionResponse {
+  race: RaceInfo;
+  /** "pre_quali" | "grid" */
+  mode: string;
+  /** ISO 8601 UTC; for a stale response it is the saved CSV's mtime. */
+  generated_at: string;
+  stale: boolean;
+  /** Sorted by p_win descending. */
+  drivers: DriverPrediction[];
+  headline: Headline;
+  evidence: Evidence;
+  disclaimer: string;
+}
+
+export interface HistoryRow {
+  round: number;
+  race: string;
+  /** Code of the driver who started 1st. */
+  pole_sitter: string | null;
+  predicted_winner: string;
+  predicted_winner_p: number;
+  actual_winner: string;
+  actual_winner_grid: number | null;
+  p_actual_winner: number;
+  winner_correct: boolean;
+  predicted_podium: string[];
+  actual_podium: string[];
+  /** 0-3 */
+  podium_hits: number;
+}
+
+export interface HistoryResponse {
+  season: number;
+  /** Always "grid": predictions made with the actual qualifying grid. */
+  mode: string;
+  races: HistoryRow[];
+}
+
+/** The first uncached /predict/next call runs the full prediction (several seconds). */
+export async function fetchPredictionNext(): Promise<PredictionResponse> {
+  const response = await call("/predict/next", "Loading the prediction");
+  return response.json();
+}
+
+export async function fetchPredictionHistory(): Promise<HistoryResponse> {
+  const response = await call("/predict/history", "Loading prediction history");
   return response.json();
 }

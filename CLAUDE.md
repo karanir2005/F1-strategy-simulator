@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 F1 race strategy simulator with a Monte Carlo engine. Models tire degradation, pit stop timing, safety cars, overtaking probabilities, and weather effects. Phase 2 adds an XGBoost ML model to predict race winners.
 
-**Current state:** Phase 1 core simulation engine is built and validated: `data_loader.py`, `tire_model.py`, `race_simulator.py`, `monte_carlo.py`, and the `POST /simulate` API route all exist (see Build Order below). `backend/app/services/` is still empty. A first Next.js frontend exists in `frontend/` (single-page strategy comparison against `POST /simulate`).
+**Current state:** Phase 1 core simulation engine is built and validated: `data_loader.py`, `tire_model.py`, `race_simulator.py`, `monte_carlo.py`, and the `POST /simulate` API route all exist (see Build Order below). `backend/app/services/` holds the prediction service. The Next.js frontend in `frontend/` has two pages: `/predict` (race winner/podium prediction) and `/strategy` (track picker, optimal stint plans, manual comparison).
 
 **Next:** the engine still simulates one car in isolation and can't meaningfully rank strategies yet. See `team/ROADMAP.md` for why, and the phased plan (full-grid sim, safety cars, per-track calibration, optimizer).
 
@@ -63,22 +63,22 @@ cache/              # FastF1 local cache (do not delete)
 ## Tech Stack
 
 - **Backend:** Python + FastAPI + FastF1 + numpy/pandas/scipy + pydantic
-- **Frontend (planned):** Next.js 14 + Tailwind CSS + shadcn/ui + Recharts + D3.js
-- **Data sources:** FastF1 (primary), Jolpica-F1 API (not Ergast — it's deprecated)
+- **Frontend:** Next.js 14 + Tailwind CSS + shadcn/ui + Recharts + D3.js
+- **Data sources:** FastF1 (cached 2026 races; live timing is paywalled), OpenF1, Jolpica-F1 API (not Ergast — it's deprecated)
 - **Infra (planned):** PostgreSQL, Redis, Docker Compose, Railway/Render + Vercel
 
 ## Build Order (per project plan)
 
 The 4 core modules, all built:
 
-1. `backend/app/core/tire_model.py` — compound-specific polynomial degradation curves + cliff effects. Fitted from `data/processed/*_laps.csv` (currently 10 races). See the module docstring for the safety-car-contamination bug that was found and fixed via `is_green_flag` filtering, and for `fit_shared_fuel_coef`'s known remaining gap. `COMPOUND_PACE_OFFSET_PLACEHOLDER` and `COMPOUND_CLIFF_PENALTY_PLACEHOLDER` are still literature-ballpark placeholders, not fitted from data — see their comments for why.
+1. `backend/app/core/tire_model.py` — compound-specific polynomial degradation curves + cliff effects. Fitted from `data/processed/*_laps.csv` (currently 16 races, 2026-only by default). See the module docstring for the safety-car-contamination bug that was found and fixed via `is_green_flag` filtering, and for `fit_shared_fuel_coef`'s known remaining gap. Wear is constrained SOFT >= MEDIUM >= HARD and pace offsets are now fitted (the free 2026 fit is inverted, so the ordering is forced); `COMPOUND_CLIFF_PENALTY_PLACEHOLDER` is still a placeholder — see their comments for why.
 2. `backend/app/core/race_simulator.py` — lap loop with tire degradation, fuel burn-off, and pit stop time loss. `DEFAULT_PIT_LOSS_SECONDS` (23.5s) is calibrated from real pit-lane duration data — see `calibrate_pit_loss.py` and the constant's comment.
 3. `backend/app/core/monte_carlo.py` — N simulation runs with noise in lap time and pit duration; both noise magnitudes (`DEFAULT_LAP_TIME_NOISE_STD` 0.8s, `DEFAULT_PIT_LOSS_NOISE_STD` 5.0s) are calibrated from real data — see `calibrate_lap_noise.py` / `calibrate_pit_loss.py` and the module docstring for the scope note on what `win_probability` does and doesn't mean.
 4. `backend/app/api/routes/simulation.py` — `POST /simulate` endpoint, wired into `backend/app/main.py`.
 
 Simulation parameters (degradation rates, pit loss, safety car frequency) should be calibrated from real FastF1 data via `data_loader.py`, not assumed — treat any parameter numbers from early planning notes as unvalidated starting guesses, not targets. Some are still placeholders; grep for "placeholder" across `backend/app/core/` to find them before trusting strategy comparisons in a real decision. `calibrate_pit_loss.py` and `calibrate_lap_noise.py` (repo root) are the calibration scripts for the ones that have been fitted — re-run them if the pulled race set in `pull_races.py` changes materially.
 
-The simulation was validated against historical race replays (`validate_replay.py`) before the API layer was added, per plan — current error across 5 replays is 0.02–1.03% excluding SC/VSC/red laps (the engine has no safety cars yet), 0.0–4.7% including them. Note `validate_replay.py` uses the driver's own fastest lap as `base_laptime`, which leaks the answer; the non-leaky check is `validate_scorecard.py` (leave-one-race-out tyre fits, qualifying-based pace, results in `data/scorecard/latest.json`). Tests live in `backend/tests/` (`pytest` from repo root).
+The simulation was validated against historical race replays (`validate_replay.py`) before the API layer was added, per plan — current error across 5 replays is 0.13–1.10% excluding SC/VSC/red laps (the engine has no safety cars yet), 0.0–4.7% including them. Note `validate_replay.py` uses the driver's own fastest lap as `base_laptime`, which leaks the answer; the non-leaky check is `validate_scorecard.py` (leave-one-race-out tyre fits, qualifying-based pace, results in `data/scorecard/latest.json`). Tests live in `backend/tests/` (`pytest` from repo root).
 
 **Data access:** FastF1 live timing has been paywalled since 2026-10-15 and FastF1 silently returns empty data, so new races come from OpenF1 (`api.openf1.org`) and Jolpica instead. See the DATA ACCESS INCIDENT section in `team/BOARD.md`. The race predictor (`predict_race.py`, `backend/app/core/predictor.py`) runs on Jolpica data.
 

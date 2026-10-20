@@ -4,7 +4,11 @@ import pandas as pd
 import pytest
 from app.core import tire_model as tm
 
-FILES = sorted(glob.glob("data/processed/*_2026_laps.csv"))
+# The 11473 / 343 / 44 / 67 pins below were measured on the ORIGINAL 10 FastF1 races.
+# T-015 promoted six more (OpenF1-sourced) races into data/processed, so the pinned
+# counts are restricted to the original ten; the six are covered by test_t015_ds.py.
+ORIGINAL_10 = ("Australia", "Austria", "Belgium", "Britain", "Canada", "China", "Hungary", "Japan", "Miami", "Monaco")
+FILES = sorted(f"data/processed/{gp}_2026_laps.csv" for gp in ORIGINAL_10)
 pytestmark = pytest.mark.skipif(len(FILES) < 10, reason="processed data missing")
 
 

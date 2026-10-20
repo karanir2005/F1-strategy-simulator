@@ -1,0 +1,111 @@
+{
+  "n_races_2026": 16,
+  "n_races_2025": 20,
+  "fit_2026": {
+    "n_clean_laps": 14185,
+    "free": {
+      "off_SOFT": 0.131,
+      "off_MEDIUM": 0.186,
+      "wear_SOFT": 0.0249,
+      "wear_MEDIUM": 0.0354,
+      "wear_HARD": 0.0364,
+      "fuel_coef": -0.0468
+    },
+    "ordered": {
+      "off_SOFT": -0.146,
+      "off_MEDIUM": 0.0,
+      "wear_SOFT": 0.036,
+      "wear_MEDIUM": 0.036,
+      "wear_HARD": 0.0313,
+      "fuel_coef": -0.0473
+    }
+  },
+  "fit_2025": {
+    "n_clean_laps": 19119,
+    "free": {
+      "off_SOFT": -0.365,
+      "off_MEDIUM": -0.049,
+      "wear_SOFT": 0.0612,
+      "wear_MEDIUM": 0.0401,
+      "wear_HARD": 0.0363,
+      "fuel_coef": -0.0521
+    },
+    "ordered": {
+      "off_SOFT": -0.365,
+      "off_MEDIUM": -0.049,
+      "wear_SOFT": 0.0612,
+      "wear_MEDIUM": 0.0401,
+      "wear_HARD": 0.0363,
+      "fuel_coef": -0.0521
+    }
+  },
+  "fit_pooled_2025_w0.5": {
+    "n_clean_laps": 33304,
+    "free": {
+      "off_SOFT": 0.004,
+      "off_MEDIUM": 0.084,
+      "wear_SOFT": 0.0331,
+      "wear_MEDIUM": 0.0372,
+      "wear_HARD": 0.0366,
+      "fuel_coef": -0.0491
+    },
+    "ordered": {
+      "off_SOFT": -0.115,
+      "off_MEDIUM": 0.0,
+      "wear_SOFT": 0.0381,
+      "wear_MEDIUM": 0.0381,
+      "wear_HARD": 0.0346,
+      "fuel_coef": -0.0493
+    }
+  },
+  "bootstrap_2026_free": {
+    "off_SOFT": {
+      "mean": 0.1513,
+      "sd": 0.1319,
+      "p05": -0.0365,
+      "p95": 0.3889
+    },
+    "off_MEDIUM": {
+      "mean": 0.1971,
+      "sd": 0.0946,
+      "p05": 0.0534,
+      "p95": 0.3451
+    },
+    "wear_SOFT": {
+      "mean": 0.024,
+      "sd": 0.009,
+      "p05": 0.0097,
+      "p95": 0.0378
+    },
+    "wear_MEDIUM": {
+      "mean": 0.0353,
+      "sd": 0.0068,
+      "p05": 0.026,
+      "p95": 0.0465
+    },
+    "wear_HARD": {
+      "mean": 0.0385,
+      "sd": 0.0107,
+      "p05": 0.0237,
+      "p95": 0.0541
+    },
+    "con_off_SOFT": {
+      "mean": -0.1562,
+      "sd": 0.0415,
+      "p05": -0.2238,
+      "p95": -0.0837
+    },
+    "con_off_MEDIUM": {
+      "mean": 0.0,
+      "sd": 0.0,
+      "p05": 0.0,
+      "p95": 0.0
+    },
+    "P(wear_SOFT > wear_MEDIUM)": 0.02,
+    "P(wear_MEDIUM > wear_HARD)": 0.39,
+    "P(SOFT faster than HARD, free)": 0.16,
+    "P(MEDIUM faster than HARD, free)": 0.01,
+    "P(SOFT faster than MEDIUM, free)": 0.75
+  },
+  "bootstrap_reps": 100
+}

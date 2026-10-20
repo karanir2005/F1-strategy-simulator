@@ -20,13 +20,17 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-012 | qa-engineer | done (PASS WITH NOTES; findings 1-2 fixed) | T-011 | Verify predictor: leakage, calibration, baselines |
 | T-013 | data-scientist | todo | T-011, US GP qualifying | Final US GP prediction with the real grid (2026-10-24) |
 | T-014 | data-scientist | done (term built, off by default: no gain on 2025; orchestrator-checked) | T-011 | Per-track "grid stickiness" (overtaking difficulty) term in the predictor, validated quali-to-result on 2026 races |
-| T-015 | data-scientist | todo | T-009 | Promote safe 2026 staging races (Barcelona, Madrid, Italy, Azerbaijan, Singapore, Netherlands) to data/processed; add era filter to tire_model; refit, rerun validate_replay + scorecard; update pinned fit-number tests |
+| T-015 | data-scientist | done (no QA, lean mode) | T-009 | Promote safe 2026 staging races (Barcelona, Madrid, Italy, Azerbaijan, Singapore, Netherlands) to data/processed; add era filter to tire_model; refit, rerun validate_replay + scorecard; update pinned fit-number tests |
 | T-016 | data-scientist | done (QA in T-019) | T-009 | Per-track params file (laps, pit loss, base pace, compounds, stint caps) — see team/contracts/track-optimizer.md |
 | T-017 | backend-engineer | done (follow-ups applied; QA in T-019) | contract | GET /tracks, POST /optimize (optimal stint plan), track_id on /simulate |
 | T-018 | frontend-engineer | done (lint+build clean; browser check in T-019) | T-016, T-017 | Track dropdown + "Find optimal strategy" view |
 | T-019 | qa-engineer | done (PASS WITH NOTES; see T-020/T-021) | T-016..T-018 | QA track params, optimizer, UI |
-| T-020 | data-scientist | todo | T-019 | Make tyre fit physical (SOFT>=MEDIUM>=HARD wear, sensible compound pace offsets) so optimizer plans match what teams really run; rerun scorecard + validate_replay; refresh pinned numbers |
-| T-021 | backend-engineer | todo | T-019 | Optimizer: stop 5-lap first-stint artefact (min stint / cap floor interaction), show effective caps in response |
+| T-020 | data-scientist | done (no QA; plans partly realistic, see handoff) | T-019 | Make tyre fit physical (SOFT>=MEDIUM>=HARD wear, sensible compound pace offsets) so optimizer plans match what teams really run; rerun scorecard + validate_replay; refresh pinned numbers |
+| T-021 | backend-engineer | done (frontend must show new params_used fields) | T-019 | Optimizer: stop 5-lap first-stint artefact (min stint / cap floor interaction), show effective caps in response |
+| T-022 | researcher | done | none | UI inspiration brief: what top-tier motorsport/data/product sites do (layout, type, colour, motion, charts) + framer-motion patterns, as an actionable design spec |
+| T-023 | backend-engineer | done (QA in T-025) | contract | GET /predict/next and /predict/history per team/contracts/prediction-api.md |
+| T-024 | frontend-engineer | done (QA in T-025) | T-022, T-023 | Redesign: shared layout, /predict page, /strategy page, framer-motion, charts |
+| T-025 | qa-engineer | todo (skipped at user request) | T-024 | QA UI (lint, build, browser pass) and the prediction API |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:

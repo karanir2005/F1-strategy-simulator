@@ -2,91 +2,164 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Design tokens ("Pit wall instrument", see team/research/T-022-ui-inspiration.md).
+ * Every colour is stored as oklch channels ("L C H") so Tailwind can apply alpha:
+ *   bg-signal/10  ->  oklch(var(--signal) / 0.1)
+ * :root is the light theme; .dark is the default (set on <html> in layout.tsx).
+ */
+@layer base {
+  :root {
+    --bg: 0.985 0.004 90;
+    --raised: 1 0 0;
+    --sunken: 0.955 0.005 90;
+    --hover: 0.965 0.005 90;
+    --line: 0.9 0.006 90;
+    --line-strong: 0.8 0.008 90;
+    --fg: 0.18 0.01 260;
+    --muted-fg: 0.45 0.01 260;
+    --faint: 0.5 0.01 260;
+    /* single brand accent: red-orange, about #FF4A1C in dark; deeper in light for text contrast */
+    --signal: 0.56 0.22 33;
+    --signal-fg: 0.99 0 0;
+    --signal-text: 0.5 0.2 33;
+    --good: 0.5 0.15 150;
+    --best: 0.5 0.19 305;
+    --bad: 0.52 0.21 25;
+    --warn: 0.5 0.12 75;
+    --radius: 0.375rem;
+    --shadow-pop: 0 8px 30px oklch(0.2 0.01 260 / 0.18);
+    --tyre-soft: #ff3b30;
+    --tyre-medium: #ffd60a;
+    --tyre-hard: #f2f2f2;
+    --tyre-inter: #34c759;
+    --tyre-wet: #2f80ff;
+  }
+  .dark {
+    --bg: 0.145 0.01 260;
+    --raised: 0.185 0.011 260;
+    --sunken: 0.115 0.01 260;
+    --hover: 0.22 0.012 260;
+    --line: 0.27 0.012 260;
+    --line-strong: 0.36 0.013 260;
+    --fg: 0.965 0.005 260;
+    --muted-fg: 0.72 0.01 260;
+    --faint: 0.64 0.01 260;
+    --signal: 0.65 0.22 35;
+    --signal-fg: 0.14 0.02 35;
+    --signal-text: 0.72 0.19 35;
+    --good: 0.78 0.19 150;
+    --best: 0.72 0.17 305;
+    --bad: 0.7 0.19 25;
+    --warn: 0.8 0.15 80;
+    --shadow-pop: 0 8px 30px oklch(0 0 0 / 0.45);
+  }
+
+  * {
+    @apply border-line;
+  }
+  html {
+    @apply font-sans;
+    color-scheme: light;
+    scroll-behavior: smooth;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-bg text-fg antialiased;
+    font-size: 15px;
+    line-height: 24px;
+    min-height: 100vh;
+  }
+  /* visible keyboard focus everywhere; mouse clicks stay quiet */
+  :focus-visible {
+    outline: 2px solid oklch(var(--signal));
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  ::selection {
+    background: oklch(var(--signal) / 0.35);
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  /* 11px mono uppercase label */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: oklch(var(--faint));
+  }
+  /* condensed Archivo for big numerals and headings */
+  .display {
+    font-family: var(--font-display), var(--font-geist-sans), sans-serif;
+    font-stretch: 78%;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .panel {
+    background: oklch(var(--raised));
+    border: 1px solid oklch(var(--line));
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.04);
+  }
+  .bg-dotfield {
+    background-image: radial-gradient(oklch(var(--fg) / 0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent 85%);
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+  }
+  /* skeleton shimmer: CSS only, same dimensions as the final content */
+  .skeleton {
+    border-radius: 3px;
+    background: linear-gradient(
+      90deg,
+      oklch(var(--sunken)) 0%,
+      oklch(var(--hover)) 50%,
+      oklch(var(--sunken)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
 }
 
-@layer base {
-  .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: var(--font-sans);
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
   }
-  :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+  to {
+    background-position: -200% 0;
   }
-  .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
   }
-  * {
-    @apply border-border outline-ring;
+  50% {
+    opacity: 0.35;
   }
-  body {
-    @apply bg-background text-foreground;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
   }
   html {
-    @apply font-sans;
+    scroll-behavior: auto;
+  }
+  .live-dot {
+    animation: none !important;
   }
 }

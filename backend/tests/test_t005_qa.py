@@ -36,7 +36,7 @@ def test_grid_rho_matches_independent_spearman(card):
 def test_pair_labels_match_results(card):
     res = {gp: pd.read_csv(PROC / f"{gp}_2026_results.csv").set_index("driver") for gp in card["meta"]["races"]}
     pairs = card["strategy_ranking"]["pairs"]
-    assert len(pairs) == 190
+    assert len(pairs) == 338  # T-015: 16 races
     for p in pairs:
         r = res[p["race"]]
         assert r.at[p["a"], "status"] in ("Finished", "Lapped") and r.at[p["b"], "status"] in ("Finished", "Lapped")
@@ -51,7 +51,7 @@ def test_skipped_and_fallback_drivers(card):
     assert set(sk) == {"Canada", "Hungary"}
     assert sk["Hungary"] == ["PER"] and len(sk["Canada"]) == 7
     fb = {gp: b["quali_fallback_drivers"] for gp, b in card["base_laptime"].items() if b["quali_fallback_drivers"]}
-    assert fb == {"Australia": ["VER", "SAI", "STR"], "Miami": ["HAD"]}
+    assert fb == {"Australia": ["VER", "SAI", "STR"], "Miami": ["HAD"], "Madrid": ["BEA", "STR"], "Singapore": ["HAD"]}
 
 
 def test_ratio_stable_and_headline_sane(card):

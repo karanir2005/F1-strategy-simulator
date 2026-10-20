@@ -277,5 +277,5 @@ def test_committed_latest_json_matches_schema():
         pytest.skip("run validate_scorecard.py first")
     card = json.loads(latest.read_text(encoding="utf-8"))
     assert card["meta"]["scorecard_version"] == vs.SCORECARD_VERSION
-    assert len(card["meta"]["races"]) == 10
+    assert len(card["meta"]["races"]) == 16  # T-015: 10 + 6 promoted
     assert card["strategy_ranking"]["primary"]["n_pairs"] > 0

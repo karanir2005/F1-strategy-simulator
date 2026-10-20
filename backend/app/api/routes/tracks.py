@@ -81,6 +81,9 @@ class ParamsUsed(BaseModel):
     pit_loss_s: float
     base_laptime_s: float
     n_sims: int
+    # optional (T-021): stint cap per compound actually used (observed max, floored to 15, clipped to race laps)
+    effective_max_stint_laps: Optional[Dict[str, int]] = None
+    min_stint_laps: Optional[int] = None
 
 
 class OptimizeResponse(BaseModel):
@@ -125,7 +128,8 @@ def optimize_route(request: OptimizeRequest) -> OptimizeResponse:
     return OptimizeResponse(
         track=track,
         params_used=ParamsUsed(
-            total_laps=total_laps, pit_loss_s=pit_loss, base_laptime_s=base, n_sims=request.n_sims
+            total_laps=total_laps, pit_loss_s=pit_loss, base_laptime_s=base, n_sims=request.n_sims,
+            effective_max_stint_laps=result.effective_caps, min_stint_laps=result.min_stint_laps,
         ),
         strategies=result.plans,
         n_candidates_screened=result.n_candidates_screened,

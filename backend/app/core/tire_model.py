@@ -99,7 +99,8 @@ every >=6-lap clean stint in the 10th:
    here rather than hacked around. A clean-air filter (road gap >= 1,
    1.5, 2 s) was also tried and barely moved any curve.
 
-Compound pace offsets stay on COMPOUND_PACE_OFFSET_PLACEHOLDER: the joint
+[Superseded by the 2026-10-20 UPDATE below -- offsets are now fitted, with an
+ordering constraint.] Compound pace offsets stay on COMPOUND_PACE_OFFSET_PLACEHOLDER: the joint
 fit still says SOFT (+0.38 s) and MEDIUM (+0.18 s) are SLOWER than HARD,
 and keying on Pirelli C-number instead of the S/M/H label doesn't help
 (C1 -0.47, C2 -0.28, C4 +0.18, C5 +0.25 s vs C3). Since that survives
@@ -107,27 +108,121 @@ the stint fix, out-lap/restart cleaning, per-race fuel and C-number
 keying, it is not a data-cleaning artefact; candidates are traffic /
 stint-situation selection and 2026 tyre/energy management. The fitted
 values are exposed as model["_compound_offsets_fitted"] (diagnostic only).
+
+UPDATE (2026-10-20, T-015 + T-020): more data, an era filter, and a tyre fit
+that is physically ordered. Four changes, in the order they were decided.
+
+1. Data (T-015). Six staged 2026 races -- Barcelona, Madrid, Italy,
+   Azerbaijan, Singapore, Netherlands (OpenF1-sourced, usable=true) -- were
+   promoted to data/processed/ (now 16 races, 14.2k clean laps vs 10 races /
+   ~9.9k). Not promoted: Malaysia (wet start), Miami_2025 / Australia_2026
+   staging (unusable, FastF1 Australia kept), the wet 2025 races. The
+   promoted CSVs keep the staging columns season/era/source (a superset of
+   the original schema; the original ten have no `era` column). Era filter:
+   build_tire_model()/load_all_laps() keep ERA_2026 only; 2025 rows are
+   dropped unless eras=(ERA_2025, ERA_2026) is passed, in which case the
+   usable dry 2025 staging races are loaded too and era_weights can
+   down-weight them. clean_laps additionally drops wet-track laps (Netherlands
+   only, 129 laps) and stints that run THROUGH a red flag (Monaco 222 laps,
+   Italy+Netherlands 36): tyre changes under a red flag are free and often
+   unrecorded, and Monaco's cars show 55-67-lap "stints".
+
+2. The free 2026 fit is not physical, and that is a property of the data,
+   not of the pipeline. 16 races, free linear fit: offsets SOFT +0.13,
+   MEDIUM +0.19 s vs HARD; wear SOFT 0.025 < MEDIUM 0.035 < HARD 0.036 s/lap.
+   Race-cluster bootstrap (calibrate_tire_compounds.py, 100 reps): MEDIUM
+   slower than HARD in 99% of resamples, SOFT wear above MEDIUM wear in 2%,
+   SOFT faster than HARD in 16%. Things tried that do NOT change it: a clean-
+   air filter (gap >= 1.5/2/3/5 s: SOFT +0.0..+0.19, MEDIUM +0.19..+0.30),
+   exponential or quadratic per-race track evolution, a two-way fit with a
+   fixed effect per (race, lap) (SOFT +0.10, MEDIUM +0.13), a flat-then-
+   hinge wear shape, and a pit-stop "jump" estimator that ignores everything
+   but the 2-3 laps either side of each stop (284 stops: a fresh SOFT after a
+   MEDIUM stint gains ~0.5 s LESS than a fresh HARD). The same code on the
+   20 usable dry 2025 races gives the textbook answer (SOFT -0.37, MEDIUM
+   -0.05 vs HARD; wear 0.061 > 0.040 > 0.036), so the 2026 inversion is
+   real in the 2026 data. Candidate causes, none proven: 2026 energy-
+   management driving (pace set by the plan, not by the tyre), stint-
+   selection effects, and the narrower 2026 tyres.
+
+3. What ships (T-020). fit_joint_model(constrain=True): bounded least squares
+   with SOFT <= MEDIUM <= HARD(=0) pace and SOFT >= MEDIUM >= HARD >= 0 wear.
+   The data violate the ordering, so the solution sits on the boundary:
+   MEDIUM offset 0.0 (equal to HARD), SOFT offset -0.12, wear 0.037 / 0.037 /
+   0.035 s/lap, fuel -0.0507 s/lap. The constraint is statistically visible
+   (RSS +0.44%, F = 30 on 2 df) but tiny in seconds (residual RMSE 0.896 ->
+   0.898 s), and it is imposed against the data, not discovered in them.
+   Why constrain rather than ship the free fit: the free fit makes MEDIUM
+   strictly the worst tyre at every stint length; the constrained fit at
+   least cannot rank a softer compound below a harder one on physics grounds.
+   The optimizer check (check_optimizer_plans.py) is the evidence it is
+   better: the model-time gap between each real top-10 finisher's strategy
+   and the optimizer's best plan (smaller = the model agrees real teams are
+   near-optimal) is median 15.8 s with the old placeholders and 2.3 s with
+   this fit (17 comparable circuits; free fit 5.8 s). Scorecard (LORO, 16
+   races): per-stint MAE 1.572 -> 1.554, relative MAE 0.765 -> 0.730,
+   finishing-order rho 0.869 -> 0.870, strategy-pair accuracy 0.690 -> 0.661
+   (n = 277, +-0.07: none of these differences is significant).
+   2025 as a prior: pooling the 2025 races at weight 0.25/0.5/1 gives nearly
+   the same ordered parameters (SOFT -0.11, MEDIUM 0.0, wear ~0.038-0.041),
+   scores marginally better in LORO (rho 0.875-0.876, pair accuracy 0.682-
+   0.686) and has the same optimizer regret, so it is NOT the default (era
+   rule above) but is one argument away: build_tire_model(eras=(ERA_2025,
+   ERA_2026), era_weights={ERA_2025: 0.5}).
+
+4. COMPOUND_PACE_OFFSET_PLACEHOLDER is now only a fallback (fitted_offsets=
+   False). COMPOUND_CLIFF_PENALTY_PLACEHOLDER is still a placeholder but is
+   not binding: max_reliable_age is ~50 laps for every compound, past every
+   stint length the optimizer's observed-maximum caps allow. A real
+   per-compound cliff needs deep-stint data this set doesn't have.
+
+Known remaining gaps: MEDIUM is dominated by HARD in this model (same pace,
+slightly more wear), so M appears in a top plan only when stint caps force
+it; the ordered S/M wear is a tie, not a measurement; one global fuel slope
+(per-race slopes range -0.003 .. -0.100, Madrid the outlier); no per-track
+or C-number-specific compound behaviour (Phase 3).
 """
 
 import glob
+import json
+import re
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Iterable, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from scipy.optimize import lsq_linear
 
 # resolved from this file's location, not the caller's cwd -- otherwise
 # this breaks the moment something imports tire_model from a process
 # launched with a different working directory (e.g. `uvicorn` started
 # from backend/ instead of the repo root)
 PROCESSED_DIR = str(Path(__file__).resolve().parents[3] / "data" / "processed")
+STAGING_DIR = str(Path(__file__).resolve().parents[3] / "data" / "staging")
 
-# Placeholder, not fitted from data -- see fit_compound_pace_offsets'
-# docstring for why. Seconds of laptime relative to HARD (negative =
-# faster); rough F1 ballpark, varies significantly by track in reality.
+# Regulation eras (T-015). The 2026 cars/tyres/power units are a different
+# machine from 2025's, and 2025 data is only ever an explicit, down-weighted
+# prior -- never silently pooled into a 2026 fit. Rows carry an `era` column
+# when they came through openf1_loader; the 10 original FastF1 CSVs don't, so
+# the era is otherwise read from the `_<year>_` in the race file name.
+ERA_2025 = "2025_regs"
+ERA_2026 = "2026_regs"
+DEFAULT_ERAS = (ERA_2026,)
+
+# 2025 staging races that are never a dry-pace source (T-009-qa): wet races
+# and OpenF1 data with missing laps. Mirrors build_track_params.EXCLUDE_RACES.
+EXCLUDED_2025_RACES = ("Belgium_2025", "Australia_2025", "Britain_2025", "Miami_2025")
+
+# SUPERSEDED (T-020): build_tire_model() now fits the offsets (ordered
+# SOFT <= MEDIUM <= HARD) and uses them. Kept only as the fallback behind
+# build_tire_model(fitted_offsets=False) so the old behaviour is reproducible.
+# Seconds of laptime relative to HARD (negative = faster); rough F1
+# ballpark, not from our data -- see the module docstring for why the free
+# fit could not be used as-is.
 COMPOUND_PACE_OFFSET_PLACEHOLDER = {"SOFT": -0.5, "MEDIUM": -0.2, "HARD": 0.0}
 
-# Placeholder, not fitted from data. A single global 0.3 s/lap cliff
+# PLACEHOLDER, not fitted from data (T-020: still true, and not binding --
+# see the module docstring, point 4). A single global 0.3 s/lap cliff
 # penalty (the old default) understates how differently compounds fall
 # off: our own data barely has any laps run deep past a soft's natural
 # life (see max_reliable_age's docstring -- SOFT samples drop to n=2 past
@@ -140,8 +235,39 @@ COMPOUND_CLIFF_PENALTY_PLACEHOLDER = {"SOFT": 1.0, "MEDIUM": 0.5, "HARD": 0.2}
 DRY_COMPOUNDS = ("SOFT", "MEDIUM", "HARD")
 
 
-def load_all_laps(pattern: str = f"{PROCESSED_DIR}/*_laps.csv") -> pd.DataFrame:
-    """Combine every pulled race into one DataFrame, tagged by source file."""
+def era_of_year(year: int) -> str:
+    return ERA_2026 if year >= 2026 else ERA_2025
+
+
+def lap_eras(laps: pd.DataFrame) -> pd.Series:
+    """Era of every lap row: the `era` column where filled, else from `_<year>_` in race_file."""
+    from_name = laps["race_file"].astype(str).map(
+        lambda p: era_of_year(int(m.group(1))) if (m := re.search(r"_(20\d\d)_", Path(p).name)) else ERA_2026
+    )
+    if "era" in laps.columns:
+        return laps["era"].where(laps["era"].notna(), from_name)
+    return from_name
+
+
+def filter_eras(laps: pd.DataFrame, eras: Optional[Iterable[str]] = DEFAULT_ERAS) -> pd.DataFrame:
+    """Keep only rows from the given regulation eras (None = keep everything)."""
+    if eras is None:
+        return laps
+    return laps[lap_eras(laps).isin(set(eras)).values]
+
+
+def load_all_laps(
+    pattern: str = f"{PROCESSED_DIR}/*_laps.csv",
+    eras: Optional[Iterable[str]] = DEFAULT_ERAS,
+) -> pd.DataFrame:
+    """
+    Combine every pulled race into one DataFrame, tagged by source file.
+
+    eras: regulation eras to keep (default 2026 only; None = everything the
+        pattern matches). 2025 races only live in data/staging, so asking
+        for ERA_2025 here ALSO pulls the usable dry 2025 staging races
+        (load_2025_staging_laps) -- an explicit opt-in, see T-015.
+    """
     frames = []
     for path in sorted(glob.glob(pattern)):
         df = pd.read_csv(path)
@@ -149,7 +275,28 @@ def load_all_laps(pattern: str = f"{PROCESSED_DIR}/*_laps.csv") -> pd.DataFrame:
         frames.append(df)
     if not frames:
         raise FileNotFoundError(f"No lap files found matching {pattern}")
-    return pd.concat(frames, ignore_index=True)
+    laps = filter_eras(pd.concat(frames, ignore_index=True), eras)
+    if eras is not None and ERA_2025 in set(eras):
+        laps = pd.concat([laps, load_2025_staging_laps()], ignore_index=True)
+    return laps
+
+
+def load_2025_staging_laps(staging_dir: str = STAGING_DIR) -> pd.DataFrame:
+    """Usable, dry 2025 staging races (OpenF1), tagged by race_file. Empty frame if none."""
+    frames = []
+    for path in sorted(glob.glob(f"{staging_dir}/*_2025_laps.csv")):
+        key = Path(path).name.replace("_laps.csv", "")
+        if key in EXCLUDED_2025_RACES:
+            continue
+        info_path = Path(path.replace("_laps.csv", "_race_info.json"))
+        if info_path.exists():
+            info = json.loads(info_path.read_text(encoding="utf-8"))
+            if not (info.get("data_quality") or {}).get("usable", True):
+                continue
+        df = pd.read_csv(path)
+        df["race_file"] = path
+        frames.append(df)
+    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 
 def _has_t002_schema(laps: pd.DataFrame) -> bool:
@@ -180,7 +327,7 @@ def assign_stint_ids(laps: pd.DataFrame) -> pd.DataFrame:
     return laps
 
 
-def clean_laps(laps: pd.DataFrame) -> pd.DataFrame:
+def clean_laps(laps: pd.DataFrame, drop_red_flag_stints: bool = True) -> pd.DataFrame:
     """
     Keep only laps that measure tyre + fuel pace (see the module docstring's
     2026-10-19 UPDATE for the measurements behind each rule):
@@ -191,6 +338,15 @@ def clean_laps(laps: pd.DataFrame) -> pd.DataFrame:
       - whole lap green (is_green_flag, TrackStatus == "1"). Local-yellow
         laps stay excluded on purpose: heavy-tailed (+0.84 s mean).
       - not the first lap after a SC/VSC/red-flag lap (restart lap)
+      - not a wet-track lap (rainfall flag; only Netherlands 2026 has any,
+        129 otherwise-clean laps)
+      - not part of a stint that runs THROUGH a red flag (drop_red_flag_stints,
+        T-015): tyre changes under a red flag are free and often unrecorded
+        or split into phantom stints, so a stint with a red-flag lap after
+        its first lap has an unreliable tyre age (Monaco 2026: 222 clean
+        laps, cars on "one set" for 55-67 laps; Italy/Netherlands: 36).
+        A stint that STARTS on the red-flag out-lap (Italy: every car
+        changed tyres at the lap-3 stoppage) is fine and is kept.
     Also removes each car's own race-average pace (laptime_demeaned) for
     the legacy per-compound fitters; fit_joint_model does its own exact
     within-driver-race transformation.
@@ -221,8 +377,15 @@ def clean_laps(laps: pd.DataFrame) -> pd.DataFrame:
         )
         if "tyre_data_missing" in laps.columns:
             keep &= ~laps["tyre_data_missing"].astype(bool)
+        if drop_red_flag_stints and "has_red" in laps.columns:
+            stint_key = [laps["race_file"], laps["driver"], laps["tyre_stint"]]
+            first_lap = laps.groupby(stint_key, dropna=False)["lap_number"].transform("min")
+            red_after_start = laps["has_red"].astype(bool) & (laps["lap_number"] > first_lap)
+            keep &= ~red_after_start.groupby(stint_key, dropna=False).transform("any").astype(bool)
     else:
         keep &= laps["tire_age"] > 1
+    if "rainfall" in laps.columns:
+        keep &= ~laps["rainfall"].fillna(False).astype(bool)
     clean = laps[keep].copy()
     clean["laptime_demeaned"] = clean["lap_time_seconds"] - clean.groupby(
         ["race_file", "driver"]
@@ -246,7 +409,50 @@ def _joint_design(clean: pd.DataFrame, quadratic: bool) -> Tuple[pd.DataFrame, l
     return X, list(X.columns)
 
 
-def fit_joint_model(clean: pd.DataFrame, quadratic: bool = False) -> dict:
+def _ordering_transform(cols: list) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Reparametrisation T (n_cols x n_theta) and lower bounds so that
+    beta = T @ theta enforces the physical ordering with theta >= 0:
+        offsets   SOFT <= MEDIUM <= HARD(=0):  off_MEDIUM = -p,  off_SOFT = -p - q
+        wear      SOFT >= MEDIUM >= HARD >= 0: age_HARD = a, age_MEDIUM = a + b,
+                                               age_SOFT = a + b + c
+    Every other column (per-race fuel slopes) passes through unbounded.
+    Linear wear only (age2 columns are not supported here).
+    """
+    idx = {c: i for i, c in enumerate(cols)}
+    n = len(cols)
+    passthrough = [c for c in cols if c.startswith("fuel_")]
+    names = passthrough + ["p", "q", "a", "b", "c"]
+    T = np.zeros((n, len(names)))
+    lower = np.full(len(names), -np.inf)
+    col_of = {nm: j for j, nm in enumerate(names)}
+    for c in passthrough:
+        T[idx[c], col_of[c]] = 1.0
+    for nm in ("p", "q", "a", "b", "c"):
+        lower[col_of[nm]] = 0.0
+    if "off_MEDIUM" in idx:
+        T[idx["off_MEDIUM"], col_of["p"]] = -1.0
+    if "off_SOFT" in idx:
+        T[idx["off_SOFT"], col_of["p"]] = -1.0
+        T[idx["off_SOFT"], col_of["q"]] = -1.0
+    if "age_HARD" in idx:
+        T[idx["age_HARD"], col_of["a"]] = 1.0
+    if "age_MEDIUM" in idx:
+        T[idx["age_MEDIUM"], col_of["a"]] = 1.0
+        T[idx["age_MEDIUM"], col_of["b"]] = 1.0
+    if "age_SOFT" in idx:
+        T[idx["age_SOFT"], col_of["a"]] = 1.0
+        T[idx["age_SOFT"], col_of["b"]] = 1.0
+        T[idx["age_SOFT"], col_of["c"]] = 1.0
+    return T, lower
+
+
+def fit_joint_model(
+    clean: pd.DataFrame,
+    quadratic: bool = False,
+    constrain: bool = False,
+    weights: Optional[pd.Series] = None,
+) -> dict:
     """
     One least-squares fit of lap time on
         driver-race fixed effect                       (car/driver/track pace)
@@ -259,18 +465,41 @@ def fit_joint_model(clean: pd.DataFrame, quadratic: bool = False) -> dict:
     each stop while lap_number doesn't; see the module docstring for why
     this replaced the per-compound fits (T-002, N-3).
 
+    constrain (T-020): bounded least squares with the physical ordering
+    SOFT <= MEDIUM <= HARD(=0) on the pace offsets and SOFT >= MEDIUM >=
+    HARD >= 0 on the (linear) wear slopes -- see _ordering_transform. If the
+    data already satisfy the ordering the constrained and free fits are
+    identical; where it doesn't the solution sits on the boundary (e.g.
+    two compounds get the same slope). Linear wear only.
+
+    weights: optional per-lap weight (aligned to clean.index), e.g. to
+    down-weight a prior era. Must be constant within a (race_file, driver)
+    group so the exact within transformation stays valid (era weights are).
+
     Returns {"coef": {name: value}, "fuel_coef": lap-weighted mean of the
     per-race lap_number slopes, "fuel_by_race": {...}, "offsets": {...},
     "wear": {compound: (age_coef, age2_coef)}, "residual": Series of the
     full-model residual per lap, "partial_wear_residual": Series of
-    y - FE - offsets - fuel (i.e. what's left for the wear curve)}.
+    y - FE - offsets - fuel (i.e. what's left for the wear curve),
+    "constrained": bool}.
     """
+    if constrain and quadratic:
+        raise ValueError("ordering constraints are only implemented for linear wear")
     X, cols = _joint_design(clean, quadratic)
     groups = [clean["race_file"], clean["driver"]]
     y = clean["lap_time_seconds"].astype(float)
     Xw = X - X.groupby(groups).transform("mean")
     yw = y - y.groupby(groups).transform("mean")
-    beta, *_ = np.linalg.lstsq(Xw.values, yw.values, rcond=None)
+    sw = np.ones(len(clean)) if weights is None else np.sqrt(np.asarray(weights, dtype=float))
+    if constrain:
+        T, lower = _ordering_transform(cols)
+        theta = lsq_linear(
+            (Xw.values @ T) * sw[:, None], yw.values * sw,
+            bounds=(lower, np.full(len(lower), np.inf)), method="bvls",
+        ).x
+        beta = T @ theta
+    else:
+        beta, *_ = np.linalg.lstsq(Xw.values * sw[:, None], yw.values * sw, rcond=None)
     coef = dict(zip(cols, beta))
 
     fitted = X.values @ beta
@@ -282,8 +511,12 @@ def fit_joint_model(clean: pd.DataFrame, quadratic: bool = False) -> dict:
 
     fuel_by_race = {c[len("fuel_"):]: coef[c] for c in cols if c.startswith("fuel_")}
     race_laps = clean["race_file"].value_counts()
+    race_w = pd.Series(sw ** 2, index=clean.index).groupby(clean["race_file"]).mean()
     fuel_coef = float(
-        np.average(list(fuel_by_race.values()), weights=[race_laps[r] for r in fuel_by_race])
+        np.average(
+            list(fuel_by_race.values()),
+            weights=[race_laps[r] * race_w[r] for r in fuel_by_race],
+        )
     )
     offsets = {"HARD": 0.0}
     for compound in ("SOFT", "MEDIUM"):
@@ -300,6 +533,7 @@ def fit_joint_model(clean: pd.DataFrame, quadratic: bool = False) -> dict:
         "wear": wear,
         "residual": residual,
         "partial_wear_residual": partial_wear_residual,
+        "constrained": bool(constrain),
     }
 
 
@@ -508,42 +742,74 @@ def build_tire_model(
     min_samples_per_age: int = 3,
     quadratic: bool = False,
     laps: Optional[pd.DataFrame] = None,
+    eras: Optional[Iterable[str]] = DEFAULT_ERAS,
+    era_weights: Optional[dict] = None,
+    constrain: bool = True,
+    fitted_offsets: bool = True,
+    drop_red_flag_stints: bool = True,
 ) -> dict:
     """
-    Full pipeline: load -> stints -> clean -> joint fit (fit_joint_model)
-    -> drop residual outliers and tyre ages with < min_samples_per_age
-    laps (per compound) -> refit -> detect cliff per compound.
+    Full pipeline: load -> era filter -> stints -> clean -> joint fit
+    (fit_joint_model) -> drop residual outliers and tyre ages with <
+    min_samples_per_age laps (per compound) -> refit -> detect cliff per
+    compound.
 
     quadratic: fit age + age^2 wear (the pre-T-002 functional form)
         instead of linear wear. Linear is the default because it predicts
-        held-out races better (LORO, see module docstring).
+        held-out races better (LORO, see module docstring). Quadratic
+        disables the ordering constraints.
     laps: optional pre-loaded laps (load_all_laps() format, needs a
         race_file column) -- for leave-one-race-out validation and tests.
+    eras: regulation eras to fit on (T-015). Default 2026 only: 2025 rows
+        (laps given, or loaded because ERA_2025 is listed) are DROPPED
+        unless the caller asks for them. If both eras are listed,
+        era_weights ({era: weight}, default 1.0) down-weights an era in
+        the least squares (e.g. {ERA_2025: 0.5}).
+    constrain: fit with the physical ordering SOFT >= MEDIUM >= HARD >= 0
+        wear and SOFT <= MEDIUM <= HARD pace (T-020, module docstring).
+    fitted_offsets: use the fitted pace offsets in the simulator
+        (model["_compound_offsets"]); False restores the old
+        COMPOUND_PACE_OFFSET_PLACEHOLDER.
+    drop_red_flag_stints: see clean_laps.
 
     Returns e.g.:
     {
         "SOFT": {"age_coef": ..., "age2_coef": ..., "cliff_age": None,
                  "max_reliable_age": 30},
         ...,
-        "_fuel_coef": -0.045,  # s of laptime per lap_number (fuel + mean track evolution)
+        "_fuel_coef": -0.05,  # s of laptime per lap_number (fuel + mean track evolution)
         "_fuel_coef_by_race": {"China_2026_laps.csv": ..., ...},   # diagnostic
-        "_compound_offsets": {"SOFT": -0.5, "MEDIUM": -0.2, "HARD": 0.0},  # PLACEHOLDER, used
-        "_compound_offsets_fitted": {...},   # joint-fit estimate, diagnostic only (inverted)
+        "_compound_offsets": {"SOFT": ..., "MEDIUM": ..., "HARD": 0.0},  # fitted, used
+        "_compound_offsets_unconstrained": {...},  # free fit, diagnostic only
+        "_wear_unconstrained": {"SOFT": ..., ...},  # free linear age_coef, diagnostic only
         "_cliff_penalties": {...},           # PLACEHOLDER
-        "_n_laps_fitted": 8700,
+        "_n_laps_fitted": 14000,
+        "_eras": ["2026_regs"],
     }
     """
+    eras = None if eras is None else tuple(eras)
     if laps is None:
-        laps = load_all_laps()
+        laps = load_all_laps(eras=eras)
+    else:
+        laps = filter_eras(laps, eras)
     laps = assign_stint_ids(laps)
-    clean = clean_laps(laps)
+    clean = clean_laps(laps, drop_red_flag_stints=drop_red_flag_stints)
+    constrain = constrain and not quadratic
 
-    first = fit_joint_model(clean, quadratic=quadratic)
+    def era_weight_of(df: pd.DataFrame) -> Optional[pd.Series]:
+        if not era_weights:
+            return None
+        w = lap_eras(df).map(lambda e: float(era_weights.get(e, 1.0)))
+        return pd.Series(w.values, index=df.index)
+
+    first = fit_joint_model(clean, quadratic=quadratic, constrain=constrain, weights=era_weight_of(clean))
     filtered = _drop_residual_outliers(clean, first["residual"])
     counts = filtered.groupby(["compound", "tire_age"])["lap_number"].transform("size")
     filtered = filtered[counts >= min_samples_per_age]
 
-    final = fit_joint_model(filtered, quadratic=quadratic)
+    w_final = era_weight_of(filtered)
+    final = fit_joint_model(filtered, quadratic=quadratic, constrain=constrain, weights=w_final)
+    free = final if not constrain else fit_joint_model(filtered, quadratic=quadratic, weights=w_final)
 
     model = {}
     # dry slicks only: rain compounds (INTERMEDIATE/WET) need their own
@@ -569,10 +835,16 @@ def build_tire_model(
     model["_fuel_coef_by_race"] = {
         Path(race).name: float(v) for race, v in final["fuel_by_race"].items()
     }
-    model["_compound_offsets"] = dict(COMPOUND_PACE_OFFSET_PLACEHOLDER)
+    model["_compound_offsets"] = (
+        dict(final["offsets"]) if fitted_offsets else dict(COMPOUND_PACE_OFFSET_PLACEHOLDER)
+    )
     model["_compound_offsets_fitted"] = dict(final["offsets"])
+    model["_compound_offsets_unconstrained"] = dict(free["offsets"])
+    model["_wear_unconstrained"] = {c: free["wear"][c][0] for c in DRY_COMPOUNDS if c in model}
+    model["_constrained"] = bool(constrain)
     model["_cliff_penalties"] = dict(COMPOUND_CLIFF_PENALTY_PLACEHOLDER)
     model["_n_laps_fitted"] = int(len(filtered))
+    model["_eras"] = sorted(set(lap_eras(filtered))) if len(filtered) else []
     return model
 
 

@@ -44,6 +44,7 @@ response: {"track": {...track params...},
            "n_candidates_screened": 1234, "n_candidates_simulated": 20,
            "assumptions": ["single car in clean air", "no safety cars", "global tyre-wear curves", ...]}
 ```
+`params_used` also carries two OPTIONAL fields (T-021): `effective_max_stint_laps: {compound: int}` (stint cap actually used per compound = observed max floored to 15 and clipped to race laps; may differ from the track's observed `max_stint_laps`) and `min_stint_laps: int` (minimum length of every stint, = max(8, 10% of race laps), clamped to laps//2).
 Nulls mean "use the track's value". `max_stops` 1–3, `n_sims` ≤ 20000, `top_n` 1–10.
 
 Optimizer: enumerate compound sequences with ≥2 distinct dry compounds (the rule), 1..max_stops stops, stint lengths within `max_stint_laps` (no extrapolation past observed data); deterministic screen with `race_simulator`, then Monte Carlo with common random numbers on the best ~20; rank by mean, report paired deltas vs rank 1. Must answer in < 3 s for max_stops=3.

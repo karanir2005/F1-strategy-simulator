@@ -34,7 +34,20 @@ from app.core.monte_carlo import (
 from app.core.race_simulator import Stint
 from app.core.tire_model import compound_pace_offset, fuel_effect, predict_delta
 
-MIN_STINT_LAPS = 5
+# Minimum stint length applies to EVERY stint (first and last included), so a plan cannot
+# dodge wear with a token 5-lap stint. Floor of 8 laps, or 10% of race distance if larger:
+# real stops almost never come before ~lap 8-10 (the shortest stint among 2025 winners'
+# plans was ~7-10 laps, e.g. China M10, Qatar M7 under the tyre-life rule), and a lap-5 stop
+# is a model artefact of the cap floor + cheap global degradation (T-019 finding 2).
+# Clamped to total_laps // 2 so very short test distances stay feasible.
+MIN_STINT_LAPS = 8
+MIN_STINT_FRACTION = 0.10
+
+
+def min_stint_laps(total_laps: int) -> int:
+    return max(1, min(max(MIN_STINT_LAPS, round(MIN_STINT_FRACTION * total_laps)), total_laps // 2))
+
+
 MAX_FINALISTS = 20
 # how many compound sequences (best grid plan each) get hill-climbed
 MAX_REFINED_SEQUENCES = 30
@@ -45,12 +58,13 @@ ASSUMPTIONS = [
     "Single car in clean air: no traffic, no opponents, no undercut/overcut interaction.",
     "No safety cars, virtual safety cars, red flags or weather; dry compounds only.",
     "Global tyre-wear curves fitted across all pulled races, not per-track degradation.",
-    "Compound pace offsets and cliff penalties are literature-ballpark placeholders "
+    "Compound pace offsets are fitted (with a forced ordering); cliff penalties are literature-ballpark placeholders "
     "(tire_model.COMPOUND_PACE_OFFSET_PLACEHOLDER / COMPOUND_CLIFF_PENALTY_PLACEHOLDER), "
     "so SOFT-vs-HARD trade-offs are indicative, not fitted.",
     "Stints are capped at the longest green stint observed for that compound at this track "
     "(max_stint_laps), with a floor of 15 laps because some compounds only had short observed "
     "stints; plans needing longer stints are not considered.",
+    "Every stint (first and last included) is at least max(8 laps, 10% of race distance); real teams do not stop on lap 5.",
     "Plans that are the same stints in a different order are shown once (the best-ordered one).",
     "All stints start on new tyres; at least 2 distinct dry compounds are used (two-compound rule).",
     "Gaps between plans are model gaps (paired, common random numbers); replay error vs real "
@@ -70,6 +84,8 @@ class OptimizeResult:
     plans: List[dict]
     n_candidates_screened: int
     n_candidates_simulated: int
+    effective_caps: Dict[str, int]  # per-compound stint cap actually used (after floor + clip)
+    min_stint_laps: int
 
 
 class NoFeasiblePlan(ValueError):
@@ -102,13 +118,13 @@ class _Cost:
         return float(t)
 
 
-def _length_grid(n_stints: int, total: int, caps_max: int, step: int) -> np.ndarray:
+def _length_grid(n_stints: int, total: int, caps_max: int, step: int, min_lap: int) -> np.ndarray:
     """All (n_stints,) length tuples on the grid; the last stint takes the remainder."""
-    values = list(range(MIN_STINT_LAPS, min(caps_max, total) + 1, step))
+    values = list(range(min_lap, min(caps_max, total) + 1, step))
     rows = []
     for head in itertools.product(values, repeat=n_stints - 1):
         last = total - sum(head)
-        if MIN_STINT_LAPS <= last <= caps_max:
+        if min_lap <= last <= caps_max:
             rows.append(head + (last,))
     return np.array(rows, dtype=np.int64).reshape(-1, n_stints)
 
@@ -117,7 +133,7 @@ def _grid_step(n_stints: int) -> int:
     return {2: 1, 3: 2}.get(n_stints, 3)
 
 
-def _refine(cost: _Cost, compounds, laps, caps) -> Plan:
+def _refine(cost: _Cost, compounds, laps, caps, min_lap) -> Plan:
     laps = list(laps)
     best = cost.total(compounds, laps)
     improved = True
@@ -128,7 +144,7 @@ def _refine(cost: _Cost, compounds, laps, caps) -> Plan:
                 cand = list(laps)
                 cand[i] -= d
                 cand[j] += d
-                if cand[i] < MIN_STINT_LAPS or cand[j] > caps[compounds[j]]:
+                if cand[i] < min_lap or cand[j] > caps[compounds[j]]:
                     continue
                 t = cost.total(compounds, cand)
                 if t < best - 1e-9:
@@ -153,14 +169,15 @@ def optimize(
     if len(compounds) < 2:
         raise NoFeasiblePlan("need caps for at least 2 dry compounds to satisfy the two-compound rule")
     caps = {c: min(max(int(max_stint_laps[c]), MIN_STINT_CAP), total_laps) for c in compounds}
+    min_lap = min_stint_laps(total_laps)
     cost = _Cost(tire_model, compounds, caps, total_laps, base_laptime_s, pit_loss_s)
 
     best_per_seq: Dict[Tuple[str, ...], Plan] = {}
     n_screened = 0
     for n_stints in range(2, max_stops + 2):
-        if n_stints * MIN_STINT_LAPS > total_laps:
+        if n_stints * min_lap > total_laps:
             break
-        grid = _length_grid(n_stints, total_laps, max(caps.values()), _grid_step(n_stints))
+        grid = _length_grid(n_stints, total_laps, max(caps.values()), _grid_step(n_stints), min_lap)
         if not len(grid):
             continue
         starts = np.cumsum(grid, axis=1) - grid  # laps already run before each stint
@@ -186,7 +203,7 @@ def optimize(
         )
 
     seeds = sorted(best_per_seq.values(), key=lambda p: (p.det_total, p.compounds))[:MAX_REFINED_SEQUENCES]
-    refined = [_refine(cost, p.compounds, p.laps, caps) for p in seeds]
+    refined = [_refine(cost, p.compounds, p.laps, caps, min_lap) for p in seeds]
     # same stints in a different order differ only by a fuel-timing sliver: keep the best order
     finalists, seen = [], set()
     for p in sorted(refined, key=lambda p: (p.det_total, p.compounds, p.laps)):
@@ -234,4 +251,4 @@ def optimize(
                 "delta_to_best_p90_s": float(d90),
             }
         )
-    return OptimizeResult(plans, n_screened, len(finalists))
+    return OptimizeResult(plans, n_screened, len(finalists), dict(caps), min_lap)
