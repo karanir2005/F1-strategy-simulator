@@ -11,13 +11,24 @@ Agents working on this repo, defined in `.claude/agents/`:
 | Frontend engineer | `frontend-engineer` | `frontend/` |
 | QA engineer | `qa-engineer` | `backend/tests/` additions, QA reports. Never fixes product code |
 
+## Lean mode (default since 2026-10-20)
+
+Every agent starts cold and every handoff costs a write plus a re-read, so use as few agents and passes as possible.
+
+- **Backend + data are one lane.** `backend-engineer` (or `data-scientist` for a heavy fitting task) takes both; don't split a change across both roles.
+- **Frontend agent only for major UI work** (new pages, redesigns). Small UI tweaks go to the backend engineer or the orchestrator.
+- **QA only at milestones:** before committing changes that move model numbers or ship a new feature. Not after every task. Simple checks (lint, build, pytest, eyeballing the UI) are done by the user or the orchestrator.
+- **Researcher only ad hoc**, for external facts nobody can answer.
+- **Short handoffs** (half a page: what changed, key numbers, open issues). New contract docs only when an API changes.
+- Run at most one or two agents at a time.
+
 ## How work flows
 
 1. The orchestrator writes a task in `BOARD.md` with an id (`T-###`), an owner, dependencies, and a definition of done.
 2. The orchestrator launches the owner agent with the task id. Agents can't talk to each other directly. All communication goes through files in `team/`, and the orchestrator routes.
 3. The owner works **only in their lane**. If a change is needed in someone else's files, they write it as a request in their handoff and don't make it themselves.
 4. The owner writes a handoff (template below) to `team/handoffs/<task-id>-<role>.md`.
-5. The orchestrator sends code changes to `qa-engineer` for verification. On `FAIL`, the task goes back to the owner with the QA report.
+5. At milestones (see Lean mode), the orchestrator sends code changes to `qa-engineer` for verification. On `FAIL`, the task goes back to the owner with the QA report.
 6. On `PASS`, the orchestrator updates `BOARD.md`, commits, and opens the follow-up tasks the handoff asked for.
 
 Only the orchestrator edits `BOARD.md` and runs `git commit`. When two agents run in parallel and could touch overlapping files, the orchestrator gives each one an isolated worktree.

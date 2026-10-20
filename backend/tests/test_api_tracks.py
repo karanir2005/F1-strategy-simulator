@@ -38,7 +38,11 @@ def test_optimize_shape_and_defaults():
     resp = client.post("/optimize", json={"track_id": "testring", "n_sims": 300, "seed": 3})
     assert resp.status_code == 200
     body = resp.json()
-    assert body["params_used"] == {"total_laps": 56, "pit_loss_s": 21.3, "base_laptime_s": 98.4, "n_sims": 300}
+    pu = body["params_used"]
+    assert {k: pu[k] for k in ("total_laps", "pit_loss_s", "base_laptime_s", "n_sims")} == {
+        "total_laps": 56, "pit_loss_s": 21.3, "base_laptime_s": 98.4, "n_sims": 300}
+    assert pu["min_stint_laps"] == 8
+    assert pu["effective_max_stint_laps"] and all(15 <= v <= 56 for v in pu["effective_max_stint_laps"].values())
     assert body["track"]["track_id"] == "testring"
     assert len(body["strategies"]) == 5
     best = body["strategies"][0]
@@ -60,7 +64,7 @@ def test_optimize_overrides_and_determinism():
     a = client.post("/optimize", json=req).json()
     b = client.post("/optimize", json=req).json()
     assert a == b
-    assert a["params_used"] == {"total_laps": 40, "pit_loss_s": 30.0, "base_laptime_s": 90.0, "n_sims": 300}
+    assert {k: a["params_used"][k] for k in ("total_laps", "pit_loss_s", "base_laptime_s", "n_sims")} == {"total_laps": 40, "pit_loss_s": 30.0, "base_laptime_s": 90.0, "n_sims": 300}
     assert len(a["strategies"]) == 3
 
 

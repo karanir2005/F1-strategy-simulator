@@ -76,3 +76,10 @@ class OptimizeResponse(BaseModel):
 - Caps floored: cap = max(observed `max_stint_laps`, 15) (still clipped to total laps); stated in `assumptions`. The `track` object in the response still shows the observed values.
 - Resolved: `base_laptime_s` follows the simulator convention (HARD, age 2, final-lap fuel). The earlier request to the data-scientist about fuel correction no longer applies; contract wording fixed.
 - Tests added: `test_no_reordered_duplicates`, `test_cap_floor`.
+
+
+## T-021 (min stint + effective caps)
+- optimizer.py: MIN_STINT_LAPS 5 -> 8, plus `min_stint_laps(total_laps)` = max(8, round(10% of laps)), clamped to laps//2. Applies to every stint (first/last too) in grid, hill-climb and feasibility check. Rationale in code comment; new assumption line added to `ASSUMPTIONS`. Two-compound rule unchanged. Same-compound repeats not penalised.
+- API (tracks.py): `params_used` gains optional `effective_max_stint_laps: {SOFT|MEDIUM|HARD: int}` (post 15-lap floor and clip to race laps; only compounds with caps and a fitted model) and `min_stint_laps: int`. Existing fields unchanged. Contract doc updated. FRONTEND: add both as optional to `ParamsUsed` in lib/api.ts and show the effective cap next to the observed one (and note min stint) in the UI.
+- Tests: updated test_api_tracks params_used asserts (subset compare); added 4 tests in test_optimizer.py (property-based, no pinned fitted numbers; real-model runtime < 3 s and determinism).
+- Tests that the data-scientist refit could legitimately change: none pinned to fitted values by me; test_t019_qa sanity checks should be rerun after refit.

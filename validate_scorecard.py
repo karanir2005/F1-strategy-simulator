@@ -680,7 +680,21 @@ def race_totals(race: RaceData, sims: dict, bases: dict) -> pd.DataFrame:
 # --------------------------------------------------------------------------
 
 
-def run_scorecard(gps: Optional[list] = None, processed_dir: Path = PROCESSED_DIR, raw_dir: Path = JOLPICA_RAW_DIR) -> dict:
+def run_scorecard(
+    gps: Optional[list] = None,
+    processed_dir: Path = PROCESSED_DIR,
+    raw_dir: Path = JOLPICA_RAW_DIR,
+    model_kwargs: Optional[dict] = None,
+    extra_train_laps: Optional[pd.DataFrame] = None,
+) -> dict:
+    """
+    model_kwargs: extra keyword arguments for tire_model.build_tire_model (T-020
+        experiments: constrain=False, fitted_offsets=False, eras=..., era_weights=...).
+        Default None = the shipped defaults.
+    extra_train_laps: laps added to EVERY race's LORO training set but never scored
+        (e.g. the 2025 staging races when eras includes 2025_regs).
+    """
+    model_kwargs = model_kwargs or {}
     gps = gps or race_names(processed_dir)
     races = {gp: load_race(gp, processed_dir, raw_dir) for gp in gps}
     all_laps = pd.concat([r.laps for r in races.values()], ignore_index=True)
@@ -690,7 +704,9 @@ def run_scorecard(gps: Optional[list] = None, processed_dir: Path = PROCESSED_DI
     for gp, race in races.items():
         # LORO: the model for `gp` never sees its laps
         train_laps = all_laps[all_laps["race_file"] != race.laps["race_file"].iloc[0]]
-        model = tm.build_tire_model(laps=train_laps)
+        if extra_train_laps is not None:
+            train_laps = pd.concat([train_laps, extra_train_laps], ignore_index=True)
+        model = tm.build_tire_model(laps=train_laps, **model_kwargs)
         sims, skipped = build_driver_sims(race, model)
         train = [(r, build_driver_sims(r, model)[0]) for g, r in races.items() if g != gp]
         ratio = fit_quali_ratio(train) if len(race.quali) else None

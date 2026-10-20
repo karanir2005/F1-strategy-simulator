@@ -1,0 +1,23 @@
+driver,driver_number,team,grid_position,position,classified_position,status,laps,points,gap_to_winner_s,race_time_s,q1_s,q2_s,q3_s,season,era,source
+HAM,44,Ferrari,2.0,1.0,1,Finished,66.0,25.0,0.0,5548.105,75.625,75.418,74.743,2026,2026_regs,jolpica
+RUS,63,Mercedes,1.0,2.0,2,Finished,66.0,18.0,19.561000000000604,5567.666,75.717,75.228,74.679,2026,2026_regs,jolpica
+NOR,1,McLaren,4.0,3.0,3,Finished,66.0,15.0,23.71900000000005,5571.824,76.287,75.361,75.001,2026,2026_regs,jolpica
+VER,3,Red Bull,5.0,4.0,4,Finished,66.0,12.0,40.4970000000003,5588.602,76.352,75.484,75.021,2026,2026_regs,jolpica
+PIA,81,McLaren,7.0,5.0,5,Finished,66.0,10.0,58.66100000000006,5606.766,76.138,75.518,75.09,2026,2026_regs,jolpica
+HAD,6,Red Bull,6.0,6.0,6,Lapped,65.0,8.0,,,76.42699999999999,75.754,75.077,2026,2026_regs,jolpica
+GAS,10,Alpine F1 Team,14.0,7.0,7,Lapped,65.0,6.0,,,76.599,76.261,,2026,2026_regs,jolpica
+LAW,30,RB F1 Team,8.0,8.0,8,Lapped,65.0,4.0,,,76.673,75.58500000000001,76.542,2026,2026_regs,jolpica
+LIN,41,RB F1 Team,11.0,9.0,9,Lapped,65.0,2.0,,,76.425,75.84,,2026,2026_regs,jolpica
+COL,43,Alpine F1 Team,13.0,10.0,10,Lapped,65.0,1.0,,,76.59,76.191,,2026,2026_regs,jolpica
+BOR,5,Audi,12.0,11.0,11,Lapped,64.0,0.0,,,76.616,76.001,,2026,2026_regs,jolpica
+SAI,55,Williams,16.0,12.0,12,Lapped,64.0,0.0,,,76.881,77.827,,2026,2026_regs,jolpica
+OCO,31,Haas F1 Team,17.0,13.0,13,Lapped,64.0,0.0,,,77.07300000000001,,,2026,2026_regs,jolpica
+PER,11,Cadillac F1 Team,19.0,14.0,14,Lapped,63.0,0.0,,,77.545,,,2026,2026_regs,jolpica
+LEC,16,Ferrari,10.0,15.0,15,Retired,62.0,0.0,,,75.964,75.281,,2026,2026_regs,jolpica
+ANT,12,Mercedes,3.0,16.0,16,Retired,61.0,0.0,,,75.977,75.295,74.998,2026,2026_regs,jolpica
+BEA,87,Haas F1 Team,15.0,17.0,17,Retired,60.0,0.0,,,76.571,76.389,,2026,2026_regs,jolpica
+ALB,23,Williams,18.0,18.0,R,Lapped,55.0,0.0,,,77.424,,,2026,2026_regs,jolpica
+ALO,14,Aston Martin,22.0,19.0,R,Retired,37.0,0.0,,,78.815,,,2026,2026_regs,jolpica
+HUL,27,Audi,9.0,20.0,R,Retired,29.0,0.0,,,76.066,75.768,76.657,2026,2026_regs,jolpica
+BOT,77,Cadillac F1 Team,20.0,21.0,R,Retired,15.0,0.0,,,77.757,,,2026,2026_regs,jolpica
+STR,18,Aston Martin,21.0,22.0,R,Retired,5.0,0.0,,,78.758,,,2026,2026_regs,jolpica

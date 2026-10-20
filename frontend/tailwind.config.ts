@@ -1,5 +1,8 @@
 import type { Config } from "tailwindcss";
 
+// every token is an oklch channel triple in globals.css; <alpha-value> makes bg-x/20 work
+const c = (name: string) => `oklch(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   darkMode: ["class"],
   content: [
@@ -9,61 +12,55 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        display: ["var(--font-display)", "var(--font-geist-sans)", "sans-serif"],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--card-foreground)",
+        // brand tokens
+        bg: c("bg"),
+        raised: c("raised"),
+        sunken: c("sunken"),
+        hover: c("hover"),
+        line: { DEFAULT: c("line"), strong: c("line-strong") },
+        fg: c("fg"),
+        "muted-fg": c("muted-fg"),
+        faint: c("faint"),
+        signal: { DEFAULT: c("signal"), fg: c("signal-fg"), text: c("signal-text") },
+        good: c("good"),
+        best: c("best"),
+        bad: c("bad"),
+        warn: c("warn"),
+        tyre: {
+          soft: "var(--tyre-soft)",
+          medium: "var(--tyre-medium)",
+          hard: "var(--tyre-hard)",
+          inter: "var(--tyre-inter)",
+          wet: "var(--tyre-wet)",
         },
-        popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
-        },
-        primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
-        },
-        secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
-        },
-        muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
-        },
-        accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-foreground)",
-        },
-        destructive: {
-          DEFAULT: "var(--destructive)",
-        },
-        border: "var(--border)",
-        input: "var(--input)",
-        ring: "var(--ring)",
-        chart: {
-          "1": "var(--chart-1)",
-          "2": "var(--chart-2)",
-          "3": "var(--chart-3)",
-          "4": "var(--chart-4)",
-          "5": "var(--chart-5)",
-        },
-        sidebar: {
-          DEFAULT: "var(--sidebar)",
-          foreground: "var(--sidebar-foreground)",
-          primary: "var(--sidebar-primary)",
-          "primary-foreground": "var(--sidebar-primary-foreground)",
-          accent: "var(--sidebar-accent)",
-          "accent-foreground": "var(--sidebar-accent-foreground)",
-          border: "var(--sidebar-border)",
-          ring: "var(--sidebar-ring)",
-        },
+        // shadcn names, kept so the base-ui components in components/ui keep working
+        background: c("bg"),
+        foreground: c("fg"),
+        card: { DEFAULT: c("raised"), foreground: c("fg") },
+        popover: { DEFAULT: c("raised"), foreground: c("fg") },
+        primary: { DEFAULT: c("signal"), foreground: c("signal-fg") },
+        secondary: { DEFAULT: c("sunken"), foreground: c("fg") },
+        muted: { DEFAULT: c("sunken"), foreground: c("muted-fg") },
+        accent: { DEFAULT: c("hover"), foreground: c("fg") },
+        destructive: { DEFAULT: c("bad") },
+        border: c("line"),
+        input: c("line-strong"),
+        ring: c("signal"),
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        sm: "2px",
+        panel: "10px",
+      },
+      boxShadow: {
+        pop: "var(--shadow-pop)",
       },
     },
   },

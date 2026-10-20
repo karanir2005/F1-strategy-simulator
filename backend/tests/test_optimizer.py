@@ -3,7 +3,7 @@ import time
 import numpy as np
 import pytest
 
-from app.core.optimizer import MIN_STINT_LAPS, NoFeasiblePlan, _Cost, optimize
+from app.core.optimizer import MIN_STINT_LAPS, min_stint_laps, NoFeasiblePlan, _Cost, optimize
 from app.core.race_simulator import Stint, simulate_race
 
 CAPS = {"SOFT": 25, "MEDIUM": 35, "HARD": 45}
@@ -117,3 +117,33 @@ def test_cap_floor(toy_tire_model):
     assert res.plans
     assert all(s["laps"] <= 15 for p in res.plans for s in p["stints"])
     assert any(s["laps"] > 10 for p in res.plans for s in p["stints"])
+
+
+def test_min_stint_scales_with_distance():
+    assert min_stint_laps(56) == 8
+    assert min_stint_laps(78) == 8
+    assert min_stint_laps(120) == 12
+    assert min_stint_laps(10) == 5  # clamped so short distances stay feasible
+
+
+def test_no_token_stints_with_tiny_caps(toy_tire_model):
+    # caps below the 15-lap floor used to allow 5-lap first stints; now every stint >= min
+    res = run(toy_tire_model, total_laps=44, max_stint_laps={"SOFT": 9, "MEDIUM": 12, "HARD": 12}, top_n=10)
+    lo = min_stint_laps(44)
+    for p in res.plans:
+        assert all(s["laps"] >= lo for s in p["stints"])
+
+
+def test_effective_caps_exposed(toy_tire_model):
+    res = run(toy_tire_model, total_laps=40, max_stint_laps={"SOFT": 9, "MEDIUM": 30, "HARD": 100})
+    assert res.effective_caps == {"SOFT": 15, "MEDIUM": 30, "HARD": 40}  # floor 15, clip to race laps
+    assert res.min_stint_laps == min_stint_laps(40)
+
+
+def test_real_model_min_stint_and_runtime(real_model):
+    t = time.perf_counter()
+    res = run(real_model, total_laps=70, max_stint_laps={"SOFT": 12, "MEDIUM": 30, "HARD": 40}, n_sims=2000)
+    assert time.perf_counter() - t < 3.0
+    assert all(s["laps"] >= 8 for p in res.plans for s in p["stints"])
+    again = run(real_model, total_laps=70, max_stint_laps={"SOFT": 12, "MEDIUM": 30, "HARD": 40}, n_sims=2000)
+    assert [p["stints"] for p in res.plans] == [p["stints"] for p in again.plans]

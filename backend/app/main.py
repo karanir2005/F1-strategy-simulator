@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes.predict import router as predict_router
 from app.api.routes.simulation import router as simulation_router
 from app.api.routes.tracks import router as tracks_router
 
@@ -31,6 +32,7 @@ app.add_middleware(
 
 app.include_router(simulation_router)
 app.include_router(tracks_router)
+app.include_router(predict_router)
 
 
 @app.get("/health")
