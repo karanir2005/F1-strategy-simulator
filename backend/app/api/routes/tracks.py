@@ -39,6 +39,8 @@ class TrackOut(BaseModel):
     base_laptime_s: float
     compounds: Optional[Dict[str, Optional[str]]] = None
     max_stint_laps: Dict[str, int]
+    # optional: p90 of observed stint lengths per compound (null where < 5 stints); optimizer cap = min(max, typical)
+    typical_stint_laps: Optional[Dict[str, Optional[int]]] = None
     source_season: Optional[int] = None
     source_races: List[str] = []
     on_2026_calendar: Optional[bool] = None
@@ -116,6 +118,7 @@ def optimize_route(request: OptimizeRequest) -> OptimizeResponse:
             pit_loss_s=pit_loss,
             base_laptime_s=base,
             max_stint_laps=track.max_stint_laps,
+            typical_stint_laps=track.typical_stint_laps,
             max_stops=request.max_stops,
             n_sims=request.n_sims,
             top_n=request.top_n,

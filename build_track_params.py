@@ -41,6 +41,8 @@ Method per field (2026-10-19):
                     track evolution). Front-running = the 5 drivers with the
                     lowest median corrected pace (>= 10 clean laps each);
                     value = median of those drivers' corrected laps.
+  typical_stint_laps p90 of observed stint lengths per compound (null if < 5 stints);
+                    the optimizer caps stints at min(max, typical).
   max_stint_laps    longest observed stint (laps run between real tyre-change
                     pit stops, in-lap preceding out-lap; laps under SC count)
                     per dry compound, from dry races only. A compound with no
@@ -305,6 +307,12 @@ def main():
         max_stint = {c: int(max(v)) for c, v in stints.items() if v}
         if cid == "monaco" and "Monaco_2025" not in sources:
             sources.append("Monaco_2025")
+        # robust cap: p90 of observed stint lengths (max is one outlier stint away from
+        # unrealistic); null when fewer than 5 stints were observed for the compound
+        typical_stint = {
+            c: (int(round(float(np.percentile(stints[c], 90)))) if len(stints[c]) >= 5 else None)
+            for c in DRY if stints[c]
+        }
         missing = [c for c in DRY if c not in max_stint]
         if missing:
             notes.append(f"No observed stints for {missing}; omitted from max_stint_laps.")
@@ -334,6 +342,7 @@ def main():
                 "base_laptime_s": round(blap, 2),
                 "compounds": comp_out,
                 "max_stint_laps": max_stint,
+                "typical_stint_laps": typical_stint,
                 "source_season": primary,
                 "source_races": sources,
                 "on_2026_calendar": True,

@@ -17,6 +17,11 @@
       "MEDIUM": 28,
       "HARD": 46
     },
+    "typical_stint_laps": {
+      "SOFT": 24,
+      "MEDIUM": 24,
+      "HARD": 46
+    },
     "source_season": 2026,
     "source_races": [
       "Australia_2026"
@@ -42,6 +47,11 @@
       "SOFT": 9,
       "MEDIUM": 23,
       "HARD": 47
+    },
+    "typical_stint_laps": {
+      "SOFT": null,
+      "MEDIUM": 19,
+      "HARD": 46
     },
     "source_season": 2026,
     "source_races": [
@@ -70,6 +80,11 @@
       "MEDIUM": 33,
       "HARD": 37
     },
+    "typical_stint_laps": {
+      "SOFT": null,
+      "MEDIUM": 23,
+      "HARD": 36
+    },
     "source_season": 2026,
     "source_races": [
       "Japan_2026",
@@ -97,6 +112,11 @@
       "MEDIUM": 41,
       "HARD": 51
     },
+    "typical_stint_laps": {
+      "SOFT": null,
+      "MEDIUM": 31,
+      "HARD": 37
+    },
     "source_season": 2026,
     "source_races": [
       "Miami_2026"
@@ -122,6 +142,11 @@
       "SOFT": 37,
       "MEDIUM": 48,
       "HARD": 37
+    },
+    "typical_stint_laps": {
+      "SOFT": 34,
+      "MEDIUM": 39,
+      "HARD": null
     },
     "source_season": 2026,
     "source_races": [
@@ -149,6 +174,11 @@
       "MEDIUM": 59,
       "HARD": 72
     },
+    "typical_stint_laps": {
+      "SOFT": null,
+      "MEDIUM": 47,
+      "HARD": 56
+    },
     "source_season": 2026,
     "source_races": [
       "Monaco_2026",
@@ -171,6 +201,11 @@
       "SOFT": 21,
       "MEDIUM": 26,
       "HARD": 31
+    },
+    "typical_stint_laps": {
+      "SOFT": 15,
+      "MEDIUM": 24,
+      "HARD": 30
     },
     "source_season": 2026,
     "source_races": [
@@ -198,6 +233,11 @@
       "MEDIUM": 27,
       "HARD": 36
     },
+    "typical_stint_laps": {
+      "SOFT": 22,
+      "MEDIUM": 24,
+      "HARD": 31
+    },
     "source_season": 2026,
     "source_races": [
       "Austria_2026"
@@ -223,6 +263,11 @@
       "SOFT": 12,
       "MEDIUM": 35,
       "HARD": 34
+    },
+    "typical_stint_laps": {
+      "SOFT": 6,
+      "MEDIUM": 28,
+      "HARD": 28
     },
     "source_season": 2026,
     "source_races": [
@@ -250,6 +295,11 @@
       "MEDIUM": 20,
       "HARD": 31
     },
+    "typical_stint_laps": {
+      "SOFT": 20,
+      "MEDIUM": 20,
+      "HARD": 30
+    },
     "source_season": 2026,
     "source_races": [
       "Belgium_2026"
@@ -276,6 +326,11 @@
       "MEDIUM": 29,
       "HARD": 49
     },
+    "typical_stint_laps": {
+      "SOFT": 31,
+      "MEDIUM": 26,
+      "HARD": 32
+    },
     "source_season": 2026,
     "source_races": [
       "Hungary_2026"
@@ -298,6 +353,11 @@
       "MEDIUM": 31,
       "HARD": 37
     },
+    "typical_stint_laps": {
+      "SOFT": 28,
+      "MEDIUM": 26,
+      "HARD": 33
+    },
     "source_season": 2026,
     "source_races": [
       "Netherlands_2026"
@@ -317,6 +377,11 @@
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 24,
+      "MEDIUM": 50,
+      "HARD": 50
+    },
+    "typical_stint_laps": {
+      "SOFT": null,
       "MEDIUM": 50,
       "HARD": 50
     },
@@ -343,6 +408,11 @@
       "MEDIUM": 20,
       "HARD": 55
     },
+    "typical_stint_laps": {
+      "SOFT": 18,
+      "MEDIUM": 15,
+      "HARD": 46
+    },
     "source_season": 2026,
     "source_races": [
       "Madrid_2026"
@@ -364,6 +434,11 @@
       "SOFT": 31,
       "MEDIUM": 32,
       "HARD": 49
+    },
+    "typical_stint_laps": {
+      "SOFT": 31,
+      "MEDIUM": 31,
+      "HARD": 39
     },
     "source_season": 2026,
     "source_races": [
@@ -388,6 +463,11 @@
       "MEDIUM": 30,
       "HARD": 21
     },
+    "typical_stint_laps": {
+      "SOFT": 21,
+      "MEDIUM": 25,
+      "HARD": 19
+    },
     "source_season": 2026,
     "source_races": [
       "Malaysia_2026"
@@ -409,6 +489,11 @@
       "SOFT": 44,
       "MEDIUM": 39,
       "HARD": 48
+    },
+    "typical_stint_laps": {
+      "SOFT": 33,
+      "MEDIUM": 33,
+      "HARD": 47
     },
     "source_season": 2026,
     "source_races": [
@@ -437,6 +522,11 @@
       "MEDIUM": 34,
       "HARD": 28
     },
+    "typical_stint_laps": {
+      "SOFT": 28,
+      "MEDIUM": 33,
+      "HARD": null
+    },
     "source_season": 2025,
     "source_races": [
       "Austin_2025"
@@ -458,6 +548,11 @@
       "SOFT": 37,
       "MEDIUM": 44,
       "HARD": 48
+    },
+    "typical_stint_laps": {
+      "SOFT": 34,
+      "MEDIUM": 38,
+      "HARD": null
     },
     "source_season": 2025,
     "source_races": [
@@ -481,6 +576,11 @@
       "MEDIUM": 52,
       "HARD": 29
     },
+    "typical_stint_laps": {
+      "SOFT": 21,
+      "MEDIUM": 36,
+      "HARD": 29
+    },
     "source_season": 2025,
     "source_races": [
       "Brazil_2025"
@@ -502,6 +602,10 @@
       "MEDIUM": 27,
       "HARD": 48
     },
+    "typical_stint_laps": {
+      "MEDIUM": 25,
+      "HARD": 35
+    },
     "source_season": 2025,
     "source_races": [
       "LasVegas_2025"
@@ -521,6 +625,11 @@
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 25,
+      "MEDIUM": 25,
+      "HARD": 25
+    },
+    "typical_stint_laps": {
+      "SOFT": null,
       "MEDIUM": 25,
       "HARD": 25
     },
@@ -545,6 +654,11 @@
       "SOFT": 8,
       "MEDIUM": 27,
       "HARD": 44
+    },
+    "typical_stint_laps": {
+      "SOFT": null,
+      "MEDIUM": 26,
+      "HARD": 43
     },
     "source_season": 2025,
     "source_races": [

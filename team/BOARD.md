@@ -30,7 +30,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-022 | researcher | done | none | UI inspiration brief: what top-tier motorsport/data/product sites do (layout, type, colour, motion, charts) + framer-motion patterns, as an actionable design spec |
 | T-023 | backend-engineer | done (QA in T-025) | contract | GET /predict/next and /predict/history per team/contracts/prediction-api.md |
 | T-024 | frontend-engineer | done (QA in T-025) | T-022, T-023 | Redesign: shared layout, /predict page, /strategy page, framer-motion, charts |
-| T-025 | qa-engineer | todo (skipped at user request) | T-024 | QA UI (lint, build, browser pass) and the prediction API |
+| T-025 | qa-engineer | skipped (lean mode) | T-024 | QA UI (lint, build, browser pass) and the prediction API |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:
@@ -139,3 +139,4 @@ Since about 2026-10-15, `livetiming.formula1.com/static/*` returns **401** for e
 - **Resolution (2026-10-19):** the user has no F1 TV subscription. **OpenF1** (`api.openf1.org/v1`, free, no auth) still serves historical 2025/2026 data, verified on the 2026 Singapore race: `stints` (compound, `tyre_age_at_start`), `laps` (durations, sectors), `race_control` (SC/VSC/flags), `weather`, `pit` (lane duration) and `intervals` (gaps). T-009 rebuilds the data expansion on OpenF1 + Jolpica.
 - **T-011** can run on Jolpica.
 - The empty `cache/2025/*` and `cache/2026/*` session directories created at 15:05–15:06 are from a failed warm-up and contain no data.
+| T-026 | backend-engineer | done (no QA) | T-020 | Robust p90 stint caps (typical_stint_laps) + recalibration check; SOFT still preferred, constants unchanged |

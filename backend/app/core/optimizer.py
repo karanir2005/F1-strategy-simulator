@@ -61,8 +61,9 @@ ASSUMPTIONS = [
     "Compound pace offsets are fitted (with a forced ordering); cliff penalties are literature-ballpark placeholders "
     "(tire_model.COMPOUND_PACE_OFFSET_PLACEHOLDER / COMPOUND_CLIFF_PENALTY_PLACEHOLDER), "
     "so SOFT-vs-HARD trade-offs are indicative, not fitted.",
-    "Stints are capped at the longest green stint observed for that compound at this track "
-    "(max_stint_laps), with a floor of 15 laps because some compounds only had short observed "
+    "Stints are capped at the p90 of observed stint lengths for that compound at this track "
+    "(typical_stint_laps, never above the observed maximum), or the observed maximum when fewer than 5 "
+    "stints were seen, with a floor of 15 laps because some compounds only had short observed "
     "stints; plans needing longer stints are not considered.",
     "Every stint (first and last included) is at least max(8 laps, 10% of race distance); real teams do not stop on lap 5.",
     "Plans that are the same stints in a different order are shown once (the best-ordered one).",
@@ -164,11 +165,18 @@ def optimize(
     seed: Optional[int] = 0,
     pit_loss_noise_std: float = DEFAULT_PIT_LOSS_NOISE_STD,
     lap_time_noise_std: float = DEFAULT_LAP_TIME_NOISE_STD,
+    typical_stint_laps: Optional[Dict[str, Optional[int]]] = None,
 ) -> OptimizeResult:
     compounds = [c for c in ("SOFT", "MEDIUM", "HARD") if c in max_stint_laps and c in tire_model]
     if len(compounds) < 2:
         raise NoFeasiblePlan("need caps for at least 2 dry compounds to satisfy the two-compound rule")
-    caps = {c: min(max(int(max_stint_laps[c]), MIN_STINT_CAP), total_laps) for c in compounds}
+    # robust cap: the observed max is one outlier stint away from unrealistic, so use the
+    # p90 ("typical") when the track has one; then floor and clip as before.
+    raw = dict(max_stint_laps)
+    for c, v in (typical_stint_laps or {}).items():
+        if v is not None and c in raw:
+            raw[c] = min(int(raw[c]), int(v))
+    caps = {c: min(max(int(raw[c]), MIN_STINT_CAP), total_laps) for c in compounds}
     min_lap = min_stint_laps(total_laps)
     cost = _Cost(tire_model, compounds, caps, total_laps, base_laptime_s, pit_loss_s)
 

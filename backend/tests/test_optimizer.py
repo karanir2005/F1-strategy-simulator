@@ -147,3 +147,14 @@ def test_real_model_min_stint_and_runtime(real_model):
     assert all(s["laps"] >= 8 for p in res.plans for s in p["stints"])
     again = run(real_model, total_laps=70, max_stint_laps={"SOFT": 12, "MEDIUM": 30, "HARD": 40}, n_sims=2000)
     assert [p["stints"] for p in res.plans] == [p["stints"] for p in again.plans]
+
+
+def test_typical_stint_laps_tightens_cap_and_none_is_ignored(toy_tire_model):
+    caps = {"SOFT": 30, "MEDIUM": 30, "HARD": 30}
+    typical = {"SOFT": 16, "MEDIUM": None, "HARD": 20}
+    res = run(toy_tire_model, total_laps=40, max_stint_laps=caps, typical_stint_laps=typical)
+    assert res.effective_caps == {"SOFT": 16, "MEDIUM": 30, "HARD": 20}
+    # typical never raises a cap above the observed max
+    res = run(toy_tire_model, total_laps=40, max_stint_laps={"SOFT": 20, "MEDIUM": 20, "HARD": 20},
+              typical_stint_laps={"SOFT": 35})
+    assert res.effective_caps["SOFT"] == 20

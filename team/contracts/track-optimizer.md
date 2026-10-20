@@ -16,7 +16,8 @@ User request (2026-10-19): in Race Settings, pick a track instead of typing numb
   "pit_loss_noise_std_s": 3.1,
   "base_laptime_s": 98.4,          // representative clean-air race pace for a front-running car, simulator convention: HARD compound, tyre age 2, final-lap (light) fuel, i.e. what race_simulator takes as base_laptime
   "compounds": {"HARD": "C1", "MEDIUM": "C3", "SOFT": "C4"},   // null if unknown
-  "max_stint_laps": {"SOFT": 25, "MEDIUM": 35, "HARD": 45},    // longest observed green stints, used as optimizer caps
+  "max_stint_laps": {"SOFT": 25, "MEDIUM": 35, "HARD": 45},    // longest observed stints (upper bound for optimizer caps)
+  "typical_stint_laps": {"SOFT": 22, "MEDIUM": 30, "HARD": null},  // OPTIONAL (T-026): p90 of observed stint lengths per compound, null if < 5 stints. Optimizer cap = min(max, typical) when present, then floor 15 / clip to race laps. Absent in old payloads.
   "source_season": 2026,           // 2026 if raced in 2026, else 2025 (track-dependent params only)
   "source_races": ["Austin_2025"],
   "on_2026_calendar": true,
