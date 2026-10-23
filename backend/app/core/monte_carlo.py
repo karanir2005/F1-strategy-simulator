@@ -54,6 +54,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from app.core.race_simulator import DEFAULT_PIT_LOSS_SECONDS, Stint, simulate_race
+from app.core.safety_cars import SafetyCarParams, draw_timelines, strategy_extra
 
 DEFAULT_N_SIMULATIONS = 10_000
 
@@ -120,6 +121,7 @@ def simulate_totals(
     pit_loss_noise_std: float = DEFAULT_PIT_LOSS_NOISE_STD,
     pit_loss_seconds: float = DEFAULT_PIT_LOSS_SECONDS,
     seed: Optional[int] = None,
+    safety_cars: Optional[SafetyCarParams] = None,
 ) -> Dict[str, np.ndarray]:
     """
     Vectorized Monte Carlo core: returns {name: array of n_simulations
@@ -154,6 +156,13 @@ def simulate_totals(
         broken toward the strategy listed first (see compare_strategies).
     Draw order is lap noise first, then pit noise, from one Generator
     seeded by `seed` -- the same seed reproduces the same results.
+
+    SAFETY CARS (T-030, off by default): when `safety_cars` is given, one SC/VSC
+    timeline per iteration is drawn AFTER the noise draws (so the noise, and
+    any safety_cars=None result, is bit-identical) and shared by all
+    strategies. The effect is still additive per iteration, so the vectorised
+    decomposition holds: each strategy's extra seconds come from
+    safety_cars.strategy_extra. See that module for what is and isn't modelled.
     """
     rng = np.random.default_rng(seed)
 
@@ -175,12 +184,20 @@ def simulate_totals(
     lap_cum = np.hstack([zeros, np.cumsum(lap_noise, axis=1)])
     pit_cum = np.hstack([zeros, np.cumsum(pit_noise, axis=1)])
 
-    return {
+    totals = {
         name: result.total_time
         + lap_cum[:, len(result.lap_times)]
         + pit_cum[:, len(result.pit_laps)]
         for name, result in deterministic.items()
     }
+    if safety_cars is not None:
+        sc_rng = np.random.default_rng(rng.integers(2**63))
+        sc, vsc = draw_timelines(sc_rng, n_simulations, max_laps, safety_cars)
+        for name, result in deterministic.items():
+            totals[name] = totals[name] + strategy_extra(
+                sc, vsc, result.lap_times, result.pit_laps, pit_loss_seconds, safety_cars
+            )
+    return totals
 
 
 def run_monte_carlo(
@@ -217,6 +234,7 @@ def compare_strategies(
     pit_loss_noise_std: float = DEFAULT_PIT_LOSS_NOISE_STD,
     pit_loss_seconds: float = DEFAULT_PIT_LOSS_SECONDS,
     seed: Optional[int] = None,
+    safety_cars: Optional[SafetyCarParams] = None,
 ) -> Dict[str, dict]:
     """
     Run several candidate strategies through Monte Carlo, and on each
@@ -268,6 +286,7 @@ def compare_strategies(
         pit_loss_noise_std=pit_loss_noise_std,
         pit_loss_seconds=pit_loss_seconds,
         seed=seed,
+        safety_cars=safety_cars,
     )
     names = list(strategies.keys())
     stacked = np.vstack([times[name] for name in names])  # (n_strategies, n_sims)

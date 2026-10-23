@@ -35,7 +35,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-027 | backend-engineer | done (no QA; FP stays off) | T-023 | Before quali: rehearse grid-mode flow (grid.csv incl. pit lane) across CLI/API/UI; grid-penalty override + page note; test whether `--fp` practice pace helps on 2026 walk-forward (decide on/off) |
 | T-028 | data-scientist | done (no QA; per-track wear opt-in, lap noise 0.8->0.6) | T-020 | Per-track tyre wear (replace global curves, shrink to global) + lap-noise (MAD) and pit-loss scripts read all 16 races |
 | T-029 | backend-engineer | todo | T-027 | Predictor: revisit track stickiness (`--stick-gamma`) and add per-track safety-car/DNF rates; keep only if walk-forward improves |
-| T-030 | backend-engineer | todo | T-028 | Safety cars (and VSC) in the single-car simulator + optimizer |
+| T-030 | backend-engineer | done (no QA; SC effect small, see handoff) | T-028 | Safety cars (and VSC) in the single-car simulator + optimizer |
 | T-031 | frontend-engineer | done (no QA; 'what changed' strip needs backend p_win_prequali, folded into T-029) | T-027 | Race-week behaviour on /predict (countdown, grid-set state, what changed since pre-quali, driver detail); phone-width browser check |
 | T-032 | backend-engineer | todo | T-031 | Deploy: Vercel frontend + Railway/Render backend, env/CORS config |
 | T-033 | frontend-engineer | backlog (later, user) | T-024 | Copy an optimizer plan into the manual comparison with one click |

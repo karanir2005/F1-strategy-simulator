@@ -18,7 +18,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.api.deps import resolve_track, tracks_or_503
 from app.api.routes.simulation import MAX_RACE_LAPS, get_tire_model
 from app.core.monte_carlo import DEFAULT_LAP_TIME_NOISE_STD, DEFAULT_PIT_LOSS_NOISE_STD
-from app.core.optimizer import ASSUMPTIONS, NoFeasiblePlan, optimize
+from app.core.optimizer import ASSUMPTIONS, SAFETY_CAR_ASSUMPTION, NoFeasiblePlan, optimize
+from app.core.safety_cars import load_params as load_safety_car_params
 
 router = APIRouter()
 
@@ -57,6 +58,15 @@ class OptimizeRequest(BaseModel):
     pit_loss_s: Optional[float] = Field(default=None, ge=0, le=120)
     base_laptime_s: Optional[float] = Field(default=None, gt=0, le=300)
     seed: Optional[int] = 0
+    use_track_wear: bool = Field(
+        default=False,
+        description="T-030: use this track's per-track tyre wear fit (T-028) instead of the global curves. "
+        "Falls back to global if the track has no fit; params_used.use_track_wear says what was applied.",
+    )
+    safety_cars: bool = Field(
+        default=False,
+        description="T-030: add random SC/VSC periods (fitted on 2025-26 races), same timeline for every plan.",
+    )
 
 
 class StintOut(BaseModel):
@@ -86,6 +96,9 @@ class ParamsUsed(BaseModel):
     # optional (T-021): stint cap per compound actually used (observed max, floored to 15, clipped to race laps)
     effective_max_stint_laps: Optional[Dict[str, int]] = None
     min_stint_laps: Optional[int] = None
+    # optional (T-030): what was actually applied
+    use_track_wear: Optional[bool] = None
+    safety_cars: Optional[bool] = None
 
 
 class OptimizeResponse(BaseModel):
@@ -111,9 +124,11 @@ def optimize_route(request: OptimizeRequest) -> OptimizeResponse:
     pit_noise = (
         track.pit_loss_noise_std_s if track.pit_loss_noise_std_s is not None else DEFAULT_PIT_LOSS_NOISE_STD
     )
+    tire_model = get_tire_model()
+    wear_applied = bool(request.use_track_wear and request.track_id in tire_model.get("_track_wear", {}))
     try:
         result = optimize(
-            get_tire_model(),
+            tire_model,
             total_laps=total_laps,
             pit_loss_s=pit_loss,
             base_laptime_s=base,
@@ -125,6 +140,8 @@ def optimize_route(request: OptimizeRequest) -> OptimizeResponse:
             seed=request.seed,
             pit_loss_noise_std=pit_noise,
             lap_time_noise_std=DEFAULT_LAP_TIME_NOISE_STD,
+            track_id=request.track_id if request.use_track_wear else None,
+            safety_cars=load_safety_car_params() if request.safety_cars else None,
         )
     except NoFeasiblePlan as exc:
         raise HTTPException(status_code=422, detail=str(exc))
@@ -133,9 +150,14 @@ def optimize_route(request: OptimizeRequest) -> OptimizeResponse:
         params_used=ParamsUsed(
             total_laps=total_laps, pit_loss_s=pit_loss, base_laptime_s=base, n_sims=request.n_sims,
             effective_max_stint_laps=result.effective_caps, min_stint_laps=result.min_stint_laps,
+            use_track_wear=wear_applied, safety_cars=request.safety_cars,
         ),
         strategies=result.plans,
         n_candidates_screened=result.n_candidates_screened,
         n_candidates_simulated=result.n_candidates_simulated,
-        assumptions=ASSUMPTIONS,
+        assumptions=[
+            SAFETY_CAR_ASSUMPTION if (request.safety_cars and a.startswith("No safety cars")) else a
+            for a in ASSUMPTIONS
+        ]
+        + (["Per-track tyre wear slopes (partially pooled to the global fit) used for this circuit."] if wear_applied else []),
     )

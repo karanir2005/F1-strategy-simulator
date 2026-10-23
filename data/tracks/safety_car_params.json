@@ -1,0 +1,686 @@
+{
+ "n_races": 40,
+ "races": [
+  "AbuDhabi_2025",
+  "Austin_2025",
+  "Australia_2025",
+  "Australia_2026",
+  "Austria_2025",
+  "Austria_2026",
+  "Azerbaijan_2025",
+  "Azerbaijan_2026",
+  "Bahrain_2025",
+  "Barcelona_2025",
+  "Barcelona_2026",
+  "Belgium_2025",
+  "Belgium_2026",
+  "Brazil_2025",
+  "Britain_2025",
+  "Britain_2026",
+  "Canada_2025",
+  "Canada_2026",
+  "China_2025",
+  "China_2026",
+  "Hungary_2025",
+  "Hungary_2026",
+  "Imola_2025",
+  "Italy_2025",
+  "Italy_2026",
+  "Japan_2025",
+  "Japan_2026",
+  "LasVegas_2025",
+  "Madrid_2026",
+  "Malaysia_2026",
+  "Mexico_2025",
+  "Miami_2026",
+  "Monaco_2025",
+  "Monaco_2026",
+  "Netherlands_2025",
+  "Netherlands_2026",
+  "Qatar_2025",
+  "Saudi_2025",
+  "Singapore_2025",
+  "Singapore_2026"
+ ],
+ "sc": {
+  "p_any_per_race": 0.525,
+  "events_per_race": 0.65,
+  "n_events": 26,
+  "hazard_per_lap": 0.010788381742738589,
+  "length_laps_mean": 5.615384615384615,
+  "length_laps_median": 5.0,
+  "length_laps_values": [
+   1,
+   3,
+   3,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   4,
+   5,
+   5,
+   5,
+   6,
+   6,
+   6,
+   7,
+   7,
+   7,
+   9,
+   9,
+   9,
+   9,
+   13
+  ],
+  "start_frac_quartiles": [
+   0.06876861966236346,
+   0.367269392033543,
+   0.7417200854700855
+  ],
+  "starts_on_lap1_frac": 0.19230769230769232,
+  "lap_multiple_median": 1.4591518464532967,
+  "lap_multiple_n": 1508,
+  "start_hist_decile_counts": [
+   7,
+   4,
+   1,
+   1,
+   1,
+   3,
+   0,
+   3,
+   3,
+   3
+  ]
+ },
+ "vsc": {
+  "p_any_per_race": 0.5,
+  "events_per_race": 0.75,
+  "n_events": 30,
+  "hazard_per_lap": 0.012448132780082987,
+  "length_laps_mean": 2.2666666666666666,
+  "length_laps_median": 2.0,
+  "length_laps_values": [
+   1,
+   1,
+   1,
+   1,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   6
+  ],
+  "start_frac_quartiles": [
+   0.2617967332123412,
+   0.44786096256684493,
+   0.731988082340195
+  ],
+  "starts_on_lap1_frac": 0.0,
+  "lap_multiple_median": 1.1921982083006326,
+  "lap_multiple_n": 554,
+  "start_hist_decile_counts": [
+   4,
+   3,
+   1,
+   3,
+   6,
+   2,
+   2,
+   6,
+   0,
+   3
+  ]
+ },
+ "pit_excess_s": {
+  "green": {
+   "median": 16.897750000000002,
+   "n": 806
+  },
+  "sc": {
+   "median": 14.873000000000005,
+   "n": 190
+  },
+  "vsc": {
+   "median": 11.433499999999995,
+   "n": 47
+  }
+ },
+ "pit_loss_ratio": {
+  "sc": 0.8801763548401416,
+  "vsc": 0.6766285452205172
+ },
+ "per_race": {
+  "AbuDhabi_2025": {
+   "total_laps": 58,
+   "sc": [],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Austin_2025": {
+   "total_laps": 56,
+   "sc": [],
+   "vsc": [
+    [
+     7,
+     2
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Australia_2025": {
+   "total_laps": 57,
+   "sc": [
+    [
+     1,
+     7
+    ],
+    [
+     33,
+     9
+    ],
+    [
+     47,
+     5
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Austria_2025": {
+   "total_laps": 70,
+   "sc": [
+    [
+     1,
+     3
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Austria_2026": {
+   "total_laps": 71,
+   "sc": [],
+   "vsc": [
+    [
+     24,
+     3
+    ],
+    [
+     52,
+     1
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Azerbaijan_2025": {
+   "total_laps": 51,
+   "sc": [
+    [
+     1,
+     4
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Azerbaijan_2026": {
+   "total_laps": 51,
+   "sc": [
+    [
+     30,
+     9
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Bahrain_2025": {
+   "total_laps": 57,
+   "sc": [
+    [
+     32,
+     4
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Barcelona_2025": {
+   "total_laps": 66,
+   "sc": [
+    [
+     54,
+     7
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Barcelona_2026": {
+   "total_laps": 66,
+   "sc": [],
+   "vsc": [
+    [
+     40,
+     2
+    ],
+    [
+     61,
+     3
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Belgium_2025": {
+   "total_laps": 44,
+   "sc": [],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Belgium_2026": {
+   "total_laps": 44,
+   "sc": [
+    [
+     1,
+     4
+    ]
+   ],
+   "vsc": [
+    [
+     18,
+     1
+    ],
+    [
+     20,
+     2
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Brazil_2025": {
+   "total_laps": 71,
+   "sc": [
+    [
+     2,
+     4
+    ]
+   ],
+   "vsc": [
+    [
+     7,
+     2
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Britain_2025": {
+   "total_laps": 52,
+   "sc": [
+    [
+     13,
+     9
+    ]
+   ],
+   "vsc": [
+    [
+     2,
+     6
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Britain_2026": {
+   "total_laps": 52,
+   "sc": [
+    [
+     47,
+     6
+    ]
+   ],
+   "vsc": [
+    [
+     21,
+     2
+    ],
+    [
+     38,
+     1
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Canada_2025": {
+   "total_laps": 70,
+   "sc": [
+    [
+     66,
+     5
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Canada_2026": {
+   "total_laps": 68,
+   "sc": [],
+   "vsc": [
+    [
+     30,
+     2
+    ],
+    [
+     51,
+     2
+    ]
+   ],
+   "red_laps": 0
+  },
+  "China_2025": {
+   "total_laps": 56,
+   "sc": [],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "China_2026": {
+   "total_laps": 56,
+   "sc": [
+    [
+     10,
+     4
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Hungary_2025": {
+   "total_laps": 70,
+   "sc": [],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Hungary_2026": {
+   "total_laps": 70,
+   "sc": [],
+   "vsc": [
+    [
+     55,
+     2
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Imola_2025": {
+   "total_laps": 63,
+   "sc": [
+    [
+     45,
+     9
+    ]
+   ],
+   "vsc": [
+    [
+     29,
+     3
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Italy_2025": {
+   "total_laps": 53,
+   "sc": [],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Italy_2026": {
+   "total_laps": 53,
+   "sc": [
+    [
+     3,
+     1
+    ]
+   ],
+   "vsc": [
+    [
+     27,
+     2
+    ]
+   ],
+   "red_laps": 2
+  },
+  "Japan_2025": {
+   "total_laps": 53,
+   "sc": [],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Japan_2026": {
+   "total_laps": 53,
+   "sc": [
+    [
+     22,
+     6
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "LasVegas_2025": {
+   "total_laps": 50,
+   "sc": [],
+   "vsc": [
+    [
+     2,
+     3
+    ],
+    [
+     16,
+     1
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Madrid_2026": {
+   "total_laps": 57,
+   "sc": [],
+   "vsc": [
+    [
+     14,
+     2
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Malaysia_2026": {
+   "total_laps": 55,
+   "sc": [
+    [
+     9,
+     4
+    ],
+    [
+     45,
+     7
+    ]
+   ],
+   "vsc": [
+    [
+     42,
+     3
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Mexico_2025": {
+   "total_laps": 71,
+   "sc": [],
+   "vsc": [
+    [
+     70,
+     2
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Miami_2026": {
+   "total_laps": 57,
+   "sc": [
+    [
+     6,
+     6
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Monaco_2025": {
+   "total_laps": 78,
+   "sc": [],
+   "vsc": [
+    [
+     2,
+     3
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Monaco_2026": {
+   "total_laps": 78,
+   "sc": [
+    [
+     58,
+     13
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 1
+  },
+  "Netherlands_2025": {
+   "total_laps": 72,
+   "sc": [
+    [
+     23,
+     4
+    ],
+    [
+     53,
+     5
+    ],
+    [
+     65,
+     4
+    ]
+   ],
+   "vsc": [
+    [
+     31,
+     2
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Netherlands_2026": {
+   "total_laps": 72,
+   "sc": [],
+   "vsc": [
+    [
+     54,
+     3
+    ],
+    [
+     68,
+     2
+    ]
+   ],
+   "red_laps": 2
+  },
+  "Qatar_2025": {
+   "total_laps": 57,
+   "sc": [
+    [
+     7,
+     4
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Saudi_2025": {
+   "total_laps": 50,
+   "sc": [
+    [
+     1,
+     3
+    ]
+   ],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Singapore_2025": {
+   "total_laps": 62,
+   "sc": [],
+   "vsc": [],
+   "red_laps": 0
+  },
+  "Singapore_2026": {
+   "total_laps": 62,
+   "sc": [],
+   "vsc": [
+    [
+     8,
+     2
+    ],
+    [
+     38,
+     2
+    ]
+   ],
+   "red_laps": 0
+  },
+  "Australia_2026": {
+   "total_laps": 58,
+   "sc": [],
+   "vsc": [
+    [
+     11,
+     3
+    ],
+    [
+     18,
+     2
+    ],
+    [
+     33,
+     2
+    ]
+   ],
+   "red_laps": 0
+  }
+ }
+}

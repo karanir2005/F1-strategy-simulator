@@ -32,6 +32,7 @@ from app.core.monte_carlo import (
     simulate_totals,
 )
 from app.core.race_simulator import Stint
+from app.core.safety_cars import SafetyCarParams
 from app.core.tire_model import compound_pace_offset, fuel_effect, model_for_track, predict_delta
 
 # Minimum stint length applies to EVERY stint (first and last included), so a plan cannot
@@ -71,6 +72,14 @@ ASSUMPTIONS = [
     "Gaps between plans are model gaps (paired, common random numbers); replay error vs real "
     "races is tens of seconds, so differences of a few seconds are not meaningful.",
 ]
+
+
+SAFETY_CAR_ASSUMPTION = (
+    "Safety cars ON: random SC/VSC periods (rates, lengths, slowdown and cheaper stops fitted on ~40 races of "
+    "2025-26, see safety_cars.py) are shared by every plan in an iteration. Plans are fixed in advance (no "
+    "reactive stop-under-SC calls), are screened without SCs and only re-ranked with them, and tyre wear and fuel "
+    "are not reduced under SC. Red flags and weather are still not modelled."
+)
 
 
 @dataclass
@@ -167,6 +176,7 @@ def optimize(
     lap_time_noise_std: float = DEFAULT_LAP_TIME_NOISE_STD,
     typical_stint_laps: Optional[Dict[str, Optional[int]]] = None,
     track_id: Optional[str] = None,
+    safety_cars: Optional[SafetyCarParams] = None,
 ) -> OptimizeResult:
     # T-028: per-track wear slopes when the tyre model carries them for this circuit
     # (model["_track_wear"]); no-op for track_id=None or an unfitted track.
@@ -235,6 +245,7 @@ def optimize(
         pit_loss_noise_std=pit_loss_noise_std,
         pit_loss_seconds=pit_loss_s,
         seed=seed,
+        safety_cars=safety_cars,
     )
     stacked = np.vstack([totals[str(i)] for i in range(len(finalists))])
     means = stacked.mean(axis=1)
