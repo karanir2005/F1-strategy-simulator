@@ -50,11 +50,16 @@ function Detail({ d, open, id }: { d: DriverPrediction; open: boolean; id: strin
               </p>
             </div>
           ))}
+          <div className="sm:col-span-3 sm:max-w-[calc(33.333%-1.4rem)]">
+            <div className="flex items-baseline justify-between text-[13px]">
+              <span className="text-muted-fg">Not finishing</span>
+              <span className="font-mono text-fg tnum">{fmtPct(d.p_dnf)}</span>
+            </div>
+            <ProbBar value={d.p_dnf} domain={1} revealed={open} className="mt-1.5" />
+          </div>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-[13px] sm:col-span-3 sm:max-w-md">
             <dt className="text-muted-fg">Expected finish</dt>
             <dd className="font-mono text-fg tnum">P{d.exp_pos.toFixed(1)}</dd>
-            <dt className="text-muted-fg">Chance of not finishing</dt>
-            <dd className="font-mono text-fg tnum">{fmtPct(d.p_dnf)}</dd>
             <dt className="text-muted-fg">Starting position</dt>
             <dd className="font-mono text-fg tnum">
               {d.grid === null ? "not set (pre-quali)" : d.grid === 0 ? "pit lane" : `P${d.grid}`}
