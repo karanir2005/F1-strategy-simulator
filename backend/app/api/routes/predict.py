@@ -52,6 +52,8 @@ class PredictionResponse(BaseModel):
     mode: str  # "pre_quali" | "grid"
     generated_at: str
     stale: bool
+    # "qualifying_classification" | "override_file" | null (pre_quali, or unknown for an old saved CSV)
+    grid_source: str | None = None
     drivers: list[DriverPrediction]
     headline: Headline
     evidence: Evidence

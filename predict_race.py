@@ -22,7 +22,10 @@ IMPORTANT for the Saturday (T-013) rerun: Jolpica's qualifying endpoint is
 the qualifying *classification*, not the starting grid. Grid penalties are
 only reflected in Jolpica's race results (after the race). If any penalty
 is announced, write the official post-penalty grid to a CSV (code,grid;
-pit-lane start = 0) and pass it with --grid-file.
+pit-lane start = 0) and pass it with --grid-file, or save it as
+data/jolpica/grid_override_2026_R18.csv: if that file exists, both this CLI
+and GET /predict/next use it instead of the qualifying classification
+(T-027). --out-dir redirects the saved prediction CSV (rehearsals).
 """
 
 from __future__ import annotations
@@ -49,6 +52,22 @@ OUT_DIR = Path(__file__).resolve().parent / "data" / "jolpica"
 # where they beat 2026-only in the 2026 walk-forward. See --evaluate and
 # team/handoffs/T-011-data-scientist.md.
 CONFIG = P.PredictorConfig()
+
+GRID_QUALI = "qualifying_classification"
+GRID_OVERRIDE = "override_file"
+
+
+def override_grid_path(rnd: int, base_dir: Path | None = None) -> Path:
+    """Post-penalty grid override for a round (T-027). If it exists it wins over Jolpica's
+    qualifying classification, for the CLI and the API alike."""
+    return (base_dir or OUT_DIR) / f"grid_override_{SEASON}_R{rnd:02d}.csv"
+
+
+def headline(t: pd.DataFrame) -> dict:
+    """Winner = highest P(win); podium = top 3 by P(podium). Same rule as the API's headline."""
+    w = t.sort_values(["p_win", "p_podium"], ascending=False, kind="stable")
+    pod = t.sort_values("p_podium", ascending=False, kind="stable")
+    return {"winner": str(w["code"].iloc[0]), "podium": [str(c) for c in pod["code"].iloc[:3]]}
 
 
 def load_fp(sched: pd.DataFrame, offline: bool) -> pd.DataFrame:
@@ -127,6 +146,25 @@ def _entry_and_grid(hist, rnd, mode, grid_file):
     return ent[["driver_id", "code", "team_id", "team"]], gq, "grid = Jolpica qualifying order (NO penalties applied)"
 
 
+def resolve(hist, rnd, mode_arg, grid_file, override_dir: Path | None = None):
+    """Single decision point for CLI and API.
+
+    Returns (mode, entry, grid, source_text, grid_source, has_quali). An existing override file
+    counts as an explicit grid file, and (like --grid-file) switches auto mode to grid mode even
+    if Jolpica has no qualifying. grid_source is None in prequali mode."""
+    q = hist["qualifying"]
+    has_q = len(q[(q["season"] == SEASON) & (q["round"] == rnd)]) > 0
+    ov = override_grid_path(rnd, override_dir)
+    if not grid_file and ov.exists():
+        grid_file = str(ov)
+    mode = mode_arg
+    if mode == "auto":
+        mode = "grid" if (has_q or grid_file) else "prequali"
+    ent, grid, src = _entry_and_grid(hist, rnd, mode, grid_file)
+    gs = None if mode == "prequali" else (GRID_OVERRIDE if grid_file else GRID_QUALI)
+    return mode, ent, grid, src, gs, has_q
+
+
 def print_table(t: pd.DataFrame, mode: str, title: str):
     print(f"\n{title}")
     gcol = "exp_grid" if mode == "prequali" else "grid"
@@ -145,12 +183,7 @@ def predict(args):
     rnd = args.round or next_round(args.offline)
     hist, _, sched = load(args.offline, rnd, with_fp=CONFIG.use_fp or args.fp)
     ev = sched[(sched["season"] == SEASON) & (sched["round"] == rnd)].iloc[0]
-    q = hist["qualifying"]
-    has_q = len(q[(q["season"] == SEASON) & (q["round"] == rnd)]) > 0
-    mode = args.mode
-    if mode == "auto":
-        mode = "grid" if (has_q or args.grid_file) else "prequali"
-    ent, grid, src = _entry_and_grid(hist, rnd, mode, args.grid_file)
+    mode, ent, grid, src, grid_source, has_q = resolve(hist, rnd, args.mode, args.grid_file)
     cfg = P.PredictorConfig(**{**CONFIG.__dict__, "n_sims": args.sims, "use_fp": CONFIG.use_fp or args.fp})
     t = P.predict_race(hist, SEASON, rnd, mode, cfg, entry_list=ent, grid=grid)
     st = t.attrs["stickiness"]
@@ -161,14 +194,17 @@ def predict(args):
     title = (
         f"{ev['race_name']} {SEASON} (round {rnd}, {ev['circuit_id']}, race {ev['date']}) -- mode: {mode}\n"
         f"data: Jolpica {SEASON} rounds 1-{min(last, rnd - 1)} (+2022-25 for the rank table, 2025 coef prior); "
-        f"{src}; qualifying for this round "
+        f"{src}; grid_source: {grid_source}; qualifying for this round "
         f"{'AVAILABLE' if has_q else 'not yet published'}\n"
         f"model: b_race={m.b_race:.3f}, b_grid={m.b_grid:.3f}, a_quali={m.a_quali:.3f}, b_fp={m.b_fp:.3f}, "
         f"blend {1 - cfg.blend_baseline:.2f} PL model + {cfg.blend_baseline:.2f} "
         f"{'grid' if mode == 'grid' else 'championship'}-rank table, n_sims={cfg.n_sims}"
     )
     print_table(t, mode, title)
-    out = OUT_DIR / "predictions"
+    hl = headline(t)
+    print(f"headline: winner {hl['winner']}, podium {' '.join(hl['podium'])}")
+    t["grid_source"] = grid_source  # saved so the API's stale fallback can still show the penalty note
+    out = Path(args.out_dir) if getattr(args, "out_dir", None) else OUT_DIR / "predictions"
     out.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     path = out / f"{SEASON}_R{rnd:02d}_{mode}_{stamp}.csv"
@@ -253,6 +289,7 @@ def main():
     ap.add_argument("--mode", choices=["auto", "prequali", "grid"], default="auto")
     ap.add_argument("--round", type=int, default=None, help="target round (default: next unraced 2026 round)")
     ap.add_argument("--grid-file", default=None, help="CSV with columns code,grid (post-penalty; pit lane = 0)")
+    ap.add_argument("--out-dir", default=None, help="directory for the saved prediction CSV (default data/jolpica/predictions)")
     ap.add_argument("--evaluate", action="store_true", help="walk-forward evaluation vs baselines")
     ap.add_argument("--variant", default="chosen", choices=list(VARIANTS) + list(FP_VARIANT),
                     help="model variant to show calibration for")

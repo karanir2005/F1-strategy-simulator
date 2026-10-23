@@ -34,12 +34,16 @@ EVAL_CSV = REPO_ROOT / "data" / "jolpica" / "eval" / "walk_forward_2026.csv"
 BY_RACE_CSV = PRED_DIR / "walk_forward_2026_by_race.csv"
 
 CACHE_TTL_S = 600
+# After qualifying day starts, a cached pre_quali payload is re-checked quickly so the switch to
+# grid mode shows up within ~2 min instead of up to 10.
+QUALI_DAY_TTL_S = 120
+OVERRIDE_DIR = REPO_ROOT / "data" / "jolpica"
 SEASON = 2026
 
 DISCLAIMER = (
     "Probabilities from a Plackett-Luce rating model blended with a rank-frequency table, "
-    "fitted on 2022-26 Jolpica results. Grid mode uses the qualifying classification and does not "
-    "include grid penalties. Small-sample 2026 evidence (16 races): treat as a calibrated "
+    "fitted on 2022-26 Jolpica results. Grid mode uses the qualifying classification, which does not "
+    "include grid penalties, unless an operator-supplied post-penalty grid is in use (see grid_source). Small-sample 2026 evidence (16 races): treat as a calibrated "
     "estimate, not a forecast guarantee."
 )
 
@@ -82,7 +86,7 @@ def driver_names(season: int = SEASON) -> dict[str, str]:
     return out
 
 
-def evidence(mode: str) -> dict:
+def evidence(mode: str, grid_source: str | None = None) -> dict:
     """Walk-forward 2026 (R2-17) log-loss of the chosen config vs its natural baseline."""
     ev: dict = {"walk_forward": None, "notes": []}
     try:
@@ -103,11 +107,14 @@ def evidence(mode: str) -> dict:
         "Baseline is the " + ("starting-grid" if mode == "grid" else "championship-order") + " rank-frequency table.",
     ]
     if mode == "grid":
-        ev["notes"].append("Grid = qualifying classification; penalties are not applied.")
+        if grid_source == "override_file":
+            ev["notes"].append("Grid = post-penalty override file supplied by the operator.")
+        else:
+            ev["notes"].append("Grid = qualifying classification; penalties are not applied.")
     return ev
 
 
-def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool) -> dict:
+def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool, grid_source: str | None = None) -> dict:
     names = driver_names()
     gcol = t["grid"] if "grid" in t.columns else pd.Series([None] * len(t))
     drivers = []
@@ -132,9 +139,10 @@ def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool
         "mode": mode,
         "generated_at": generated_at,
         "stale": stale,
+        "grid_source": grid_source if mode == "grid" else None,
         "drivers": drivers,
         "headline": {"winner": drivers[0]["code"], "podium": [d["code"] for d in sorted(drivers, key=lambda d: -d["p_podium"])[:3]]},
-        "evidence": evidence(mode),
+        "evidence": evidence(mode, grid_source),
         "disclaimer": DISCLAIMER,
     }
 
@@ -154,9 +162,9 @@ def compute_live() -> tuple[tuple, dict]:
     hist, _, sched = S.load(False, rnd, with_fp=S.CONFIG.use_fp)
     ev = sched[(sched["season"] == SEASON) & (sched["round"] == rnd)].iloc[0]
     q = hist["qualifying"]
-    has_q = len(q[(q["season"] == SEASON) & (q["round"] == rnd)]) > 0
-    mode = "grid" if has_q else "prequali"
-    ent, grid, _src = S._entry_and_grid(hist, rnd, mode, None)
+    # Same decision function as the CLI: an existing data/jolpica/grid_override_2026_RNN.csv
+    # wins over the qualifying classification (T-027).
+    mode, ent, grid, _src, grid_source, has_q = S.resolve(hist, rnd, "auto", None, override_dir=OVERRIDE_DIR)
     t = P.predict_race(hist, SEASON, rnd, mode, S.CONFIG, entry_list=ent, grid=grid)
     api_mode = "grid" if mode == "grid" else "pre_quali"
     race = {
@@ -166,9 +174,9 @@ def compute_live() -> tuple[tuple, dict]:
         "date": str(ev["date"]),
         "quali_date": None if pd.isna(ev["quali_date"]) else str(ev["quali_date"]),
     }
-    payload = shape(t, mode, race, _now(), False)
+    payload = shape(t, mode, race, _now(), False, grid_source)
     payload["mode"] = api_mode
-    return (rnd, api_mode, bool(has_q)), payload
+    return (rnd, api_mode, bool(has_q), grid_source), payload
 
 
 def _circuit_name(circuit_id: str) -> str:
@@ -208,16 +216,24 @@ def latest_saved() -> dict:
         }
     except (OSError, IndexError, KeyError, ValueError):
         pass
-    payload = shape(t, mode, race, datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat(timespec="seconds"), True)
+    gs = t["grid_source"].iloc[0] if "grid_source" in t.columns and pd.notna(t["grid_source"].iloc[0]) else None
+    payload = shape(t, mode, race, datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat(timespec="seconds"), True, gs)
     payload["mode"] = "grid" if mode == "grid" else "pre_quali"
     return payload
+
+
+def _ttl(payload: dict) -> float:
+    qd = payload["race"].get("quali_date")
+    if payload["mode"] == "pre_quali" and qd and datetime.now(timezone.utc).date().isoformat() >= qd:
+        return QUALI_DAY_TTL_S
+    return CACHE_TTL_S
 
 
 def get_next(now: float | None = None) -> dict:
     """Cached live prediction, else stale fallback, else PredictionUnavailable."""
     now = time.monotonic() if now is None else now
     with _lock:
-        if _cache["payload"] is not None and now - _cache["t"] < CACHE_TTL_S:
+        if _cache["payload"] is not None and now - _cache["t"] < _ttl(_cache["payload"]):
             return _cache["payload"]
         try:
             key, payload = compute_live()

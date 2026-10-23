@@ -79,12 +79,14 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--stops", type=int, default=3)
     ap.add_argument("--n-sims", type=int, default=500)
+    ap.add_argument("--per-track", action="store_true", help="T-028: use per-track wear (writes optimizer_plans_per_track.json)")
     args = ap.parse_args()
 
-    model = tm.build_tire_model()
+    global_model = tm.build_tire_model()
     tracks = json.loads(TRACKS.read_text(encoding="utf-8"))
     rows = []
     for t in tracks:
+        model = tm.model_for_track(global_model, t["track_id"] if args.per_track else None)
         key = t["source_races"][0]
         d = race_dir(key)
         laps = pd.read_csv(d / f"{key}_laps.csv")
@@ -150,10 +152,11 @@ def main() -> None:
         "max_winner_plan_gap_s (comparable)": float(np.max([r["winner_plan_gap_s"] for r in ok])),
         "winner_stops_hist (comparable)": {int(k): int(v) for k, v in zip(*np.unique([r["winner_stops"] for r in ok], return_counts=True))},
     }
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({"model": {"offsets": model["_compound_offsets"],
-                                          "wear": {c: model[c]["age_coef"] for c in tm.DRY_COMPOUNDS},
-                                          "fuel_coef": model["_fuel_coef"]},
+    out_path = OUT.with_name("optimizer_plans_per_track.json") if args.per_track else OUT
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps({"model": {"offsets": global_model["_compound_offsets"],
+                                          "wear": {c: global_model[c]["age_coef"] for c in tm.DRY_COMPOUNDS},
+                                          "fuel_coef": global_model["_fuel_coef"], "per_track": args.per_track},
                                "summary": summary, "tracks": rows}, indent=2), encoding="utf-8")
 
     print(f"{'track':<12} {'top plan':<16} {'S%':>3} | {'winner':<22} {'top10 stops':<12} {'gap s':>6}  flag")
@@ -164,7 +167,7 @@ def main() -> None:
     print()
     for k, v in summary.items():
         print(f"{k}: {v}")
-    print(f"\nwrote {OUT}")
+    print(f"\nwrote {out_path}")
 
 
 if __name__ == "__main__":

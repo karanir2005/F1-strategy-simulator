@@ -176,6 +176,22 @@ that is physically ordered. Four changes, in the order they were decided.
    stint length the optimizer's observed-maximum caps allow. A real
    per-compound cliff needs deep-stint data this set doesn't have.
 
+UPDATE (2026-10-23, T-028): per-track wear with partial pooling. See
+fit_track_wear() and model_for_track(). Each circuit's linear wear slope per
+compound is fitted with the global offsets and per-race fuel slopes held
+fixed, a ridge pull towards the global slope (prior sd tau = TRACK_WEAR_TAU
+s/lap per lap of age, penalty sigma^2/tau^2, so a track with few stints stays
+at the global value), and the same SOFT>=MEDIUM>=HARD>=0 ordering as the
+global fit; a compound with < MIN_TRACK_STINTS stints at the track keeps the
+global slope outright. Stored as model["_track_wear"][track_id]; the plain
+model is unchanged and model_for_track(model, track_id) returns a copy whose
+age_coef are the track's. Evaluation (validate_scorecard.py --per-track): plain
+LORO is degenerate here (one 2026 race per circuit, so the held-out track has
+no data and falls back to the global fit, identical by construction); the
+test used instead is a split-half by driver inside the held-out race. See
+team/handoffs/T-028-data-scientist.md for the numbers and for what is
+shipped as default.
+
 Known remaining gaps: MEDIUM is dominated by HARD in this model (same pace,
 slightly more wear), so M appears in a top plan only when stint caps force
 it; the ordered S/M wear is a tie, not a measurement; one global fuel slope
@@ -738,6 +754,112 @@ def _drop_residual_outliers(
     return df[keep].drop(columns="_residual")
 
 
+# --- per-track wear (T-028) ------------------------------------------------
+# Prior sd of a track's wear slope around the global slope, s/lap per lap of
+# age. Chosen by the split-half-by-driver scorecard (validate_scorecard.py
+# --per-track), not by eye -- see the T-028 handoff.
+TRACK_WEAR_TAU = 0.01
+MIN_TRACK_STINTS = 3  # fewer stints of a compound at a track -> keep the global slope
+
+_TRACK_ALIASES = {"lasvegas": "las_vegas"}
+
+
+def track_id_of_race(race_file: str) -> str:
+    """track_params.json track_id for a laps file: 'AbuDhabi_2026_laps.csv' -> 'abudhabi'."""
+    name = re.split(r"_20\d\d", Path(str(race_file)).name)[0].lower()
+    return _TRACK_ALIASES.get(name, name)
+
+
+def fit_track_wear(
+    filtered: pd.DataFrame,
+    final: dict,
+    tau: float = TRACK_WEAR_TAU,
+    min_stints: int = MIN_TRACK_STINTS,
+) -> dict:
+    """
+    Per-circuit linear wear slopes, partially pooled towards the global fit.
+
+    For each track (all laps whose race_file maps to the same track_id), take
+    the global fit's offsets and per-race fuel slopes as given, remove them
+    from lap time, remove the driver-race fixed effects by the same within
+    transformation as fit_joint_model, and fit  y = sum_c a_c * age_c  by
+    bounded least squares with  a = (A, A+B, A+B+C), A,B,C >= 0  (the
+    SOFT >= MEDIUM >= HARD >= 0 ordering) plus a ridge row per compound
+    pulling a_c towards the global slope g_c with weight sigma^2 / tau^2
+    (sigma = residual sd of the global fit). Little data -> the ridge wins
+    and a_c ~ g_c; a compound with fewer than min_stints distinct stints at the
+    track is pinned to g_c. Held fixed at the global values: offsets, fuel,
+    cliff/max_reliable_age (those need deep-stint data a single race does not have).
+
+    Returns {track_id: {compound: {"age_coef", "global_age_coef", "n_stints",
+    "n_laps", "pooled": True if pinned to global}}}.
+    """
+    glob_wear = {c: final["wear"][c][0] for c in DRY_COMPOUNDS}
+    sigma2 = float(np.var(final["residual"]))
+    lam = sigma2 / (tau ** 2) if tau > 0 else np.inf
+    tracks = filtered["race_file"].map(track_id_of_race)
+    out = {}
+    order = ["HARD", "MEDIUM", "SOFT"]
+    M = np.array([[1, 0, 0], [1, 1, 0], [1, 1, 1]], dtype=float)  # wear = M @ (A, B, C), order H, M, S
+    g = np.array([glob_wear[c] for c in order])
+    for tid in sorted(tracks.unique()):
+        sub = filtered[tracks == tid]
+        race_fuel = sub["race_file"].map(final["fuel_by_race"]).astype(float)
+        y = (
+            sub["lap_time_seconds"].astype(float)
+            - sub["compound"].map(final["offsets"]).astype(float)
+            - race_fuel * sub["lap_number"].astype(float)
+        )
+        groups = [sub["race_file"], sub["driver"]]
+        stint_key = sub["race_file"].astype(str) + "|" + sub["driver"].astype(str) + "|" + sub["stint_id"].astype(str)
+        X = pd.DataFrame(
+            {c: (sub["compound"] == c).astype(float) * sub["tire_age"].astype(float) for c in DRY_COMPOUNDS},
+            index=sub.index,
+        )
+        Xw = X - X.groupby(groups).transform("mean")
+        yw = y - y.groupby(groups).transform("mean")
+        n_stints = {c: int(stint_key[sub["compound"] == c].nunique()) for c in DRY_COMPOUNDS}
+        n_laps = {c: int((sub["compound"] == c).sum()) for c in DRY_COMPOUNDS}
+        usable = {c: bool(n_stints[c] >= min_stints and np.isfinite(lam)) for c in DRY_COMPOUNDS}
+
+        rows, rhs = [Xw[order].values @ M], [yw.values]
+        for i, c in enumerate(order):
+            w = np.sqrt(lam) if usable[c] else 1e6  # 1e6 = pin to global
+            rows.append(w * M[i][None, :])
+            rhs.append(np.array([w * g[i]]))
+        theta = lsq_linear(np.vstack(rows), np.concatenate(rhs), bounds=(0, np.inf), method="bvls").x
+        wear = M @ theta
+        out[tid] = {
+            c: {
+                "age_coef": float(wear[i]),
+                "global_age_coef": float(g[i]),
+                "n_stints": n_stints[c],
+                "n_laps": n_laps[c],
+                "pooled": not usable[c],
+            }
+            for i, c in enumerate(order)
+        }
+    return out
+
+
+def model_for_track(model: dict, track_id: Optional[str]) -> dict:
+    """
+    The tyre model with this circuit's fitted wear slopes swapped in (T-028).
+    Returns `model` itself when track_id is None / has no per-track fit, so
+    callers can pass it unconditionally. Everything except each compound's
+    age_coef (offsets, fuel, cliffs, max_reliable_age) is shared with the global model.
+    """
+    tw = (model.get("_track_wear") or {}).get(track_id) if track_id else None
+    if not tw:
+        return model
+    out = dict(model)
+    for compound, v in tw.items():
+        if compound in out and isinstance(out[compound], dict):
+            out[compound] = dict(out[compound], age_coef=float(v["age_coef"]))
+    out["_track_id"] = track_id
+    return out
+
+
 def build_tire_model(
     min_samples_per_age: int = 3,
     quadratic: bool = False,
@@ -747,6 +869,7 @@ def build_tire_model(
     constrain: bool = True,
     fitted_offsets: bool = True,
     drop_red_flag_stints: bool = True,
+    track_wear_tau: Optional[float] = TRACK_WEAR_TAU,
 ) -> dict:
     """
     Full pipeline: load -> era filter -> stints -> clean -> joint fit
@@ -771,6 +894,10 @@ def build_tire_model(
         (model["_compound_offsets"]); False restores the old
         COMPOUND_PACE_OFFSET_PLACEHOLDER.
     drop_red_flag_stints: see clean_laps.
+    track_wear_tau: prior sd for the per-track wear fit (fit_track_wear) that
+        fills model["_track_wear"]; None skips it. Linear-wear fits only.
+        The returned model's own compound curves are always the GLOBAL ones;
+        per-track values are used only through model_for_track().
 
     Returns e.g.:
     {
@@ -843,6 +970,8 @@ def build_tire_model(
     model["_wear_unconstrained"] = {c: free["wear"][c][0] for c in DRY_COMPOUNDS if c in model}
     model["_constrained"] = bool(constrain)
     model["_cliff_penalties"] = dict(COMPOUND_CLIFF_PENALTY_PLACEHOLDER)
+    if track_wear_tau is not None and not quadratic and len(filtered):
+        model["_track_wear"] = fit_track_wear(filtered, final, tau=track_wear_tau)
     model["_n_laps_fitted"] = int(len(filtered))
     model["_eras"] = sorted(set(lap_eras(filtered))) if len(filtered) else []
     return model

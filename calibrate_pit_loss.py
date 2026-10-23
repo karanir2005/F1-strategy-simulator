@@ -1,70 +1,61 @@
 """
 Calibrate DEFAULT_PIT_LOSS_SECONDS (race_simulator.py) and
-DEFAULT_PIT_LOSS_NOISE_STD (monte_carlo.py) from real pit stop durations
-across the pulled 2026 races.
+DEFAULT_PIT_LOSS_NOISE_STD (monte_carlo.py) from real pit-lane durations.
 
 Run this from project root with: python calibrate_pit_loss.py
+
+T-028 (2026-10-23): reads every data/processed/*_pit_stops.csv (all 16 pulled
+2026 races, FastF1 + OpenF1 sourced) instead of re-loading a hardwired list of
+10 FastF1 sessions, which could not see the six OpenF1 races. Stop filter is
+the same one build_track_params.pit_durations uses (real tyre change, not
+under SC/VSC/red, 10-120 s), so this constant and the per-track pit_loss_s
+come from the same stops. Monaco is reported separately and excluded from the
+headline figures: its narrow pit lane produces a heavy queued-stop tail that
+would skew a single global constant (see race_simulator.DEFAULT_PIT_LOSS_SECONDS).
+The old 10-race run (all stops 10-100 s, incl. Monaco, FastF1 sessions) gave
+369 stops / median 23.80 s / std 7.67 s.
 """
 
-import sys
+import glob
+from pathlib import Path
 
-sys.path.insert(0, "backend")
-
-import fastf1
 import numpy as np
 import pandas as pd
 
-from app.core.data_loader import extract_pit_stops, load_race_session
+ROOT = Path(__file__).resolve().parent
+PROCESSED = ROOT / "data" / "processed"
 
-fastf1.Cache.enable_cache("cache")
 
-# Same race list as pull_races.py, so the pit-loss constant is calibrated
-# from the same data the tire model was fitted on.
-RACES = [
-    (2026, "China"),
-    (2026, "Australia"),
-    (2026, "Japan"),
-    (2026, "Monaco"),
-    (2026, "Britain"),
-    (2026, "Miami"),
-    (2026, "Canada"),
-    # (2026, "Spain") removed with pull_races.py's (T-002): it resolves to
-    # the uncached Madrid race and would trigger a network pull. T-009.
-    (2026, "Austria"),
-    (2026, "Belgium"),
-    (2026, "Hungary"),
-]
+def clean_durations(pits: pd.DataFrame) -> np.ndarray:
+    ok = (
+        pits["is_tyre_change"].astype(bool)
+        & ~pits["pit_under_sc"].astype(bool)
+        & ~pits["pit_under_vsc"].astype(bool)
+        & ~pits["pit_under_red"].astype(bool)
+        & pits["pit_lane_s"].between(10, 120)
+    )
+    return pits.loc[ok, "pit_lane_s"].to_numpy(dtype=float)
 
-all_durations = []
 
-for year, gp in RACES:
-    print(f"Loading {year} {gp} Grand Prix...")
-    try:
-        session = load_race_session(year, gp)
-        pit_stops = extract_pit_stops(session)
-    except Exception as e:
-        print(f"  Failed to load {gp}: {e}")
-        continue
+def main() -> None:
+    per_race, pooled = {}, []
+    for path in sorted(glob.glob(str(PROCESSED / "*_pit_stops.csv"))):
+        race = Path(path).name.replace("_pit_stops.csv", "")
+        d = clean_durations(pd.read_csv(path))
+        per_race[race] = d
+        if not race.startswith("Monaco"):
+            pooled.extend(d.tolist())
+    for race, d in per_race.items():
+        if len(d):
+            print(f"  {race:<18} n={len(d):>3}  median {np.median(d):6.2f}  std {d.std():5.2f}")
+    durations = np.array(pooled)
+    print(f"\n{len(durations)} clean tyre-change stops across {len(per_race) - 1} races (Monaco excluded)")
+    print(f"  mean:   {durations.mean():.2f}s")
+    print(f"  median: {np.median(durations):.2f}s   <- DEFAULT_PIT_LOSS_SECONDS")
+    print(f"  std:    {durations.std():.2f}s   <- DEFAULT_PIT_LOSS_NOISE_STD")
+    print(f"  min/max: {durations.min():.2f}s / {durations.max():.2f}s")
+    print(f"  p10/p90: {np.percentile(durations, 10):.2f}s / {np.percentile(durations, 90):.2f}s")
 
-    if pit_stops.empty:
-        print("  No pit stops found")
-        continue
 
-    # Drop stops under 10s (formation-lap/red-flag artifacts, not real
-    # pit-lane traversal) and over 100s (drive-through penalties, long
-    # red-flag stops) -- neither represents a routine tire-change pit loss.
-    clean = pit_stops[
-        (pit_stops["pit_duration_seconds"] >= 10)
-        & (pit_stops["pit_duration_seconds"] <= 100)
-    ]
-    print(f"  {len(pit_stops)} stops, {len(clean)} after filtering")
-    all_durations.extend(clean["pit_duration_seconds"].tolist())
-
-durations = np.array(all_durations)
-print(f"\n{len(durations)} total clean pit stops across {len(RACES)} races")
-print(f"  mean:   {durations.mean():.2f}s")
-print(f"  median: {np.median(durations):.2f}s")
-print(f"  std:    {durations.std():.2f}s")
-print(f"  min:    {durations.min():.2f}s")
-print(f"  max:    {durations.max():.2f}s")
-print(f"  p10/p90: {np.percentile(durations, 10):.2f}s / {np.percentile(durations, 90):.2f}s")
+if __name__ == "__main__":
+    main()

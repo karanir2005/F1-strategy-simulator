@@ -32,8 +32,8 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-024 | frontend-engineer | done (QA in T-025) | T-022, T-023 | Redesign: shared layout, /predict page, /strategy page, framer-motion, charts |
 | T-025 | qa-engineer | skipped (lean mode) | T-024 | QA UI (lint, build, browser pass) and the prediction API |
 | T-026 | backend-engineer | done (no QA) | T-020 | Robust p90 stint caps (typical_stint_laps) + recalibration check; SOFT still preferred, constants unchanged |
-| T-027 | backend-engineer | in-progress | T-023 | Before quali: rehearse grid-mode flow (grid.csv incl. pit lane) across CLI/API/UI; grid-penalty override + page note; test whether `--fp` practice pace helps on 2026 walk-forward (decide on/off) |
-| T-028 | data-scientist | todo | T-020 | Per-track tyre wear (replace global curves, shrink to global) + lap-noise (MAD) and pit-loss scripts read all 16 races |
+| T-027 | backend-engineer | done (no QA; FP stays off) | T-023 | Before quali: rehearse grid-mode flow (grid.csv incl. pit lane) across CLI/API/UI; grid-penalty override + page note; test whether `--fp` practice pace helps on 2026 walk-forward (decide on/off) |
+| T-028 | data-scientist | done (no QA; per-track wear opt-in, lap noise 0.8->0.6) | T-020 | Per-track tyre wear (replace global curves, shrink to global) + lap-noise (MAD) and pit-loss scripts read all 16 races |
 | T-029 | backend-engineer | todo | T-027 | Predictor: revisit track stickiness (`--stick-gamma`) and add per-track safety-car/DNF rates; keep only if walk-forward improves |
 | T-030 | backend-engineer | todo | T-028 | Safety cars (and VSC) in the single-car simulator + optimizer |
 | T-031 | frontend-engineer | todo | T-027 | Race-week behaviour on /predict (countdown, grid-set state, what changed since pre-quali, driver detail); phone-width browser check |
