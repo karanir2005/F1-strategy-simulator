@@ -28,7 +28,7 @@ def tracks():
 def test_schema(tracks):
     assert tracks
     for t in tracks:
-        assert set(t) == KEYS, t["track_id"]
+        assert set(t) - {"tire_wear"} == KEYS, t["track_id"]  # tire_wear: optional (T-028)
         assert isinstance(t["track_id"], str) and t["track_id"]
         assert isinstance(t["total_laps"], int)
         for k in ("pit_loss_s", "pit_loss_noise_std_s", "base_laptime_s"):

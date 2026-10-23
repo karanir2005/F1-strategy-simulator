@@ -1,0 +1,842 @@
+{
+  "model": {
+    "offsets": {
+      "HARD": 0.0,
+      "SOFT": -0.12313621053912926,
+      "MEDIUM": 0.0
+    },
+    "wear": {
+      "SOFT": 0.037118790427214124,
+      "MEDIUM": 0.037118790427214124,
+      "HARD": 0.035027882686235884
+    },
+    "fuel_coef": -0.0507369113361197,
+    "per_track": true
+  },
+  "summary": {
+    "n_tracks": 23,
+    "n_comparable": 17,
+    "top_plan_stop_counts": {
+      "1": 16,
+      "2": 7
+    },
+    "mean_soft_share_top_plan": 0.377,
+    "n_top_plans_with_soft": 17,
+    "n_top_plans_two_soft_stints": 6,
+    "n_top_plans_min_stint_lt_10": 0,
+    "stops_match_modal_top10 (comparable)": 17,
+    "same_compound_set_as_winner (comparable)": 5,
+    "median_winner_plan_gap_s (comparable)": 2.3,
+    "max_winner_plan_gap_s (comparable)": 15.8,
+    "winner_stops_hist (comparable)": {
+      "1": 12,
+      "2": 3,
+      "3": 2
+    }
+  },
+  "tracks": [
+    {
+      "track_id": "australia",
+      "source": "Australia_2026",
+      "total_laps": 58,
+      "top_plan": "H34/S24",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.41,
+      "runner_ups": [
+        "H34/M24",
+        "S19/H20/S19"
+      ],
+      "winner": "M12/H46",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "1": 7,
+        "2": 3
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 10.4,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 24,
+        "MEDIUM": 24,
+        "HARD": 46
+      }
+    },
+    {
+      "track_id": "china",
+      "source": "China_2026",
+      "total_laps": 56,
+      "top_plan": "H37/M19",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "M"
+      ],
+      "soft_share": 0.0,
+      "runner_ups": [
+        "H41/S15",
+        "H26/S15/S15"
+      ],
+      "winner": "M10/H46",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "1": 9,
+        "2": 1
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 6.1,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 15,
+        "MEDIUM": 19,
+        "HARD": 46
+      }
+    },
+    {
+      "track_id": "japan",
+      "source": "Japan_2026",
+      "total_laps": 53,
+      "top_plan": "H33/S20",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.38,
+      "runner_ups": [
+        "M23/H30",
+        "H16/S18/S19"
+      ],
+      "winner": "M22/H31",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "1": 10
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 1.8,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 20,
+        "MEDIUM": 23,
+        "HARD": 36
+      }
+    },
+    {
+      "track_id": "miami",
+      "source": "Miami_2026",
+      "total_laps": 57,
+      "top_plan": "H29/M28",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "M"
+      ],
+      "soft_share": 0.0,
+      "runner_ups": [
+        "H19/S19/S19",
+        "M19/S19/S19"
+      ],
+      "winner": "M26/H31",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "1": 10
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 0.1,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 19,
+        "MEDIUM": 31,
+        "HARD": 37
+      }
+    },
+    {
+      "track_id": "canada",
+      "source": "Canada_2026",
+      "total_laps": 68,
+      "top_plan": "H34/S34",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.5,
+      "runner_ups": [
+        "M34/S34",
+        "H34/M34"
+      ],
+      "winner": "S31/M37",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "1": 8,
+        "2": 2
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 0.7,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 34,
+        "MEDIUM": 39,
+        "HARD": 37
+      }
+    },
+    {
+      "track_id": "monaco",
+      "source": "Monaco_2026",
+      "total_laps": 78,
+      "top_plan": "S32/H46",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.41,
+      "runner_ups": [
+        "M35/H43",
+        "M46/S32"
+      ],
+      "winner": "M37/H24/S7/S10",
+      "winner_stops": 3,
+      "winner_compounds": [
+        "H",
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "2": 4,
+        "3": 5,
+        "4": 1
+      },
+      "modal_top10_stops": 3,
+      "winner_plan_gap_s": 39.4,
+      "flags": [
+        "red flag"
+      ],
+      "effective_caps": {
+        "SOFT": 32,
+        "MEDIUM": 47,
+        "HARD": 56
+      }
+    },
+    {
+      "track_id": "barcelona",
+      "source": "Barcelona_2026",
+      "total_laps": 66,
+      "top_plan": "H25/H26/S15",
+      "top_plan_stops": 2,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.23,
+      "runner_ups": [
+        "H23/H23/M20",
+        "M21/M21/H24"
+      ],
+      "winner": "S11/H16/M14/H25",
+      "winner_stops": 3,
+      "winner_compounds": [
+        "H",
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "2": 7,
+        "3": 3
+      },
+      "modal_top10_stops": 2,
+      "winner_plan_gap_s": 10.7,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 15,
+        "MEDIUM": 24,
+        "HARD": 30
+      }
+    },
+    {
+      "track_id": "austria",
+      "source": "Austria_2026",
+      "total_laps": 71,
+      "top_plan": "H27/S22/S22",
+      "top_plan_stops": 2,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.62,
+      "runner_ups": [
+        "S22/H24/H25",
+        "H26/S22/M23"
+      ],
+      "winner": "M19/H24/H28",
+      "winner_stops": 2,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "2": 8,
+        "3": 2
+      },
+      "modal_top10_stops": 2,
+      "winner_plan_gap_s": 3.6,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 22,
+        "MEDIUM": 24,
+        "HARD": 31
+      }
+    },
+    {
+      "track_id": "britain",
+      "source": "Britain_2026",
+      "total_laps": 52,
+      "top_plan": "H26/M26",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "M"
+      ],
+      "soft_share": 0.0,
+      "runner_ups": [
+        "H22/S15/S15",
+        "M22/S15/S15"
+      ],
+      "winner": "M25/H23/S4",
+      "winner_stops": 2,
+      "winner_compounds": [
+        "H",
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "2": 8,
+        "3": 2
+      },
+      "modal_top10_stops": 2,
+      "winner_plan_gap_s": 24.7,
+      "flags": [
+        "short/fragmented stints"
+      ],
+      "effective_caps": {
+        "SOFT": 15,
+        "MEDIUM": 28,
+        "HARD": 28
+      }
+    },
+    {
+      "track_id": "belgium",
+      "source": "Belgium_2026",
+      "total_laps": 44,
+      "top_plan": "S20/H24",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.45,
+      "runner_ups": [
+        "M20/H24",
+        "S15/S16/H13"
+      ],
+      "winner": "M18/S26",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "1": 9,
+        "3": 1
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 0.0,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 20,
+        "MEDIUM": 20,
+        "HARD": 30
+      }
+    },
+    {
+      "track_id": "hungary",
+      "source": "Hungary_2026",
+      "total_laps": 70,
+      "top_plan": "H22/S24/S24",
+      "top_plan_stops": 2,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.69,
+      "runner_ups": [
+        "M22/S24/S24",
+        "H23/H22/S25"
+      ],
+      "winner": "M17/H22/H17/S14",
+      "winner_stops": 3,
+      "winner_compounds": [
+        "H",
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "1": 1,
+        "2": 6,
+        "3": 3
+      },
+      "modal_top10_stops": 2,
+      "winner_plan_gap_s": 15.8,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 31,
+        "MEDIUM": 26,
+        "HARD": 32
+      }
+    },
+    {
+      "track_id": "netherlands",
+      "source": "Netherlands_2026",
+      "total_laps": 72,
+      "top_plan": "H25/S23/S24",
+      "top_plan_stops": 2,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.65,
+      "runner_ups": [
+        "H25/H24/S23",
+        "M22/S25/S25"
+      ],
+      "winner": "M2/S19/H22/H3/H25",
+      "winner_stops": 4,
+      "winner_compounds": [
+        "H",
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "2": 2,
+        "3": 4,
+        "4": 4
+      },
+      "modal_top10_stops": 3,
+      "winner_plan_gap_s": 32.6,
+      "flags": [
+        "red flag",
+        "short/fragmented stints"
+      ],
+      "effective_caps": {
+        "SOFT": 28,
+        "MEDIUM": 26,
+        "HARD": 33
+      }
+    },
+    {
+      "track_id": "italy",
+      "source": "Italy_2026",
+      "total_laps": 53,
+      "top_plan": "H28/M25",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "M"
+      ],
+      "soft_share": 0.0,
+      "runner_ups": [
+        "H32/S21",
+        "M30/S23"
+      ],
+      "winner": "H3/M25/M25",
+      "winner_stops": 2,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "1": 8,
+        "2": 2
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 24.2,
+      "flags": [
+        "red flag",
+        "short/fragmented stints"
+      ],
+      "effective_caps": {
+        "SOFT": 24,
+        "MEDIUM": 50,
+        "HARD": 50
+      }
+    },
+    {
+      "track_id": "madrid",
+      "source": "Madrid_2026",
+      "total_laps": 57,
+      "top_plan": "S18/H39",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.32,
+      "runner_ups": [
+        "H42/M15",
+        "H22/H22/S13"
+      ],
+      "winner": "M14/H43",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "1": 9,
+        "2": 1
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 2.7,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 18,
+        "MEDIUM": 15,
+        "HARD": 46
+      }
+    },
+    {
+      "track_id": "azerbaijan",
+      "source": "Azerbaijan_2026",
+      "total_laps": 51,
+      "top_plan": "H24/S27",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.53,
+      "runner_ups": [
+        "M24/S27",
+        "H25/M26"
+      ],
+      "winner": "M31/S5/S15",
+      "winner_stops": 2,
+      "winner_compounds": [
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "1": 7,
+        "2": 2,
+        "3": 1
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 19.8,
+      "flags": [
+        "short/fragmented stints"
+      ],
+      "effective_caps": {
+        "SOFT": 31,
+        "MEDIUM": 31,
+        "HARD": 39
+      }
+    },
+    {
+      "track_id": "malaysia",
+      "source": "Malaysia_2026",
+      "total_laps": 55,
+      "top_plan": "S19/H17/S19",
+      "top_plan_stops": 2,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.69,
+      "runner_ups": [
+        "S19/S20/M16",
+        "H17/H18/S20"
+      ],
+      "winner": "I1/S1/S7/S46",
+      "winner_stops": 3,
+      "winner_compounds": [
+        "I",
+        "S"
+      ],
+      "top10_stops": {
+        "2": 1,
+        "3": 8,
+        "4": 1
+      },
+      "modal_top10_stops": 3,
+      "winner_plan_gap_s": null,
+      "flags": [
+        "winner on wet/unknown tyre",
+        "short/fragmented stints"
+      ],
+      "effective_caps": {
+        "SOFT": 21,
+        "MEDIUM": 25,
+        "HARD": 19
+      }
+    },
+    {
+      "track_id": "singapore",
+      "source": "Singapore_2026",
+      "total_laps": 62,
+      "top_plan": "H29/S33",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.53,
+      "runner_ups": [
+        "M29/S33",
+        "H31/M31"
+      ],
+      "winner": "S32/M30",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "1": 7,
+        "2": 3
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 0.0,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 33,
+        "MEDIUM": 33,
+        "HARD": 47
+      }
+    },
+    {
+      "track_id": "austin",
+      "source": "Austin_2025",
+      "total_laps": 56,
+      "top_plan": "H28/S28",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.5,
+      "runner_ups": [
+        "M28/S28",
+        "H28/M28"
+      ],
+      "winner": "M33/S23",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "1": 10
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 2.3,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 28,
+        "MEDIUM": 33,
+        "HARD": 28
+      }
+    },
+    {
+      "track_id": "mexico",
+      "source": "Mexico_2025",
+      "total_laps": 71,
+      "top_plan": "H37/S34",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.48,
+      "runner_ups": [
+        "M37/S34",
+        "H36/M35"
+      ],
+      "winner": "S34/M37",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "1": 5,
+        "2": 5
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 1.3,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 34,
+        "MEDIUM": 38,
+        "HARD": 48
+      }
+    },
+    {
+      "track_id": "brazil",
+      "source": "Brazil_2025",
+      "total_laps": 71,
+      "top_plan": "S21/S21/M29",
+      "top_plan_stops": 2,
+      "top_plan_compounds": [
+        "M",
+        "S"
+      ],
+      "soft_share": 0.59,
+      "runner_ups": [
+        "H25/H25/S21",
+        "H26/S21/M24"
+      ],
+      "winner": "M30/S20/M21",
+      "winner_stops": 2,
+      "winner_compounds": [
+        "M",
+        "S"
+      ],
+      "top10_stops": {
+        "1": 2,
+        "2": 7,
+        "3": 1
+      },
+      "modal_top10_stops": 2,
+      "winner_plan_gap_s": 3.0,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 21,
+        "MEDIUM": 36,
+        "HARD": 29
+      }
+    },
+    {
+      "track_id": "las_vegas",
+      "source": "LasVegas_2025",
+      "total_laps": 50,
+      "top_plan": "H26/M24",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "M"
+      ],
+      "soft_share": 0.0,
+      "runner_ups": [
+        "H17/H17/M16",
+        "H17/M17/M16"
+      ],
+      "winner": "M25/H25",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "1": 9,
+        "2": 1
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 0.0,
+      "flags": [],
+      "effective_caps": {
+        "MEDIUM": 25,
+        "HARD": 35
+      }
+    },
+    {
+      "track_id": "qatar",
+      "source": "Qatar_2025",
+      "total_laps": 57,
+      "top_plan": "S20/S20/H17",
+      "top_plan_stops": 2,
+      "top_plan_compounds": [
+        "H",
+        "S"
+      ],
+      "soft_share": 0.7,
+      "runner_ups": [
+        "M17/S20/S20",
+        "S21/H18/H18"
+      ],
+      "winner": "M7/M25/H25",
+      "winner_stops": 2,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "2": 10
+      },
+      "modal_top10_stops": 2,
+      "winner_plan_gap_s": 8.5,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 25,
+        "MEDIUM": 25,
+        "HARD": 25
+      }
+    },
+    {
+      "track_id": "abudhabi",
+      "source": "AbuDhabi_2025",
+      "total_laps": 58,
+      "top_plan": "H32/M26",
+      "top_plan_stops": 1,
+      "top_plan_compounds": [
+        "H",
+        "M"
+      ],
+      "soft_share": 0.0,
+      "runner_ups": [
+        "H43/S15",
+        "S15/H28/S15"
+      ],
+      "winner": "M23/H35",
+      "winner_stops": 1,
+      "winner_compounds": [
+        "H",
+        "M"
+      ],
+      "top10_stops": {
+        "1": 6,
+        "2": 4
+      },
+      "modal_top10_stops": 1,
+      "winner_plan_gap_s": 0.8,
+      "flags": [],
+      "effective_caps": {
+        "SOFT": 15,
+        "MEDIUM": 26,
+        "HARD": 43
+      }
+    }
+  ]
+}

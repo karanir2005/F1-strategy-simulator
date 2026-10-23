@@ -24,9 +24,12 @@ from app.core.tire_model import compound_pace_offset, fuel_effect, predict_delta
 
 # Calibrated from real pit-lane duration data (data_loader.py's
 # extract_pit_stops, PitOutTime - PitInTime) via calibrate_pit_loss.py,
-# pooled across the 10 races in pull_races.py's RACES list (369 stops,
-# 10-100s sanity range to drop formation-lap/drive-through artifacts).
-# Value is the median (23.55s), not the mean (25.35s), because Monaco's
+# pooled across the original 10 races (369 stops, 10-100s sanity range to
+# drop formation-lap/drive-through artifacts): median 23.55s, mean 25.35s.
+# T-028 (2026-10-23) re-ran it over all 16 races in data/processed (294 clean
+# tyre-change stops, Monaco excluded, not under SC/VSC/red): median 22.88s,
+# -2.6%, inside the 10% re-tune threshold so the constant is left alone.
+# Value is the median, not the mean, because Monaco's
 # narrow pit lane produces a heavy right tail of traffic-queued stops
 # (std 13.76s vs 1-6s elsewhere) that would otherwise skew a single
 # global constant toward an atypical track. Re-run calibrate_pit_loss.py

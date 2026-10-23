@@ -65,12 +65,16 @@ DEFAULT_N_SIMULATIONS = 10_000
 # term shouldn't be stretched to cover those rare large deviations:
 #   - lap time: MAD-based robust std of per-lap residuals (actual minus
 #     race_simulator.py's predicted lap time) after removing each
-#     driver's average bias, pooled across all 10 races (raw std 2.76s,
-#     robust std 0.77s -- used the latter)
+#     driver's average bias, pooled across all 16 races (T-028, 2026-10-23:
+#     14,164 clean laps, raw std 0.99s, MAD robust std 0.60s -- used the
+#     latter. Was 0.8 s, from the original 10 races when the filter was
+#     looser (robust 0.77 s then); the 16-race clean_laps figure is 25%
+#     lower, > 10%, so the constant moved)
 #   - pit loss: pooled std of real pit-stop durations, excluding Monaco
 #     (whose narrow pit lane makes it a genuine outlier, not noise --
-#     see race_simulator.py's DEFAULT_PIT_LOSS_SECONDS comment)
-DEFAULT_LAP_TIME_NOISE_STD = 0.8  # seconds, per lap
+#     see race_simulator.py's DEFAULT_PIT_LOSS_SECONDS comment). T-028: 16
+#     races, 294 clean tyre-change stops, std 5.06 s (was 5.0 on 10) -- unchanged
+DEFAULT_LAP_TIME_NOISE_STD = 0.6  # seconds, per lap
 DEFAULT_PIT_LOSS_NOISE_STD = 5.0  # seconds, per pit stop
 
 

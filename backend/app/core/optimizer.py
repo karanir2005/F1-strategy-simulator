@@ -32,7 +32,7 @@ from app.core.monte_carlo import (
     simulate_totals,
 )
 from app.core.race_simulator import Stint
-from app.core.tire_model import compound_pace_offset, fuel_effect, predict_delta
+from app.core.tire_model import compound_pace_offset, fuel_effect, model_for_track, predict_delta
 
 # Minimum stint length applies to EVERY stint (first and last included), so a plan cannot
 # dodge wear with a token 5-lap stint. Floor of 8 laps, or 10% of race distance if larger:
@@ -166,7 +166,11 @@ def optimize(
     pit_loss_noise_std: float = DEFAULT_PIT_LOSS_NOISE_STD,
     lap_time_noise_std: float = DEFAULT_LAP_TIME_NOISE_STD,
     typical_stint_laps: Optional[Dict[str, Optional[int]]] = None,
+    track_id: Optional[str] = None,
 ) -> OptimizeResult:
+    # T-028: per-track wear slopes when the tyre model carries them for this circuit
+    # (model["_track_wear"]); no-op for track_id=None or an unfitted track.
+    tire_model = model_for_track(tire_model, track_id)
     compounds = [c for c in ("SOFT", "MEDIUM", "HARD") if c in max_stint_laps and c in tire_model]
     if len(compounds) < 2:
         raise NoFeasiblePlan("need caps for at least 2 dry compounds to satisfy the two-compound rule")

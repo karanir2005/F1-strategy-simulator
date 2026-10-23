@@ -17,6 +17,10 @@ restart laps). With the old filter (green + not an in-lap) this script
 gives std 2.76 s on the pre-T-002 data and 2.80 s on the new data; with
 clean_laps it gives 1.03 s. Neither reproduces the 0.8 s currently in
 monte_carlo.DEFAULT_LAP_TIME_NOISE_STD -- see team/handoffs/T-002-data-scientist.md.
+
+T-028 (2026-10-23): also prints the MAD-based robust std (the 0.8 s constant was
+described as MAD-robust, the script printed only the raw std, so they were never
+comparable). Reads all of data/processed (16 races).
 """
 
 import sys
@@ -69,5 +73,10 @@ for path in glob.glob("data/processed/*_laps.csv"):
 
 residuals = np.array(residuals)
 print(f"{len(residuals)} clean laps across {len(glob.glob('data/processed/*_laps.csv'))} races")
-print(f"  std:    {residuals.std():.3f}s")
+# MAD-based robust std (1.4826 * median |x - median|): the same kind of estimate
+# DEFAULT_LAP_TIME_NOISE_STD (monte_carlo.py) is documented as, so these two are
+# directly comparable. The raw std is heavy-tail inflated (traffic, residual yellows).
+mad_std = 1.4826 * np.median(np.abs(residuals - np.median(residuals)))
+print(f"  raw std:        {residuals.std():.3f}s  (heavy-tail inflated, not comparable)")
+print(f"  robust std MAD: {mad_std:.3f}s   <- compare with DEFAULT_LAP_TIME_NOISE_STD")
 print(f"  p10/p90 abs: {np.percentile(np.abs(residuals), 10):.3f}s / {np.percentile(np.abs(residuals), 90):.3f}s")

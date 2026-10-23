@@ -686,6 +686,8 @@ def run_scorecard(
     raw_dir: Path = JOLPICA_RAW_DIR,
     model_kwargs: Optional[dict] = None,
     extra_train_laps: Optional[pd.DataFrame] = None,
+    split_half: bool = False,
+    per_track: bool = False,
 ) -> dict:
     """
     model_kwargs: extra keyword arguments for tire_model.build_tire_model (T-020
@@ -693,6 +695,15 @@ def run_scorecard(
         Default None = the shipped defaults.
     extra_train_laps: laps added to EVERY race's LORO training set but never scored
         (e.g. the 2025 staging races when eras includes 2025_regs).
+    split_half (T-028): replace plain LORO by a two-fold split by driver INSIDE the
+        held-out race. Fold k trains on the other races plus half of the held-out
+        race's drivers (alternating in sorted order) and scores only the other half,
+        so every scored stint comes from a driver the model never saw, but the track
+        itself is in the training data. This is the only out-of-sample test a
+        per-track parameter can have with one 2026 race per circuit (plain LORO leaves
+        a held-out track with no data -> per-track falls back to global, identical).
+    per_track (T-028): score each race with tire_model.model_for_track(model, that
+        track) (per-track wear). Only meaningful together with split_half.
     """
     model_kwargs = model_kwargs or {}
     gps = gps or race_names(processed_dir)
@@ -703,12 +714,34 @@ def run_scorecard(
     per_race, base_info, skipped_all = {}, {}, {}
     for gp, race in races.items():
         # LORO: the model for `gp` never sees its laps
-        train_laps = all_laps[all_laps["race_file"] != race.laps["race_file"].iloc[0]]
+        rf = race.laps["race_file"].iloc[0]
+        train_laps = all_laps[all_laps["race_file"] != rf]
         if extra_train_laps is not None:
             train_laps = pd.concat([train_laps, extra_train_laps], ignore_index=True)
-        model = tm.build_tire_model(laps=train_laps, **model_kwargs)
-        sims, skipped = build_driver_sims(race, model)
-        train = [(r, build_driver_sims(r, model)[0]) for g, r in races.items() if g != gp]
+        if not split_half:
+            model = tm.build_tire_model(laps=train_laps, **model_kwargs)
+            sims, skipped = build_driver_sims(race, model)
+            train = [(r, build_driver_sims(r, model)[0]) for g, r in races.items() if g != gp]
+        else:
+            drivers = sorted(race.laps["driver"].unique())
+            sims, skipped, train = {}, {}, None
+            for k in (0, 1):
+                seen = set(drivers[k::2])  # in the training set for this fold
+                fold_train = pd.concat([train_laps, race.laps[race.laps["driver"].isin(seen)]], ignore_index=True)
+                fold_model = tm.build_tire_model(laps=fold_train, **model_kwargs)
+                if per_track:
+                    fold_model = tm.model_for_track(fold_model, tm.track_id_of_race(rf))
+                fs, fk = build_driver_sims(race, fold_model)
+                sims.update({d: v for d, v in fs.items() if d not in seen})
+                skipped.update({d: v for d, v in fk.items() if d not in seen})
+                if k == 0:
+                    model = fold_model
+                    # quali ratio from the other races, each scored with its own track's wear if per_track
+                    base_m = tm.build_tire_model(laps=fold_train, **model_kwargs)
+                    train = [
+                        (r, build_driver_sims(r, tm.model_for_track(base_m, tm.track_id_of_race(r.laps["race_file"].iloc[0])) if per_track else base_m)[0])
+                        for g, r in races.items() if g != gp
+                    ]
         ratio = fit_quali_ratio(train) if len(race.quali) else None
         bases = base_laptimes(race, sims, ratio["ratio"] if ratio else None)
 
@@ -990,8 +1023,12 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--no-write", action="store_true")
+    ap.add_argument("--split-half", action="store_true", help="T-028: split-half by driver inside the held-out race instead of LORO")
+    ap.add_argument("--per-track", action="store_true", help="T-028: per-track wear (implies --split-half)")
+    ap.add_argument("--tau", type=float, default=None, help="per-track wear prior sd (default tire_model.TRACK_WEAR_TAU)")
     args = ap.parse_args()
-    card = run_scorecard()
+    kw = {"track_wear_tau": args.tau} if args.tau is not None else None
+    card = run_scorecard(split_half=args.split_half or args.per_track, per_track=args.per_track, model_kwargs=kw)
     print_scorecard(card)
     if not args.no_write:
         write_scorecard(card, args.out)
