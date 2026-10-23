@@ -31,6 +31,15 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-023 | backend-engineer | done (QA in T-025) | contract | GET /predict/next and /predict/history per team/contracts/prediction-api.md |
 | T-024 | frontend-engineer | done (QA in T-025) | T-022, T-023 | Redesign: shared layout, /predict page, /strategy page, framer-motion, charts |
 | T-025 | qa-engineer | skipped (lean mode) | T-024 | QA UI (lint, build, browser pass) and the prediction API |
+| T-026 | backend-engineer | done (no QA) | T-020 | Robust p90 stint caps (typical_stint_laps) + recalibration check; SOFT still preferred, constants unchanged |
+| T-027 | backend-engineer | in-progress | T-023 | Before quali: rehearse grid-mode flow (grid.csv incl. pit lane) across CLI/API/UI; grid-penalty override + page note; test whether `--fp` practice pace helps on 2026 walk-forward (decide on/off) |
+| T-028 | data-scientist | todo | T-020 | Per-track tyre wear (replace global curves, shrink to global) + lap-noise (MAD) and pit-loss scripts read all 16 races |
+| T-029 | backend-engineer | todo | T-027 | Predictor: revisit track stickiness (`--stick-gamma`) and add per-track safety-car/DNF rates; keep only if walk-forward improves |
+| T-030 | backend-engineer | todo | T-028 | Safety cars (and VSC) in the single-car simulator + optimizer |
+| T-031 | frontend-engineer | todo | T-027 | Race-week behaviour on /predict (countdown, grid-set state, what changed since pre-quali, driver detail); phone-width browser check |
+| T-032 | backend-engineer | todo | T-031 | Deploy: Vercel frontend + Railway/Render backend, env/CORS config |
+| T-033 | frontend-engineer | backlog (later, user) | T-024 | Copy an optimizer plan into the manual comparison with one click |
+| T-034 | backend-engineer | backlog (after v1.0.0, user) | T-030 | Phase 1 full-grid multi-car race simulation: the 'final polishing' step that would let the winner prediction beat grid order |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:
@@ -139,4 +148,3 @@ Since about 2026-10-15, `livetiming.formula1.com/static/*` returns **401** for e
 - **Resolution (2026-10-19):** the user has no F1 TV subscription. **OpenF1** (`api.openf1.org/v1`, free, no auth) still serves historical 2025/2026 data, verified on the 2026 Singapore race: `stints` (compound, `tyre_age_at_start`), `laps` (durations, sectors), `race_control` (SC/VSC/flags), `weather`, `pit` (lane duration) and `intervals` (gaps). T-009 rebuilds the data expansion on OpenF1 + Jolpica.
 - **T-011** can run on Jolpica.
 - The empty `cache/2025/*` and `cache/2026/*` session directories created at 15:05–15:06 are from a failed warm-up and contain no data.
-| T-026 | backend-engineer | done (no QA) | T-020 | Robust p90 stint caps (typical_stint_laps) + recalibration check; SOFT still preferred, constants unchanged |
