@@ -381,7 +381,8 @@ def test_api_response_is_additive_superset_of_old_fields():
     )
     assert resp.status_code == 200
     body = resp.json()
-    assert set(body) == {"reference_strategy", "results"}
+    # T-030 added the optional safety_cars / assumptions top-level fields
+    assert set(body) == {"reference_strategy", "results", "safety_cars", "assumptions"}
     for r in body["results"]:
         assert OLD_RESULT_FIELDS <= set(r)
         assert set(r) - OLD_RESULT_FIELDS == {"delta_mean", "delta_p10", "delta_p90"}

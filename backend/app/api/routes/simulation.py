@@ -31,6 +31,7 @@ from app.core.monte_carlo import (
     compare_strategies,
 )
 from app.core.race_simulator import DEFAULT_PIT_LOSS_SECONDS, Stint, simulate_race
+from app.core.safety_cars import load_params as load_safety_car_params
 from app.core.tire_model import build_tire_model
 
 router = APIRouter()
@@ -128,6 +129,11 @@ class SimulateRequest(BaseModel):
             f"Seconds lost per stop; default {DEFAULT_PIT_LOSS_SECONDS} "
             "(or the track's pit_loss_s when track_id is given)"
         ),
+    )
+    safety_cars: bool = Field(
+        default=False,
+        description="T-030: add random SC/VSC periods (fitted rates), same timeline for every strategy. "
+        "Default false = unchanged behaviour. Fixed pit plans only; no reactive stops.",
     )
     seed: Optional[int] = None
 
@@ -239,6 +245,9 @@ class SimulateResponse(BaseModel):
         )
     )
     results: List[StrategyResult]
+    # optional (T-030): whether the SC/VSC model was applied, plus a one-line assumption note
+    safety_cars: Optional[bool] = None
+    assumptions: Optional[List[str]] = None
 
 
 @lru_cache(maxsize=1)
@@ -284,6 +293,7 @@ def simulate(request: SimulateRequest) -> SimulateResponse:
         pit_loss_noise_std=pit_noise,
         pit_loss_seconds=pit_loss,
         seed=request.seed,
+        safety_cars=load_safety_car_params() if request.safety_cars else None,
     )
 
     # one noise-free run per strategy purely for the lap-by-lap chart --
@@ -304,6 +314,13 @@ def simulate(request: SimulateRequest) -> SimulateResponse:
 
     return SimulateResponse(
         reference_strategy=reference,
+        safety_cars=request.safety_cars,
+        assumptions=[
+            "Safety cars/VSCs ON: random fitted SC/VSC periods, same timeline for every strategy; fixed pit "
+            "plans (no reactive stops); lap_times trace stays the green-flag run."
+            if request.safety_cars
+            else "Safety cars OFF: no SC/VSC/red flags or opponents; single car in clean air."
+        ],
         results=[
             StrategyResult(
                 name=name,
