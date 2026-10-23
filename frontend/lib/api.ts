@@ -254,6 +254,8 @@ export interface PredictionResponse {
   /** ISO 8601 UTC; for a stale response it is the saved CSV's mtime. */
   generated_at: string;
   stale: boolean;
+  /** T-027. null in pre_quali mode, or for an old saved CSV that did not record it. */
+  grid_source?: "qualifying_classification" | "override_file" | null;
   /** Sorted by p_win descending. */
   drivers: DriverPrediction[];
   headline: Headline;

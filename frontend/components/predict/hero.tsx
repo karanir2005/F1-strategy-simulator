@@ -50,7 +50,15 @@ function Headline({ data, top, runnerUp }: { data: PredictionResponse; top: Driv
 
   return (
     <section aria-labelledby="hl-winner" className="min-w-0">
-      <p id="hl-winner" className="label-mono">
+      <p id="hl-winner" className="label-mono flex items-center gap-2">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-sm border px-1.5 py-0.5 ${
+            data.mode === "grid" ? "border-signal text-signal" : "border-line-strong text-muted-fg"
+          }`}
+        >
+          <span aria-hidden className={`size-1.5 rounded-full ${data.mode === "grid" ? "bg-signal" : "bg-faint"}`} />
+          {data.mode === "grid" ? "Grid set" : "Pre-qualifying"}
+        </span>
         Most likely winner
       </p>
       <div className="mt-2 flex items-stretch gap-3">
