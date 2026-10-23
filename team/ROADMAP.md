@@ -29,6 +29,8 @@ Two tracks run in parallel:
 - Common random numbers across strategies, and numpy-vectorized Monte Carlo.
 
 ### Phase 1: Full-grid race simulation (the change that matters most)
+
+> **Scheduling (user, 2026-10-23):** this is the final polishing step, done after v1.0.0 (T-027..T-032 shipped). Track as T-034.
 - Pace per car/driver from qualifying and practice long runs, shrunk toward the team mean.
 - Gaps and dirty air (time loss + extra degradation when within ~1s), fitted from 2026 laps.
 - Overtake probability = f(pace delta, tyre-age delta, gap, track), fitted from 2026 data (overtake mode, not DRS).

@@ -34,6 +34,18 @@ function Headline({ data, top, runnerUp }: { data: PredictionResponse; top: Driv
     dots.forEach((d) => c.set(d.code, (c.get(d.code) ?? 0) + 1));
     return c;
   }, [dots]);
+  // teammates share a colour, so the second driver of each team is drawn as a hollow ring
+  const secondCodes = useMemo(() => {
+    const seen = new Map<string, string[]>();
+    [...data.drivers]
+      .sort((a, b) => a.code.localeCompare(b.code))
+      .forEach((d) => seen.set(d.team, [...(seen.get(d.team) ?? []), d.code]));
+    return new Set(Array.from(seen.values()).flatMap((codes) => codes.slice(1)));
+  }, [data.drivers]);
+  const swatch = (d: DriverPrediction): React.CSSProperties =>
+    secondCodes.has(d.code)
+      ? { border: `2px solid ${teamColor(d.team)}`, background: "transparent" }
+      : { background: teamColor(d.team) };
   const lead = runnerUp ? (top.p_win - runnerUp.p_win) * 100 : null;
 
   return (
@@ -79,7 +91,7 @@ function Headline({ data, top, runnerUp }: { data: PredictionResponse; top: Driv
               key={i}
               title={`${d.name}: wins in the simulation`}
               className="aspect-square rounded-full"
-              style={{ background: teamColor(d.team) }}
+              style={swatch(d)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.2, delay: Math.min(i * 0.005, 0.5) }}
@@ -93,7 +105,7 @@ function Headline({ data, top, runnerUp }: { data: PredictionResponse; top: Driv
               const d = data.drivers.find((x) => x.code === code)!;
               return (
                 <li key={code} className="flex items-center gap-1.5">
-                  <span aria-hidden className="size-2 rounded-full" style={{ background: teamColor(d.team) }} />
+                  <span aria-hidden className="box-border size-2.5 rounded-full" style={swatch(d)} />
                   <span className="font-mono text-fg">{code}</span>
                   <span className="tnum">{n}</span>
                 </li>
@@ -101,7 +113,7 @@ function Headline({ data, top, runnerUp }: { data: PredictionResponse; top: Driv
             })}
         </ul>
         <p className="mt-2 max-w-md text-[13px] leading-5 text-muted-fg">
-          Each dot is 1 of 100 simulated races, coloured by the winner&apos;s team. Drivers below half a percent get no
+          Each dot is 1 of 100 simulated races, coloured by the winner&apos;s team (solid for one driver, hollow ring for the teammate). Drivers below half a percent get no
           dot.
         </p>
       </div>
