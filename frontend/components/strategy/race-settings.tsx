@@ -29,6 +29,10 @@ export interface RaceSettingsProps {
   onNSimulations: (v: NumField) => void;
   maxStops: number;
   onMaxStops: (n: number) => void;
+  safetyCars: boolean;
+  onSafetyCars: (on: boolean) => void;
+  trackWear: boolean;
+  onTrackWear: (on: boolean) => void;
   onOptimize: () => void;
   optLoading: boolean;
   optValidationError: string | null;
@@ -179,6 +183,41 @@ export function RaceSettings(p: RaceSettingsProps) {
         Base lap time shifts every lap of every strategy by the same amount, so it won&apos;t change which strategy wins
         when they run the same total lap count.
       </p>
+
+      <fieldset className="mt-4 border-t border-line pt-4">
+        <legend className="sr-only">Model options</legend>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <label className="flex min-h-9 cursor-pointer items-center gap-2 text-sm text-fg">
+            <input
+              type="checkbox"
+              className="size-4 accent-signal"
+              checked={p.safetyCars}
+              onChange={(e) => p.onSafetyCars(e.target.checked)}
+            />
+            Safety cars
+          </label>
+          {t && (
+            <label
+              className={`flex min-h-9 items-center gap-2 text-sm ${t.tire_wear ? "cursor-pointer text-fg" : "text-muted-fg"}`}
+              title={t.tire_wear ? undefined : "No 2026 race data at this circuit yet, so the global wear fit is used"}
+            >
+              <input
+                type="checkbox"
+                className="size-4 accent-signal"
+                disabled={!t.tire_wear}
+                checked={p.trackWear && !!t.tire_wear}
+                onChange={(e) => p.onTrackWear(e.target.checked)}
+              />
+              Track-specific tyre wear{!t.tire_wear && <span className="text-[12px]">(not available here)</span>}
+            </label>
+          )}
+        </div>
+        <p className="mt-1 text-[13px] leading-5 text-muted-fg">
+          Safety cars add random SC/VSC periods, the same for every plan in a run, so gaps stay comparable. Pit plans are
+          fixed, so they can&apos;t react by pitting under a safety car yet. Track wear uses this circuit&apos;s own
+          tyre fit where there is enough data (optimizer only); it hasn&apos;t been shown to beat the global fit.
+        </p>
+      </fieldset>
 
       <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-4">
         <div className="flex items-center gap-2">

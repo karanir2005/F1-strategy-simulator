@@ -59,9 +59,8 @@ ASSUMPTIONS = [
     "Single car in clean air: no traffic, no opponents, no undercut/overcut interaction.",
     "No safety cars, virtual safety cars, red flags or weather; dry compounds only.",
     "Global tyre-wear curves fitted across all pulled races, not per-track degradation.",
-    "Compound pace offsets are fitted (with a forced ordering); cliff penalties are literature-ballpark placeholders "
-    "(tire_model.COMPOUND_PACE_OFFSET_PLACEHOLDER / COMPOUND_CLIFF_PENALTY_PLACEHOLDER), "
-    "so SOFT-vs-HARD trade-offs are indicative, not fitted.",
+    "Compound pace offsets are fitted with a forced SOFT-fastest ordering (the unconstrained 2026 fit is not "
+    "physical), and tyre-cliff penalties are still placeholders, so SOFT-vs-HARD trade-offs are indicative.",
     "Stints are capped at the p90 of observed stint lengths for that compound at this track "
     "(typical_stint_laps, never above the observed maximum), or the observed maximum when fewer than 5 "
     "stints were seen, with a floor of 15 laps because some compounds only had short observed "

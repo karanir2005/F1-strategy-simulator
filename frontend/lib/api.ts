@@ -33,6 +33,8 @@ export interface SimulateRequest {
   pit_loss_noise_std?: number;
   pit_loss_seconds?: number;
   seed?: number;
+  /** T-030. Shared SC/VSC timeline per Monte Carlo run; default false. */
+  safety_cars?: boolean;
 }
 
 export interface StrategyResult {
@@ -58,6 +60,9 @@ export interface SimulateResponse {
   /** Strategy all delta_* are measured against: lowest mean total; ties -> first listed. */
   reference_strategy: string;
   results: StrategyResult[];
+  /** T-030. Echo of the request flag. */
+  safety_cars?: boolean | null;
+  assumptions?: string[] | null;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -98,6 +103,13 @@ export interface TrackOut {
   on_2026_calendar: boolean | null;
   already_raced_2026: boolean | null;
   notes: string | null;
+  /** T-026. p90 of observed stint lengths per compound; null when too few stints. */
+  typical_stint_laps?: Record<string, number | null> | null;
+  /** T-028. Per-track wear fit per compound; absent/null when the track has no fit. */
+  tire_wear?: Record<
+    string,
+    { age_coef: number; global_age_coef: number; n_stints: number; pooled: boolean }
+  > | null;
 }
 
 /** Mirrors backend `OptimizeRequest`. Null/omitted overrides = use the track's value. */
@@ -116,6 +128,10 @@ export interface OptimizeRequest {
   /** >0, <=300 */
   base_laptime_s?: number | null;
   seed?: number | null;
+  /** T-030. Default false. */
+  safety_cars?: boolean;
+  /** T-030. Use the per-track tyre-wear fit when the track has one; default false. */
+  use_track_wear?: boolean;
 }
 
 export interface StintOut {
@@ -148,6 +164,9 @@ export interface ParamsUsed {
   effective_max_stint_laps?: Record<string, number> | null;
   /** T-021. Minimum laps for every stint in the plan search. */
   min_stint_laps?: number | null;
+  /** T-030. What was actually applied (use_track_wear is false when the track has no fit). */
+  safety_cars?: boolean | null;
+  use_track_wear?: boolean | null;
 }
 
 export interface OptimizeResponse {
