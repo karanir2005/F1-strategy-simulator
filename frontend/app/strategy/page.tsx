@@ -47,6 +47,8 @@ export default function StrategyPage() {
   const [trackId, setTrackId] = useState<string>("");
   const [override, setOverride] = useState(false);
   const [maxStops, setMaxStops] = useState(3);
+  const [safetyCars, setSafetyCars] = useState(false);
+  const [trackWear, setTrackWear] = useState(false);
   const [optResult, setOptResult] = useState<OptimizeResponse | null>(null);
   const [optLoading, setOptLoading] = useState(false);
   const [optError, setOptError] = useState<string | null>(null);
@@ -134,6 +136,8 @@ export default function StrategyPage() {
         await runOptimize({
           track_id: track.track_id,
           max_stops: maxStops,
+          safety_cars: safetyCars,
+          use_track_wear: trackWear,
           top_n: 10, // ask for extra so client-side dedupe still leaves 5 distinct plans
           ...(override
             ? {
@@ -217,6 +221,7 @@ export default function StrategyPage() {
             : {}),
           strategies: payload,
           n_simulations: nSimulations as number,
+          safety_cars: safetyCars,
         }),
       );
     } catch (err) {
@@ -256,6 +261,10 @@ export default function StrategyPage() {
         onNSimulations={setNSimulations}
         maxStops={maxStops}
         onMaxStops={setMaxStops}
+        safetyCars={safetyCars}
+        onSafetyCars={setSafetyCars}
+        trackWear={trackWear}
+        onTrackWear={setTrackWear}
         onOptimize={handleOptimize}
         optLoading={optLoading}
         optValidationError={optValidationError}
