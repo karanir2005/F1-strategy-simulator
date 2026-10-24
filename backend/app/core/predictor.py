@@ -637,13 +637,37 @@ def simulate(
     order = np.argsort(-perf, axis=1)
     pos = np.empty((n_sims, n))
     pos[np.arange(n_sims)[:, None], order] = np.arange(1, n + 1)
-    return {
+    out = {
         "p_win": (pos == 1).mean(0),
         "p_podium": (pos <= 3).mean(0),
         "p_top10": (pos <= 10).mean(0),
         "exp_pos": pos.mean(0),
         "p_dnf_sim": dnf.mean(0),
         "exp_grid": g.mean(0),
+    }
+    if mode == "prequali":  # T-035: expose the simulated qualifying distribution
+        out.update(quali_events(g))
+    return out
+
+
+def q1_cutoff(n: int) -> int:
+    """First grid slot that is eliminated in Q1 under the current format.
+    22 cars: 16 advance, 6 out (slots 17-22). 20 cars (<=2025 era): 15 advance, 5 out.
+    Smaller fields: the same 15 advance rule, nobody out if n <= 15."""
+    advance = 16 if n >= 21 else 15
+    return min(advance, n) + 1
+
+
+def quali_events(g: np.ndarray) -> dict:
+    """Per-driver probabilities from simulated qualifying orders g (n_sims, n), rank 1 = pole.
+    p_q3 = top 10, p_q1_exit = slot >= q1_cutoff(n). Qualifying classification, not the
+    penalised grid."""
+    n = g.shape[1]
+    return {
+        "p_pole": (g == 1).mean(0),
+        "p_front_row": (g <= 2).mean(0),
+        "p_q3": (g <= 10).mean(0),
+        "p_q1_exit": (g >= q1_cutoff(n)).mean(0),
     }
 
 
@@ -713,6 +737,8 @@ def predict_race(
             out[f"p_{ev}"] = (1 - w) * out[f"p_{ev}_model"] + w * out[f"p_{ev}_baseline"]
     if mode == "prequali":
         out["exp_grid"] = sim["exp_grid"]
+        for k in ("p_pole", "p_front_row", "p_q3", "p_q1_exit"):
+            out[k] = sim[k]
     out["season"], out["round"], out["mode"] = season, rnd, mode
     out.attrs["model"] = model
     out.attrs["stickiness"] = track_stickiness(hist, season, rnd, cfg)
@@ -889,6 +915,117 @@ def calibration_table(pred: pd.DataFrame, ev: str, bins=(0, 0.02, 0.05, 0.15, 0.
             "events_obs": g[f"y_{ev}"].sum(),
         }
     )
+
+
+# ------------------------------------------- qualifying evaluation (T-035)
+
+QUALI_BASELINES = ("prev_quali", "champ", "uniform")
+
+
+def _quali_truth(hist, season, rnd) -> pd.DataFrame:
+    q = hist["qualifying"]
+    t = q[(q["season"] == season) & (q["round"] == rnd)].dropna(subset=["quali_position"])
+    return t[["driver_id", "quali_position"]].reset_index(drop=True)
+
+
+def _quali_baseline_rank(hist, season, rnd, kind: str, drivers: pd.Series) -> np.ndarray:
+    """1-based pre-qualifying rank of `drivers` by a simple rule, from strictly earlier rounds.
+    prev_quali: qualifying position at the latest earlier round of the season that has one
+    (unseen drivers last). champ: points of earlier rounds (race + sprint)."""
+    if kind == "prev_quali":
+        q = hist["qualifying"]
+        prev = q[(q["season"] == season) & (q["round"] < rnd)].dropna(subset=["quali_position"])
+        score = pd.Series(99.0, index=drivers.index)
+        if len(prev):
+            last = prev[prev["round"] == prev["round"].max()]
+            score = drivers.map(dict(zip(last["driver_id"], last["quali_position"]))).fillna(99.0)
+    else:
+        res = hist["results"]
+        pts = res[(res["season"] == season) & (res["round"] < rnd)].groupby("driver_id")["points"].sum()
+        sp = hist.get("sprint")
+        if sp is not None and len(sp):
+            pts = pts.add(sp[(sp["season"] == season) & (sp["round"] < rnd)].groupby("driver_id")["points"].sum(), fill_value=0)
+        score = -drivers.map(pts).fillna(0.0)
+    order = pd.DataFrame({"s": score.to_numpy(), "d": drivers.to_numpy()}).sort_values(["s", "d"]).index
+    rank = np.empty(len(drivers))
+    rank[order] = np.arange(1, len(drivers) + 1)
+    return rank
+
+
+def _quali_rank_table(hist, season, rnd, kind: str, alpha=1.0) -> dict:
+    """P(event | baseline rank) from 2022-2025 plus earlier rounds (>=2) of `season`,
+    add-alpha smoothed. Same generosity as RankBaseline: 4 extra seasons of history."""
+    q = hist["qualifying"]
+    keys = []
+    for s in (2022, 2023, 2024, 2025):
+        if s < season:
+            keys += [(s, k) for k in sorted(q[q["season"] == s]["round"].unique()) if k >= 2]
+    keys += [(season, k) for k in sorted(q[(q["season"] == season) & (q["round"] < rnd)]["round"].unique()) if k >= 2]
+    rows = []
+    for s, k in keys:
+        t = _quali_truth(hist, s, k)
+        t["rank"] = _quali_baseline_rank(hist, s, k, kind, t["driver_id"])
+        t["n"] = len(t)
+        rows.append(t)
+    r = pd.concat(rows, ignore_index=True)
+    out = {}
+    for ev, thr, prior in (("pole", 1, 1 / 21), ("front_row", 2, 2 / 21), ("q3", 10, 10 / 21)):
+        y = (r["quali_position"] <= thr).astype(float)
+        cnt = r.groupby("rank").size().reindex(range(1, 23), fill_value=0)
+        hit = y.groupby(r["rank"]).sum().reindex(range(1, 23), fill_value=0)
+        out[ev] = ((hit + alpha * prior * 0.2) / (cnt + alpha)).to_numpy()
+    return out
+
+
+def quali_walk_forward(hist, season, rounds, method, cfg=PredictorConfig()) -> pd.DataFrame:
+    """Per-driver qualifying predictions for each round from strictly earlier information.
+    method: "model" or one of QUALI_BASELINES. Columns: round, driver_id, p_pole, p_q3,
+    pred_rank (exp_grid for the model, baseline rank otherwise), actual (quali_position)."""
+    out = []
+    stores = _stores_for(hist, cfg, season) if method == "model" else None
+    for rnd in rounds:
+        truth = _quali_truth(hist, season, rnd)
+        if len(truth) < 10:
+            continue
+        if method == "model":
+            p = predict_race(hist, season, rnd, "prequali", cfg, stores=stores)
+            d = truth.merge(p[["driver_id", "p_pole", "p_q3", "exp_grid"]], on="driver_id", how="left")
+            d = d.rename(columns={"exp_grid": "pred_rank"})
+        else:
+            d = truth.copy()
+            n = len(d)
+            if method == "uniform":
+                d["p_pole"], d["p_q3"], d["pred_rank"] = 1 / n, min(1.0, 10 / n), np.nan
+            else:
+                d["pred_rank"] = _quali_baseline_rank(hist, season, rnd, method, d["driver_id"])
+                tab = _quali_rank_table(hist, season, rnd, method)
+                idx = np.minimum(d["pred_rank"].to_numpy().astype(int), 22) - 1
+                pp, p3 = tab["pole"][idx], tab["q3"][idx]
+                d["p_pole"] = pp / pp.sum()
+                d["p_q3"] = np.minimum(p3 / p3.sum() * 10, 1.0)
+        d["round"] = rnd
+        out.append(d)
+    df = pd.concat(out, ignore_index=True)
+    for c in ("p_pole", "p_q3"):
+        df[c] = np.clip(df[c], PROB_CLIP, 1 - PROB_CLIP)
+    return df
+
+
+def quali_score(df: pd.DataFrame) -> dict:
+    """Mean per-race binary log-loss for pole and Q3, pole NLL (-log P(actual pole sitter)) and
+    mean per-race Spearman(predicted rank, actual quali position) (nan for uniform)."""
+    out = {}
+    for ev, thr in (("pole", 1), ("q3", 10)):
+        y = (df["quali_position"] <= thr).astype(float)
+        p = df[f"p_{ev}"]
+        ll = -(y * np.log(p) + (1 - y) * np.log(1 - p))
+        out[f"{ev}_logloss"] = float(ll.groupby(df["round"]).mean().mean())
+    w = df[df["quali_position"] == 1]
+    out["pole_nll"] = float(-np.log(w["p_pole"]).mean())
+    sp = [g["pred_rank"].corr(g["quali_position"], method="spearman") for _, g in df.groupby("round")]
+    out["spearman"] = float(np.nanmean(sp)) if not np.all(np.isnan(sp)) else float("nan")
+    out["n_races"] = int(df["round"].nunique())
+    return out
 
 
 def tune_on_season(hist, season, rounds, grid_of_cfgs) -> pd.DataFrame:

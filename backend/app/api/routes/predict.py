@@ -28,6 +28,36 @@ class DriverPrediction(BaseModel):
     p_top10: float
     exp_pos: float
     p_dnf: float
+    # T-029, grid mode only (absent in pre_quali). Previously dropped by this response model.
+    p_win_prequali: float | None = None
+    p_podium_prequali: float | None = None
+
+
+class QualiDriver(BaseModel):
+    code: str
+    p_pole: float
+    p_front_row: float
+    p_q3: float
+    p_q1_exit: float
+    exp_grid: float
+    actual_grid: int | None = None  # grid mode only; 0 = pit-lane start
+
+
+class QualiEvidence(BaseModel):
+    races: int
+    pole_logloss: float
+    baseline_pole_logloss: float
+    baseline_name: str
+    spearman: float
+    baseline_spearman: float
+    q3_logloss: float | None = None
+    baseline_q3_logloss: float | None = None
+
+
+class Qualifying(BaseModel):
+    available: bool
+    drivers: list[QualiDriver]
+    evidence: QualiEvidence | None = None
 
 
 class Headline(BaseModel):
@@ -55,6 +85,7 @@ class PredictionResponse(BaseModel):
     # "qualifying_classification" | "override_file" | null (pre_quali, or unknown for an old saved CSV)
     grid_source: str | None = None
     drivers: list[DriverPrediction]
+    qualifying: Qualifying | None = None  # T-035
     headline: Headline
     evidence: Evidence
     disclaimer: str
@@ -81,7 +112,7 @@ class HistoryResponse(BaseModel):
     races: list[HistoryRow]
 
 
-@router.get("/next", response_model=PredictionResponse)
+@router.get("/next", response_model=PredictionResponse, response_model_exclude_unset=True)
 def predict_next() -> dict:
     try:
         return svc.get_next()

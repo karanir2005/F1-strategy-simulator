@@ -33,3 +33,19 @@ Jolpica's qualifying endpoint is the classification, not the starting grid, so p
 When `GET /predict/next` has `mode == "grid"`, each `drivers[]` entry gains two optional fields:
 `"p_win_prequali": number | null`, `"p_podium_prequali": number | null` (probabilities in 0..1, same units as `p_win`/`p_podium`).
 Source: the newest saved `data/jolpica/predictions/2026_R{round}_prequali_<YYYYMMDD_HHMM>.csv` for the same round (newest by filename stamp). They are null when no such file exists, the file is unreadable, or the driver is not in it. Nothing is estimated or back-filled. In `pre_quali` mode the fields are absent. Change per driver = `p_win - p_win_prequali`. Existing clients that ignore the fields keep working. The stale-CSV fallback attaches them too.
+
+## Addendum T-035: qualifying (starting-grid) prediction (backend-engineer)
+`GET /predict/next` gains an optional top-level `"qualifying"` block (null when unavailable; clients that ignore it keep working):
+```json
+"qualifying": {"available": true,
+  "drivers": [{"code":"HAM","p_pole":0.16,"p_front_row":0.30,"p_q3":0.93,"p_q1_exit":0.02,"exp_grid":4.0,"actual_grid":null}],
+  "evidence": {"races":16,"pole_logloss":0.1312,"baseline_pole_logloss":0.1371,"baseline_name":"championship order",
+               "spearman":0.8493,"baseline_spearman":0.8268,"q3_logloss":0.2993,"baseline_q3_logloss":0.3637} | null}
+```
+- Probabilities are 0..1 from the same 20k-sim qualifying-order draw the race model uses. Sums over a 22-car field: pole 1, front row 2, Q3 10, Q1 exit 6. `p_front_row` = grid<=2, `p_q3` = grid<=10, `p_q1_exit` = slot >= 17 for 22 cars (16 advance from Q1; 20-car fields: slot >= 16). `exp_grid` = mean simulated qualifying rank (1 = pole). Drivers sorted by `p_pole` desc.
+- These predict the qualifying classification, not the penalised grid.
+- `pre_quali` mode: computed live (or from the stale CSV if it has the columns); `actual_grid` is null.
+- `grid` mode: the numbers come from the newest `2026_R{round}_prequali_*.csv` that has the new columns (older files without them are skipped); `actual_grid` = the grid in use (classification or override file; 0 = pit-lane start), null for a driver not in the grid. If no such file exists the whole block is null.
+- `evidence`: 2026 walk-forward vs the strongest non-uniform baseline by pole log-loss (here "championship order"; the other is "previous-race qualifying order"). null if `data/jolpica/eval/quali_walk_forward.csv` is missing. Produced by `python predict_race.py --evaluate-quali`.
+- CLI prequali CSVs gain columns `p_pole,p_front_row,p_q3,p_q1_exit` (exp_grid already existed).
+- Fix in the same change: `drivers[].p_win_prequali` / `p_podium_prequali` (T-029) were being dropped by the route's response model; they are now declared and the route uses `response_model_exclude_unset`, so they appear in grid mode and stay absent in pre_quali.

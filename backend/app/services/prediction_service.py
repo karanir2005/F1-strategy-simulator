@@ -32,6 +32,7 @@ PRED_DIR = REPO_ROOT / "data" / "jolpica" / "predictions"
 RAW_DIR = REPO_ROOT / "data" / "jolpica" / "raw"
 EVAL_CSV = REPO_ROOT / "data" / "jolpica" / "eval" / "walk_forward_2026.csv"
 BY_RACE_CSV = PRED_DIR / "walk_forward_2026_by_race.csv"
+QUALI_EVAL_CSV = REPO_ROOT / "data" / "jolpica" / "eval" / "quali_walk_forward.csv"
 
 CACHE_TTL_S = 600
 # After qualifying day starts, a cached pre_quali payload is re-checked quickly so the switch to
@@ -130,6 +131,70 @@ def prequali_snapshot(rnd: int) -> dict[str, tuple[float, float]]:
     return {}
 
 
+QUALI_COLS = ["p_pole", "p_front_row", "p_q3", "p_q1_exit", "exp_grid"]
+
+
+def quali_evidence() -> dict | None:
+    """2026 walk-forward qualifying evidence (predict_race.py --evaluate-quali): the model vs the
+    strongest non-uniform baseline by pole log-loss. None when the eval file is missing."""
+    try:
+        t = pd.read_csv(QUALI_EVAL_CSV)
+        t = t[t["season"] == SEASON].set_index("method")
+        m = t.loc["model"]
+        b = t.loc[[x for x in t.index if x not in ("model", "uniform")]].sort_values("pole_logloss").iloc[0]
+        return {
+            "races": int(m["n_races"]),
+            "pole_logloss": round(float(m["pole_logloss"]), 4),
+            "baseline_pole_logloss": round(float(b["pole_logloss"]), 4),
+            "baseline_name": {"prev_quali": "previous-race qualifying order", "champ": "championship order"}.get(b.name, b.name),
+            "spearman": round(float(m["spearman"]), 4),
+            "baseline_spearman": round(float(b["spearman"]), 4),
+            "q3_logloss": round(float(m["q3_logloss"]), 4),
+            "baseline_q3_logloss": round(float(b["q3_logloss"]), 4),
+        }
+    except (OSError, KeyError, ValueError, IndexError):
+        return None
+
+
+def prequali_quali_table(rnd: int) -> pd.DataFrame | None:
+    """Newest saved pre-quali CSV of this round that carries the T-035 qualifying columns (older
+    files from before T-035 do not, and are skipped). None when there is none."""
+    files = sorted(PRED_DIR.glob(f"{SEASON}_R{int(rnd):02d}_prequali_*.csv"), key=lambda p: p.name)
+    for f in reversed(files):
+        try:
+            t = pd.read_csv(f, usecols=["code"] + QUALI_COLS)
+        except (OSError, ValueError):
+            continue
+        return t
+    return None
+
+
+def quali_block(mode: str, t: pd.DataFrame, rnd: int | None, actual: dict[str, int | None]) -> dict | None:
+    """The optional `qualifying` response block (T-035). Pre-quali: the live/stale table's own
+    simulated qualifying distribution, actual_grid null. Grid mode: the saved pre-quali numbers
+    with actual_grid filled from the grid in use. None when no qualifying numbers exist."""
+    if mode == "grid":
+        q = prequali_quali_table(rnd) if rnd is not None else None
+    else:
+        q = t if all(c in t.columns for c in QUALI_COLS) else None
+    if q is None or q.empty:
+        return None
+    q = q.sort_values(["p_pole", "p_front_row"], ascending=False)
+    drivers = [
+        {
+            "code": r["code"],
+            "p_pole": float(r["p_pole"]),
+            "p_front_row": float(r["p_front_row"]),
+            "p_q3": float(r["p_q3"]),
+            "p_q1_exit": float(r["p_q1_exit"]),
+            "exp_grid": float(r["exp_grid"]),
+            "actual_grid": actual.get(r["code"]) if mode == "grid" else None,
+        }
+        for _, r in q.iterrows()
+    ]
+    return {"available": True, "drivers": drivers, "evidence": quali_evidence()}
+
+
 def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool, grid_source: str | None = None) -> dict:
     names = driver_names()
     pq = prequali_snapshot(race.get("round")) if mode == "grid" and race.get("round") is not None else {}
@@ -155,7 +220,9 @@ def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool
             drivers[-1]["p_win_prequali"] = None if old is None else old[0]
             drivers[-1]["p_podium_prequali"] = None if old is None else old[1]
     drivers.sort(key=lambda d: (-d["p_win"], -d["p_podium"]))
+    actual = {d["code"]: d["grid"] for d in drivers} if mode == "grid" else {}
     return {
+        "qualifying": quali_block(mode, t, race.get("round"), actual),
         "race": race,
         "mode": mode,
         "generated_at": generated_at,

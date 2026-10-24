@@ -169,6 +169,9 @@ def print_table(t: pd.DataFrame, mode: str, title: str):
     print(f"\n{title}")
     gcol = "exp_grid" if mode == "prequali" else "grid"
     ghdr = "E[grid]" if mode == "prequali" else "Grid"
+    if mode == "prequali" and "p_pole" in t.columns:
+        print("qualifying: " + ", ".join(
+            f"{r['code']} pole {100 * r['p_pole']:.0f}%" for _, r in t.sort_values("p_pole", ascending=False).head(4).iterrows()))
     print(f"{'#':>2}  {'Driver':<4} {'Team':<16} {ghdr:>7} {'P(win)':>7} {'P(pod)':>7} {'P(top10)':>8} {'P(DNF)':>7} {'E[pos]':>6}")
     for i, r in t.iterrows():
         print(
@@ -268,6 +271,26 @@ def evaluate(args):
     print(f"\nsaved {out / f'walk_forward_{SEASON}.csv'}")
 
 
+def evaluate_quali(args):
+    """T-035: walk-forward qualifying predictions (pole / Q3 log-loss, Spearman of exp_grid)
+    vs previous-race quali order, championship order and uniform. 2026 and 2025."""
+    rnd = next_round(args.offline) if not args.round else args.round
+    hist, _, _ = load(args.offline, rnd)
+    cfg = P.PredictorConfig(**{**CONFIG.__dict__, "n_sims": args.sims})
+    rows = []
+    for season in (2026, 2025):
+        last = int(hist["qualifying"].query("season == @season")["round"].max())
+        for method in ("model",) + P.QUALI_BASELINES:
+            s = P.quali_score(P.quali_walk_forward(hist, season, range(2, last + 1), method, cfg))
+            rows.append({"season": season, "rounds": f"R2-{last}", "method": method, **s})
+    tab = pd.DataFrame(rows)
+    print(tab.round(4).to_string(index=False))
+    out = OUT_DIR / "eval"
+    out.mkdir(parents=True, exist_ok=True)
+    tab.to_csv(out / "quali_walk_forward.csv", index=False)
+    print(f"\nsaved {out / 'quali_walk_forward.csv'}")
+
+
 def by_race(args):
     rnd = next_round(args.offline) if not args.round else args.round
     hist, _, _ = load(args.offline, rnd)
@@ -291,6 +314,7 @@ def main():
     ap.add_argument("--grid-file", default=None, help="CSV with columns code,grid (post-penalty; pit lane = 0)")
     ap.add_argument("--out-dir", default=None, help="directory for the saved prediction CSV (default data/jolpica/predictions)")
     ap.add_argument("--evaluate", action="store_true", help="walk-forward evaluation vs baselines")
+    ap.add_argument("--evaluate-quali", action="store_true", help="T-035: walk-forward qualifying evaluation -> eval/quali_walk_forward.csv")
     ap.add_argument("--variant", default="chosen", choices=list(VARIANTS) + list(FP_VARIANT),
                     help="model variant to show calibration for")
     ap.add_argument("--fp", action="store_true",
@@ -307,6 +331,8 @@ def main():
         CONFIG = P.PredictorConfig(**{**CONFIG.__dict__, "dnf_track_m": args.dnf_track_m})
     if args.by_race:
         by_race(args)
+    elif args.evaluate_quali:
+        evaluate_quali(args)
     elif args.evaluate:
         evaluate(args)
     else:
