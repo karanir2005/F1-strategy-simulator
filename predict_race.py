@@ -297,11 +297,14 @@ def main():
                     help="also pull OpenF1 practice long runs (feature; --evaluate adds a 'chosen +FP' variant)")
     ap.add_argument("--by-race", action="store_true", help="T-014: per-race walk-forward table (grid mode) -> predictions/walk_forward_2026_by_race.csv")
     ap.add_argument("--stick-gamma", type=float, default=None, help="override PredictorConfig.stick_gamma (0 = off)")
+    ap.add_argument("--dnf-track-m", type=float, default=None, help="T-029: track-level DNF shrinkage m (0 = off, the default)")
     ap.add_argument("--offline", action="store_true", help="use cached Jolpica data only")
     ap.add_argument("--sims", type=int, default=CONFIG.n_sims)
     args = ap.parse_args()
     if args.stick_gamma is not None:
         CONFIG = P.PredictorConfig(**{**CONFIG.__dict__, "stick_gamma": args.stick_gamma})
+    if args.dnf_track_m is not None:
+        CONFIG = P.PredictorConfig(**{**CONFIG.__dict__, "dnf_track_m": args.dnf_track_m})
     if args.by_race:
         by_race(args)
     elif args.evaluate:

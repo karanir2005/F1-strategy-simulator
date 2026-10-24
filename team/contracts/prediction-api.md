@@ -28,3 +28,8 @@ Jolpica's qualifying endpoint is the classification, not the starting grid, so p
 - `drivers[].grid` is 0 for a pit-lane starter (already in the contract), now reachable via the override file.
 - Cache: a cached `pre_quali` payload is re-checked after 120 s (instead of 600 s) once `race.quali_date` is today or past, so the switch to grid mode appears within about 2 min. The cache key in the service now includes `grid_source`.
 - CLI saved CSVs gain a `grid_source` column (filename unchanged: `2026_R18_<prequali|grid>_<YYYYMMDD_HHMM>.csv`). Note the CLI/CSV spell the mode `prequali`; the API spells it `pre_quali`.
+
+## Addendum T-029: "what changed since pre-quali" fields (backend-engineer)
+When `GET /predict/next` has `mode == "grid"`, each `drivers[]` entry gains two optional fields:
+`"p_win_prequali": number | null`, `"p_podium_prequali": number | null` (probabilities in 0..1, same units as `p_win`/`p_podium`).
+Source: the newest saved `data/jolpica/predictions/2026_R{round}_prequali_<YYYYMMDD_HHMM>.csv` for the same round (newest by filename stamp). They are null when no such file exists, the file is unreadable, or the driver is not in it. Nothing is estimated or back-filled. In `pre_quali` mode the fields are absent. Change per driver = `p_win - p_win_prequali`. Existing clients that ignore the fields keep working. The stale-CSV fallback attaches them too.
