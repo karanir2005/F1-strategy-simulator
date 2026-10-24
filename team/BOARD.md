@@ -41,7 +41,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-033 | frontend-engineer | backlog (later, user) | T-024 | Copy an optimizer plan into the manual comparison with one click |
 | T-034 | backend-engineer | backlog (after v1.0.0, user) | T-030 | Phase 1 full-grid multi-car race simulation: the 'final polishing' step that would let the winner prediction beat grid order |
 | T-035 | backend-engineer | done (no QA) | T-027 | Qualifying prediction (pole/front row/Q3/Q1 exit/exp grid) in API, walk-forward validated vs baselines |
-| T-036 | orchestrator | in-progress | T-035 | Qualifying columns in the /predict driver table; predicted vs actual grid after quali |
+| T-036 | orchestrator | done | T-035 | Qualifying columns in the /predict driver table; predicted vs actual grid after quali |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:
