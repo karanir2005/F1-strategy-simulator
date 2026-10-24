@@ -150,9 +150,16 @@ class PredictorConfig:
     #     m = exp(stick_gamma * (s_circuit - s_global)),
     # s = weighted mean Spearman(grid, finish) over earlier races (shrunk to
     # the global mean with stick_k pseudo-races). 0.0 = off (m == 1).
-    stick_gamma: float = 0.0
+    stick_gamma: float = 4.0  # T-037: with stick_mode="pole" (2025-tuned; 0 = off)
     stick_k: float = 4.0
     stick_w_old: float = 0.5  # weight of races from earlier seasons (era-mixed)
+    # T-037 which per-race signal feeds the stickiness: "rho" = whole-field
+    # Spearman (T-014); "front" = Spearman over the top stick_top starters only;
+    # "pole" = 1 if the winner started P1 else 0 (front-of-grid win lock-in).
+    stick_mode: str = "pole"
+    stick_top: int = 8
+    # races of seasons < 2022 (pre ground-effect) get stick_w_old * this factor
+    stick_w_pre2022: float = 1.0
 
 
 # ----------------------------------------------------------- data shaping
@@ -214,7 +221,7 @@ def _grid_eff(grid: pd.Series, n: int) -> np.ndarray:
 # ------------------------------------------------- track grid stickiness
 
 
-def _race_rho(res: pd.DataFrame) -> pd.DataFrame:
+def _race_rho(res: pd.DataFrame, mode: str = "rho", top: int = 8) -> pd.DataFrame:
     """Per race: Spearman(grid, finishing position) among classified cars
     (grid 0 / pit lane = last). Columns season, round, circuit_id, rho."""
     rows = []
@@ -224,18 +231,28 @@ def _race_rho(res: pd.DataFrame) -> pd.DataFrame:
         if len(c) < 5:
             continue
         ge = _grid_eff(c["grid"], n)
-        rho = pd.Series(ge).rank().corr(pd.Series(c["position"].to_numpy(dtype=float)).rank())
+        if mode == "pole":
+            w = c[c["position"] == c["position"].min()]
+            rho = float(ge[(c["position"] == c["position"].min()).to_numpy()][0] <= 1) if len(w) else np.nan
+        elif mode == "front":
+            k = ge <= top
+            if k.sum() < 4:
+                continue
+            rho = pd.Series(ge[k]).rank().corr(pd.Series(c["position"].to_numpy(dtype=float)[k]).rank())
+        else:
+            rho = pd.Series(ge).rank().corr(pd.Series(c["position"].to_numpy(dtype=float)).rank())
         if np.isfinite(rho):
             rows.append((int(s), int(r), str(g["circuit_id"].iloc[0]), float(rho)))
     return pd.DataFrame(rows, columns=["season", "round", "circuit_id", "rho"])
 
 
-def _rho_table(hist: dict) -> pd.DataFrame:
-    if "_rho" not in hist:  # cache on the (mutable) history dict
+def _rho_table(hist: dict, mode: str = "rho", top: int = 8) -> pd.DataFrame:
+    key = ("_rho", mode, top)
+    if key not in hist:  # cache on the (mutable) history dict
         parts = [hist["results"]] + ([hist["track_results"]] if "track_results" in hist else [])
         cols = ["season", "round", "circuit_id", "grid", "position", "classified"]
-        hist["_rho"] = _race_rho(pd.concat([p[cols] for p in parts], ignore_index=True))
-    return hist["_rho"]
+        hist[key] = _race_rho(pd.concat([p[cols] for p in parts], ignore_index=True), mode, top)
+    return hist[key]
 
 
 def circuit_of(hist: dict, season: int, rnd: int) -> str | None:
@@ -263,12 +280,13 @@ def track_stickiness(hist: dict, season: int, rnd: int, cfg: "PredictorConfig") 
     history -> s_c = s_global -> multiplier exactly 1.
     Returns dict(mult, s_circuit, s_global, n_cur, n_old, circuit_id).
     """
-    t = _rho_table(hist)
+    t = _rho_table(hist, cfg.stick_mode, cfg.stick_top)
     t = t[(t["season"] < season) | ((t["season"] == season) & (t["round"] < rnd))]
     cid = circuit_of(hist, season, rnd)
     if t.empty:
         return dict(mult=1.0, s_circuit=np.nan, s_global=np.nan, n_cur=0, n_old=0, circuit_id=cid)
-    w = np.where(t["season"] == season, 1.0, cfg.stick_w_old)
+    w = np.where(t["season"] == season, 1.0,
+                 np.where(t["season"] < 2022, cfg.stick_w_old * cfg.stick_w_pre2022, cfg.stick_w_old))
     s_glob = float((w * t["rho"]).sum() / w.sum())
     m = (t["circuit_id"] == cid).to_numpy()
     sw = float(w[m].sum())
