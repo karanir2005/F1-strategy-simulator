@@ -135,7 +135,7 @@ class SimulateRequest(BaseModel):
         description="T-030: add random SC/VSC periods (fitted rates), same timeline for every strategy. "
         "Default false = unchanged behaviour. Fixed pit plans only; no reactive stops.",
     )
-    seed: Optional[int] = None
+    seed: Optional[int] = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def base_laptime_or_track(self):
@@ -234,7 +234,10 @@ class StrategyResult(BaseModel):
     lap_times: List[float] = Field(
         description="Noise-free lap-by-lap trace (one deterministic run), for charting"
     )
-    pit_laps: List[int]
+    pit_laps: List[int] = Field(
+        description="1-indexed lap numbers on which each new stint STARTS (the out-lap after a stop), "
+        "i.e. one more than the lap the car pitted at the end of. /optimize reports the last lap of each stint instead."
+    )
 
 
 class SimulateResponse(BaseModel):

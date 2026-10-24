@@ -57,7 +57,7 @@ class OptimizeRequest(BaseModel):
     total_laps: Optional[int] = Field(default=None, gt=0, le=MAX_RACE_LAPS)
     pit_loss_s: Optional[float] = Field(default=None, ge=0, le=120)
     base_laptime_s: Optional[float] = Field(default=None, gt=0, le=300)
-    seed: Optional[int] = 0
+    seed: Optional[int] = Field(default=0, ge=0)
     use_track_wear: bool = Field(
         default=False,
         description="T-030: use this track's per-track tyre wear fit (T-028) instead of the global curves. "
@@ -158,6 +158,7 @@ def optimize_route(request: OptimizeRequest) -> OptimizeResponse:
         assumptions=[
             SAFETY_CAR_ASSUMPTION if (request.safety_cars and a.startswith("No safety cars")) else a
             for a in ASSUMPTIONS
+            if not (wear_applied and a.startswith("Global tyre-wear"))
         ]
         + (["Per-track tyre wear slopes (partially pooled to the global fit) used for this circuit."] if wear_applied else []),
     )

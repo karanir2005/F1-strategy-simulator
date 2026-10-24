@@ -43,6 +43,8 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-035 | backend-engineer | done (no QA) | T-027 | Qualifying prediction (pole/front row/Q3/Q1 exit/exp grid) in API, walk-forward validated vs baselines |
 | T-036 | orchestrator | done | T-035 | Qualifying columns in the /predict driver table; predicted vs actual grid after quali |
 | T-037 | backend-engineer | done | T-029 | Per-circuit grid stickiness from pole-to-win rate (2018-2026, shrunk, no leakage); default stick_mode=pole, gamma 4. 2026 grid win LL 0.0794->0.0762, podium 0.2083->0.1990; still picks pole every race |
+| T-038 | backend-engineer | done | QA sweep | Quali-day hardening: partial quali refetch, robust override parsing + stale_reason, stale cache on failure, session start times, seed 422, Austin HARD C2, eval refresh |
+| T-039 | frontend-engineer | done | QA sweep | Countdown on real session times, strategy staleness guards + run caption, SC copy, laps-match validation, fetch timeout, small copy fixes |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:

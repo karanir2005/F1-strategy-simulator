@@ -42,7 +42,7 @@ function barDomain(rows: Row[], key: Metric): number {
 }
 
 function gridLabel(g: number | null): string {
-  return g === null ? "not set" : g === 0 ? "pit lane" : `P${g}`;
+  return g == null ? "not set" : g === 0 ? "pit lane" : `P${g}`;
 }
 
 const COLS =
@@ -105,7 +105,7 @@ function Detail({ r, session, open, id }: { r: Row; session: Session; open: bool
             )}
             <dt className="text-muted-fg">Starting position</dt>
             <dd className="font-mono text-fg tnum">
-              {r.grid === null ? "not set (pre-quali)" : gridLabel(r.grid)}
+              {r.grid == null ? "not set (pre-quali)" : gridLabel(r.grid)}
             </dd>
           </dl>
         </div>
@@ -122,7 +122,7 @@ export function ProbabilityTable({
   qualifying?: QualifyingBlock | null;
 }) {
   const hasQuali = !!qualifying?.available && qualifying.drivers.length > 0;
-  const hasActual = hasQuali && qualifying!.drivers.some((d) => d.actual_grid !== null);
+  const hasActual = hasQuali && qualifying!.drivers.some((d) => d.actual_grid != null);
   const [session, setSession] = useState<Session>("race");
   const [metric, setMetric] = useState<Metric>("p_win");
   const [openCode, setOpenCode] = useState<string | null>(null);
@@ -183,7 +183,7 @@ export function ProbabilityTable({
                     view === s ? "bg-fg text-bg" : "text-muted-fg hover:text-fg"
                   }`}
                 >
-                  {s === "race" ? "Race" : "Qualifying"}
+                  {s === "race" ? "Race" : hasActual ? "Qualifying (pre-quali prediction)" : "Qualifying"}
                 </button>
               ))}
             </div>

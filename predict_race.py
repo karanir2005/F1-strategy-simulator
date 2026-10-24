@@ -97,6 +97,26 @@ def next_round(offline: bool) -> int:
     raise SystemExit("season complete")
 
 
+def read_grid_file(path) -> pd.DataFrame:
+    """Tolerant override-grid reader: ; or , separator, any header case, stray whitespace,
+    codes upper-cased, PL/PIT/blank-free grid cells ("PL"/"pit" = pit-lane start = 0).
+    Raises SystemExit with the offending rows listed."""
+    g = pd.read_csv(path, sep=None, engine="python", dtype=str, skipinitialspace=True)
+    g.columns = [str(c).strip().lower() for c in g.columns]
+    if "code" not in g.columns or "grid" not in g.columns:
+        raise SystemExit(f"grid file needs columns code,grid; found {list(g.columns)}")
+    g = g[["code", "grid"]].copy()
+    g["code"] = g["code"].fillna("").str.strip().str.upper()
+    raw = g["grid"].fillna("").str.strip().str.upper()
+    raw = raw.where(~raw.isin(["PL", "PIT", "PITLANE", "PIT LANE"]), "0")
+    num = pd.to_numeric(raw, errors="coerce")
+    bad = g.loc[num.isna(), "code"].tolist()
+    if bad:
+        raise SystemExit(f"grid file has blank/non-numeric grid values for: {bad}")
+    g["grid"] = num.astype(int)
+    return g[g["code"] != ""].reset_index(drop=True)
+
+
 def _entry_and_grid(hist, rnd, mode, grid_file):
     """Entry list + grid for the target race (grid mode only)."""
     q = hist["qualifying"]
@@ -105,8 +125,7 @@ def _entry_and_grid(hist, rnd, mode, grid_file):
     if mode == "prequali":
         return base, None, "entry list from " + ("qualifying" if len(q) else "the latest race")
     if grid_file:
-        g = pd.read_csv(grid_file)
-        g["code"] = g["code"].str.upper()
+        g = read_grid_file(grid_file)
         dup_c = g["code"][g["code"].duplicated()].unique().tolist()
         if dup_c:
             raise SystemExit(f"grid file has duplicate driver codes: {dup_c}")
@@ -114,13 +133,14 @@ def _entry_and_grid(hist, rnd, mode, grid_file):
         dup_g = gp[gp.duplicated()].unique().tolist()
         if dup_g:
             raise SystemExit(f"grid file has duplicate non-zero grid positions: {dup_g}")
-        if len(g) < 22:
-            print(f"WARNING: grid file has {len(g)} rows (<22); missing cars are dropped from the field.")
         known = pd.concat([base, P.entrants_for(hist, SEASON, rnd - 1)]).drop_duplicates("code")
         ent = g.merge(known, on="code", how="left")
         missing = ent[ent["driver_id"].isna()]["code"].tolist()
         if missing:
             raise SystemExit(f"grid file codes not found in Jolpica entry lists: {missing}")
+        absent = [c for c in base["code"] if c not in set(g["code"])]
+        if absent:
+            raise SystemExit(f"grid file is missing drivers {absent} (every entrant needs a row; pit-lane start = 0)")
         return ent[["driver_id", "code", "team_id", "team"]], ent["grid"].to_numpy(dtype=float), f"grid from {grid_file}"
     if len(q) == 0:
         raise SystemExit(

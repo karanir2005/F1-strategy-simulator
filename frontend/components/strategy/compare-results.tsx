@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import type { SimulateResponse, StrategyResult } from "@/lib/api";
+import { NOISE_FLOOR_S } from "@/lib/strategy-form";
 import { fmtPct, fmtRaceTime, fmtSigned, fmtTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { RangePlot } from "@/components/viz/range-plot";
@@ -18,7 +19,7 @@ import { RangePlot } from "@/components/viz/range-plot";
 const DELTA_HELP =
   "Paired gap vs the reference (lowest-mean) strategy: per simulation, this strategy's total minus the reference's total in the same simulation. Reported as the mean and the p10 to p90 range.";
 const WIN_PROB_HELP =
-  "Secondary. Share of simulations in which this strategy beat the other strategies compared, under the current model (one car in isolation; no safety cars or traffic yet). Not a race-win chance.";
+  "Secondary. Share of simulations in which this strategy beat the other strategies compared, under the current model (one car in isolation, no traffic). Not a race-win chance.";
 
 // line colours that read on both themes; fixed hexes because SVG strokes cannot use oklch channel tokens
 const LINE_COLORS = ["#ff6a3d", "#a78bfa", "#4ade80", "#38bdf8", "#f9a8d4", "#facc15"];
@@ -60,7 +61,9 @@ function makePitStopDot(pitLaps: number[], color: string) {
   return PitStopDot;
 }
 
-export function CompareResults({ results }: { results: SimulateResponse }) {
+export function CompareResults({ results, context }: { results: SimulateResponse; context?: string | null }) {
+  const sc = results.safety_cars === true;
+  const scCopy = sc ? "random safety cars included, no traffic yet" : "no safety cars or traffic yet";
   const sorted = [...results.results].sort((a, b) => a.mean - b.mean);
   const referenceName = results.reference_strategy;
   const lo = Math.min(...sorted.map((r) => r.p10));
@@ -73,6 +76,14 @@ export function CompareResults({ results }: { results: SimulateResponse }) {
       <h2 id="res-h" className="display text-3xl text-fg">
         Results
       </h2>
+      {context && <p className="-mt-3 font-mono text-[12px] text-muted-fg">{context}</p>}
+      {results.assumptions && results.assumptions.length > 0 && (
+        <ul className="max-w-3xl list-disc space-y-1 pl-5 text-xs leading-5 text-muted-fg">
+          {results.assumptions.map((a) => (
+            <li key={a}>{a}</li>
+          ))}
+        </ul>
+      )}
 
       <div className="panel overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-[13px]">
@@ -129,13 +140,13 @@ export function CompareResults({ results }: { results: SimulateResponse }) {
           Time vs reference is the paired gap: for each simulation, this strategy&apos;s total minus the reference
           strategy&apos;s total in the same simulation (the reference has the lowest mean time). Strategies with the same
           stop count share their random draws, so their gap is a single number rather than a range. A negative p10 means
-          the strategy beat the reference in at least 10% of simulations. Gaps of about a second or less are well inside
-          the model&apos;s error (replays of real races are off by tens of seconds), so treat them as no meaningful
-          difference.
+          the strategy beat the reference in at least 10% of simulations. Gaps of about {NOISE_FLOOR_S} seconds or less
+          are inside the model&apos;s error (replays of real races are off by tens of seconds), so treat them as no
+          meaningful difference.
         </p>
         <p>
           *Beat others is the share of simulations in which the strategy beat the other strategies compared, under the
-          current model (one car in isolation; no safety cars or traffic yet). It is not a race-win chance. With shared
+          current model (one car in isolation; {scCopy}). It is not a race-win chance. With shared
           random draws it can read exactly 0% or 100% for a fraction-of-a-second gap, so read the time gap first.
         </p>
       </div>

@@ -833,7 +833,7 @@
     "pit_loss_noise_std_s": 0.76,
     "base_laptime_s": 97.63,
     "compounds": {
-      "HARD": "C1",
+      "HARD": "C2",
       "MEDIUM": "C3",
       "SOFT": "C4"
     },
@@ -853,7 +853,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": false,
-    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. compounds from T-010 research note (2025 allocation). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (181 laps, race_simulator convention); pit stops n=20."
+    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. compounds: 2026 allocation C2/C3/C4 per F1.com (HARD C2; the T-010 note had the 2025 C1). Wear/stint figures are from Austin_2025 (HARD was C1 then), not refitted. base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (181 laps, race_simulator convention); pit stops n=20."
   },
   {
     "track_id": "mexico",

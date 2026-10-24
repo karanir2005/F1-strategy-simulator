@@ -65,7 +65,8 @@ export interface SimulateResponse {
   assumptions?: string[] | null;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const FETCH_TIMEOUT_MS = 60_000;
+const API_URL =process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 /** FastAPI 422 `detail` is a list of {loc, msg}; render as readable text, else fall back to JSON. */
 function formatDetail(detail: unknown): string | null {
@@ -187,10 +188,19 @@ async function failure(response: Response, what: string): Promise<Error> {
 /** fetch() rejects with a bare TypeError when the server is unreachable; give that a useful message. */
 async function call(path: string, what: string, init?: RequestInit): Promise<Response> {
   let response: Response;
+  const ctl = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    ctl.abort();
+  }, FETCH_TIMEOUT_MS);
   try {
-    response = await fetch(`${API_URL}${path}`, init);
+    response = await fetch(`${API_URL}${path}`, { ...init, signal: ctl.signal });
   } catch {
+    if (timedOut) throw new Error(`${what} failed: the backend did not respond within ${FETCH_TIMEOUT_MS / 1000} s.`);
     throw new Error(`${what} failed: cannot reach the backend at ${API_URL}.`);
+  } finally {
+    clearTimeout(timer);
   }
   if (!response.ok) throw await failure(response, what);
   return response;
@@ -232,6 +242,9 @@ export interface RaceInfo {
   /** ISO date, YYYY-MM-DD */
   date: string;
   quali_date: string | null;
+  /** ISO datetime (UTC) of the session start; optional, absent until the backend provides it. */
+  race_start_utc?: string | null;
+  quali_start_utc?: string | null;
 }
 
 export interface DriverPrediction {

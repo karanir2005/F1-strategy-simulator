@@ -16,6 +16,8 @@ class RaceInfo(BaseModel):
     circuit: str
     date: str
     quali_date: str | None = None
+    race_start_utc: str | None = None  # ISO UTC, e.g. 2026-10-25T19:00:00Z; null if schedule lacks a time
+    quali_start_utc: str | None = None
 
 
 class DriverPrediction(BaseModel):
@@ -82,6 +84,7 @@ class PredictionResponse(BaseModel):
     mode: str  # "pre_quali" | "grid"
     generated_at: str
     stale: bool
+    stale_reason: str | None = None  # why the live path failed when stale=true
     # "qualifying_classification" | "override_file" | null (pre_quali, or unknown for an old saved CSV)
     grid_source: str | None = None
     drivers: list[DriverPrediction]

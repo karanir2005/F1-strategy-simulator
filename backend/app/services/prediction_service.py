@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import logging
 import threading
 import time
 from datetime import datetime, timezone
@@ -53,7 +54,10 @@ class PredictionUnavailable(RuntimeError):
     """No live prediction and no saved CSV to fall back on."""
 
 
+STALE_TTL_S = 60  # after a failed refresh, serve the stale payload this long before retrying Jolpica
+log = logging.getLogger(__name__)
 _cache: dict = {"t": 0.0, "key": None, "payload": None}
+_stale: dict = {"t": 0.0, "payload": None}
 _lock = threading.Lock()
 _script = None
 
@@ -92,7 +96,9 @@ def evidence(mode: str, grid_source: str | None = None) -> dict:
     ev: dict = {"walk_forward": None, "notes": []}
     try:
         t = pd.read_csv(EVAL_CSV)
-        t = t[t["rounds"] == "R2-17"].set_index("method")
+        labels = t["rounds"].unique().tolist()
+        last = max((l for l in labels if l.startswith("R2-")), key=lambda l: int(l[3:]))
+        t = t[t["rounds"] == last].set_index("method")
         base = "baseline: grid" if mode == "grid" else "baseline: champ"
         m = t.loc[f"model {mode} (chosen)"]
         ev["walk_forward"] = {
@@ -235,6 +241,22 @@ def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool
     }
 
 
+def _iso_utc(date, time_) -> str | None:
+    """Jolpica date ('2026-10-25') + time ('19:00:00Z') -> '2026-10-25T19:00:00Z'; None if either is missing."""
+    if date is None or time_ is None or pd.isna(date) or pd.isna(time_):
+        return None
+    t = str(time_)
+    return f"{date}T{t if t.endswith('Z') else t + 'Z'}"
+
+
+def _start_times(ev) -> dict:
+    g = lambda k: ev[k] if k in ev.index else None
+    return {
+        "race_start_utc": _iso_utc(g("date"), g("race_time")),
+        "quali_start_utc": _iso_utc(g("quali_date"), g("quali_time")),
+    }
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
@@ -261,6 +283,7 @@ def compute_live() -> tuple[tuple, dict]:
         "circuit": _circuit_name(str(ev["circuit_id"])),
         "date": str(ev["date"]),
         "quali_date": None if pd.isna(ev["quali_date"]) else str(ev["quali_date"]),
+        **_start_times(ev),
     }
     payload = shape(t, mode, race, _now(), False, grid_source)
     payload["mode"] = api_mode
@@ -284,7 +307,7 @@ def _circuit_name(circuit_id: str) -> str:
 
 def latest_saved() -> dict:
     """Newest saved prediction CSV (by filename timestamp), shaped as a stale response."""
-    files = sorted(PRED_DIR.glob(f"{SEASON}_R*_*.csv"), key=lambda p: p.stat().st_mtime)
+    files = sorted(PRED_DIR.glob(f"{SEASON}_R*_*.csv"), key=lambda p: p.name)
     if not files:
         raise PredictionUnavailable("no live prediction available and no saved prediction CSV found")
     f = files[-1]
@@ -301,6 +324,7 @@ def latest_saved() -> dict:
             "circuit": _circuit_name(str(ev["circuit_id"])),
             "date": str(ev["date"]),
             "quali_date": None if pd.isna(ev["quali_date"]) else str(ev["quali_date"]),
+            **_start_times(ev),
         }
     except (OSError, IndexError, KeyError, ValueError):
         pass
@@ -323,16 +347,25 @@ def get_next(now: float | None = None) -> dict:
     with _lock:
         if _cache["payload"] is not None and now - _cache["t"] < _ttl(_cache["payload"]):
             return _cache["payload"]
+        if _stale["payload"] is not None and now - _stale["t"] < STALE_TTL_S:
+            return _stale["payload"]
         try:
             key, payload = compute_live()
-        except (Exception, SystemExit):  # network down, Jolpica error, grid mode without quali, ...
-            return latest_saved()
+        except (Exception, SystemExit) as e:  # network down, Jolpica error, grid mode without quali, ...
+            reason = f"{type(e).__name__}: {e}"[:500]
+            log.warning("live prediction failed, serving stale CSV: %s", reason, exc_info=isinstance(e, Exception))
+            payload = latest_saved()
+            payload["stale_reason"] = reason
+            _stale.update(t=now, payload=payload)
+            return payload
+        _stale.update(t=0.0, payload=None)
         _cache.update(t=now, key=key, payload=payload)
         return payload
 
 
 def clear_cache() -> None:
     _cache.update(t=0.0, key=None, payload=None)
+    _stale.update(t=0.0, payload=None)
 
 
 # ------------------------------------------------------------------ history
