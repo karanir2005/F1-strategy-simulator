@@ -92,7 +92,7 @@ export default function PredictPage() {
       ) : (
         <>
           <Hero data={data} />
-          <ProbabilityTable drivers={data.drivers} />
+          <ProbabilityTable drivers={data.drivers} qualifying={data.qualifying} />
         </>
       )}
 
