@@ -12,7 +12,7 @@ F1 race strategy simulator with a Monte Carlo engine. Models tire degradation, p
 
 ## Agent team
 
-Work is split across subagents in `.claude/agents/` (researcher, data-scientist, backend-engineer, frontend-engineer, qa-engineer). The main session orchestrates. Protocol, lane ownership and the handoff template are in `team/README.md`, tasks are in `team/BOARD.md` (orchestrator-only edits), and handoffs and research notes go in `team/handoffs/` and `team/research/`. Every code task goes through `qa-engineer` before it's marked done.
+Work is split across subagents in `.claude/agents/` (researcher, data-scientist, backend-engineer, frontend-engineer, qa-engineer). The main session orchestrates. Protocol, lane ownership and the handoff template are in `team/README.md`, tasks are in `team/BOARD.md` (orchestrator-only edits), and handoffs and research notes go in `team/handoffs/` and `team/research/`. QA runs only at milestones (see "Lean mode" in `team/README.md`).
 
 ## Running the Project
 
