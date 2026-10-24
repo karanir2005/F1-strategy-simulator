@@ -1,9 +1,11 @@
 import type { Compound } from "@/lib/api";
 
-/** Whole % from 10% up, one decimal below, "<1%" instead of a misleading 0%. */
+/** Whole % from 10% up, one decimal below, "<1%" / ">99%" instead of a misleading 0% / 100%. */
 export function fmtPct(p: number): string {
   if (p <= 0) return "0%";
+  if (p >= 1) return "100%";
   if (p < 0.01) return "<1%";
+  if (p > 0.99) return ">99%";
   const v = p * 100;
   return v >= 10 ? `${Math.round(v)}%` : `${v.toFixed(1)}%`;
 }

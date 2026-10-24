@@ -283,6 +283,41 @@ export interface PredictionResponse {
   headline: Headline;
   evidence: Evidence;
   disclaimer: string;
+  /** T-035. Predicted qualifying order; null when unavailable (e.g. grid mode without a saved pre-quali snapshot). */
+  qualifying?: QualifyingBlock | null;
+}
+
+export interface QualifyingDriver {
+  code: string;
+  p_pole: number;
+  /** grid <= 2 */
+  p_front_row: number;
+  /** grid <= 10 */
+  p_q3: number;
+  /** knocked out in Q1 (slot >= 17 of 22) */
+  p_q1_exit: number;
+  /** mean simulated qualifying rank, 1 = pole */
+  exp_grid: number;
+  /** grid mode only: the grid in use (0 = pit lane), null before qualifying */
+  actual_grid: number | null;
+}
+
+export interface QualifyingEvidence {
+  races: number;
+  pole_logloss: number;
+  baseline_pole_logloss: number;
+  baseline_name: string;
+  spearman: number;
+  baseline_spearman: number;
+  q3_logloss?: number;
+  baseline_q3_logloss?: number;
+}
+
+export interface QualifyingBlock {
+  available: boolean;
+  /** Sorted by p_pole descending. */
+  drivers: QualifyingDriver[];
+  evidence: QualifyingEvidence | null;
 }
 
 export interface HistoryRow {
