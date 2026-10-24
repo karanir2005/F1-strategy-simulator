@@ -1,0 +1,67 @@
+2025 races 23 (R2-24) FP weekends with data: {'V0 all long-run': 24, 'C1 fastest lap': 24, 'C2 last dry session LR, no sprint': 18}
+2026 races 16 (R2-17) FP weekends with data: {'V0 all long-run': 18, 'C1 fastest lap': 17, 'C2 last dry session LR, no sprint': 12}
+2025 prequali current (no FP) {'win_logloss': np.float64(0.1336), 'podium_logloss': np.float64(0.2525), 'top10_logloss': np.float64(0.5581), 'winner_nll': 1.7557}
+2025 prequali V0 all long-run {'win_logloss': np.float64(0.1348), 'podium_logloss': np.float64(0.2547), 'top10_logloss': np.float64(0.5587), 'winner_nll': 1.7721}
+2025 prequali C1 fastest lap {'win_logloss': np.float64(0.1368), 'podium_logloss': np.float64(0.2545), 'top10_logloss': np.float64(0.5488), 'winner_nll': 1.82}
+2025 prequali C2 last dry session LR, no sprint {'win_logloss': np.float64(0.1323), 'podium_logloss': np.float64(0.2565), 'top10_logloss': np.float64(0.5648), 'winner_nll': 1.7392}
+2025 grid current (no FP) {'win_logloss': np.float64(0.0837), 'podium_logloss': np.float64(0.1961), 'top10_logloss': np.float64(0.4976), 'winner_nll': 0.9935}
+2025 grid V0 all long-run {'win_logloss': np.float64(0.0864), 'podium_logloss': np.float64(0.1994), 'top10_logloss': np.float64(0.5043), 'winner_nll': 1.0288}
+2025 grid C1 fastest lap {'win_logloss': np.float64(0.087), 'podium_logloss': np.float64(0.197), 'top10_logloss': np.float64(0.4919), 'winner_nll': 1.0295}
+2025 grid C2 last dry session LR, no sprint {'win_logloss': np.float64(0.0862), 'podium_logloss': np.float64(0.2005), 'top10_logloss': np.float64(0.5065), 'winner_nll': 1.0243}
+2026 prequali current (no FP) {'win_logloss': np.float64(0.1129), 'podium_logloss': np.float64(0.2453), 'top10_logloss': np.float64(0.5069), 'winner_nll': 1.6343}
+2026 prequali V0 all long-run {'win_logloss': np.float64(0.1129), 'podium_logloss': np.float64(0.2455), 'top10_logloss': np.float64(0.5063), 'winner_nll': 1.6352}
+2026 prequali C1 fastest lap {'win_logloss': np.float64(0.1115), 'podium_logloss': np.float64(0.243), 'top10_logloss': np.float64(0.4964), 'winner_nll': 1.6093}
+2026 prequali C2 last dry session LR, no sprint {'win_logloss': np.float64(0.1129), 'podium_logloss': np.float64(0.2454), 'top10_logloss': np.float64(0.5071), 'winner_nll': 1.6345}
+2026 grid current (no FP) {'win_logloss': np.float64(0.0746), 'podium_logloss': np.float64(0.1992), 'top10_logloss': np.float64(0.4956), 'winner_nll': 1.0202}
+2026 grid V0 all long-run {'win_logloss': np.float64(0.0745), 'podium_logloss': np.float64(0.1992), 'top10_logloss': np.float64(0.4946), 'winner_nll': 1.0188}
+2026 grid C1 fastest lap {'win_logloss': np.float64(0.0725), 'podium_logloss': np.float64(0.1959), 'top10_logloss': np.float64(0.4834), 'winner_nll': 0.9816}
+2026 grid C2 last dry session LR, no sprint {'win_logloss': np.float64(0.0746), 'podium_logloss': np.float64(0.1995), 'top10_logloss': np.float64(0.4964), 'winner_nll': 1.0208}
+2025 prequali C3 V0 x stick^-2 {'win_logloss': np.float64(0.1384), 'podium_logloss': np.float64(0.2552), 'top10_logloss': np.float64(0.565), 'winner_nll': 1.8274}
+2025 prequali C3 V0 x stick^-1 {'win_logloss': np.float64(0.136), 'podium_logloss': np.float64(0.2537), 'top10_logloss': np.float64(0.5582), 'winner_nll': 1.7896}
+2025 prequali C3 V0 x stick^1 {'win_logloss': np.float64(0.1349), 'podium_logloss': np.float64(0.2605), 'top10_logloss': np.float64(0.562), 'winner_nll': 1.7789}
+2025 prequali C3 V0 x stick^2 {'win_logloss': np.float64(0.1367), 'podium_logloss': np.float64(0.2646), 'top10_logloss': np.float64(0.5644), 'winner_nll': 1.8097}
+2025 grid C3 V0 x stick^-2 {'win_logloss': np.float64(0.0948), 'podium_logloss': np.float64(0.2003), 'top10_logloss': np.float64(0.5132), 'winner_nll': 1.1661}
+2025 grid C3 V0 x stick^-1 {'win_logloss': np.float64(0.0897), 'podium_logloss': np.float64(0.1987), 'top10_logloss': np.float64(0.5056), 'winner_nll': 1.0767}
+2025 grid C3 V0 x stick^1 {'win_logloss': np.float64(0.0853), 'podium_logloss': np.float64(0.2027), 'top10_logloss': np.float64(0.5068), 'winner_nll': 1.0101}
+2025 grid C3 V0 x stick^2 {'win_logloss': np.float64(0.0866), 'podium_logloss': np.float64(0.2069), 'top10_logloss': np.float64(0.5078), 'winner_nll': 1.0182}
+2026 prequali C3 V0 x stick^-2 {'win_logloss': np.float64(0.1133), 'podium_logloss': np.float64(0.2456), 'top10_logloss': np.float64(0.5047), 'winner_nll': 1.6413}
+2026 prequali C3 V0 x stick^-1 {'win_logloss': np.float64(0.1132), 'podium_logloss': np.float64(0.2453), 'top10_logloss': np.float64(0.5059), 'winner_nll': 1.6394}
+2026 prequali C3 V0 x stick^1 {'win_logloss': np.float64(0.1126), 'podium_logloss': np.float64(0.2462), 'top10_logloss': np.float64(0.5058), 'winner_nll': 1.6303}
+2026 prequali C3 V0 x stick^2 {'win_logloss': np.float64(0.1124), 'podium_logloss': np.float64(0.2464), 'top10_logloss': np.float64(0.5058), 'winner_nll': 1.6253}
+2026 grid C3 V0 x stick^-2 {'win_logloss': np.float64(0.0748), 'podium_logloss': np.float64(0.1991), 'top10_logloss': np.float64(0.4941), 'winner_nll': 1.0207}
+2026 grid C3 V0 x stick^-1 {'win_logloss': np.float64(0.0749), 'podium_logloss': np.float64(0.1991), 'top10_logloss': np.float64(0.4949), 'winner_nll': 1.023}
+2026 grid C3 V0 x stick^1 {'win_logloss': np.float64(0.0739), 'podium_logloss': np.float64(0.1991), 'top10_logloss': np.float64(0.4925), 'winner_nll': 1.0108}
+2026 grid C3 V0 x stick^2 {'win_logloss': np.float64(0.0733), 'podium_logloss': np.float64(0.1992), 'top10_logloss': np.float64(0.4907), 'winner_nll': 1.0009}
+ season     mode                           variant  win_logloss  win_brier  podium_logloss  podium_brier  top10_logloss  top10_brier  winner_nll  n_races
+   2025 prequali                   current (no FP)       0.1336     0.0413          0.2525        0.0782         0.5581       0.1865      1.7557       23
+   2025 prequali                   V0 all long-run       0.1348     0.0417          0.2547        0.0791         0.5587       0.1870      1.7721       23
+   2025 prequali                    C1 fastest lap       0.1368     0.0413          0.2545        0.0782         0.5488       0.1828      1.8200       23
+   2025 prequali C2 last dry session LR, no sprint       0.1323     0.0406          0.2565        0.0794         0.5648       0.1893      1.7392       23
+   2025     grid                   current (no FP)       0.0837     0.0264          0.1961        0.0566         0.4976       0.1616      0.9935       23
+   2025     grid                   V0 all long-run       0.0864     0.0270          0.1994        0.0572         0.5043       0.1643      1.0288       23
+   2025     grid                    C1 fastest lap       0.0870     0.0281          0.1970        0.0569         0.4919       0.1589      1.0295       23
+   2025     grid C2 last dry session LR, no sprint       0.0862     0.0273          0.2005        0.0582         0.5065       0.1656      1.0243       23
+   2026 prequali                   current (no FP)       0.1129     0.0336          0.2453        0.0814         0.5069       0.1653      1.6343       16
+   2026 prequali                   V0 all long-run       0.1129     0.0337          0.2455        0.0815         0.5063       0.1650      1.6352       16
+   2026 prequali                    C1 fastest lap       0.1115     0.0334          0.2430        0.0812         0.4964       0.1617      1.6093       16
+   2026 prequali C2 last dry session LR, no sprint       0.1129     0.0336          0.2454        0.0815         0.5071       0.1654      1.6345       16
+   2026     grid                   current (no FP)       0.0746     0.0210          0.1992        0.0636         0.4956       0.1607      1.0202       16
+   2026     grid                   V0 all long-run       0.0745     0.0210          0.1992        0.0636         0.4946       0.1602      1.0188       16
+   2026     grid                    C1 fastest lap       0.0725     0.0204          0.1959        0.0629         0.4834       0.1562      0.9816       16
+   2026     grid C2 last dry session LR, no sprint       0.0746     0.0210          0.1995        0.0637         0.4964       0.1610      1.0208       16
+   2025 prequali                  C3 V0 x stick^-2       0.1384     0.0430          0.2552        0.0797         0.5650       0.1900      1.8274       23
+   2025 prequali                  C3 V0 x stick^-1       0.1360     0.0422          0.2537        0.0790         0.5582       0.1868      1.7896       23
+   2025 prequali                   C3 V0 x stick^1       0.1349     0.0415          0.2605        0.0816         0.5620       0.1885      1.7789       23
+   2025 prequali                   C3 V0 x stick^2       0.1367     0.0418          0.2646        0.0831         0.5644       0.1895      1.8097       23
+   2025     grid                  C3 V0 x stick^-2       0.0948     0.0281          0.2003        0.0581         0.5132       0.1676      1.1661       23
+   2025     grid                  C3 V0 x stick^-1       0.0897     0.0276          0.1987        0.0572         0.5056       0.1647      1.0767       23
+   2025     grid                   C3 V0 x stick^1       0.0853     0.0269          0.2027        0.0586         0.5068       0.1651      1.0101       23
+   2025     grid                   C3 V0 x stick^2       0.0866     0.0279          0.2069        0.0605         0.5078       0.1653      1.0182       23
+   2026 prequali                  C3 V0 x stick^-2       0.1133     0.0338          0.2456        0.0816         0.5047       0.1647      1.6413       16
+   2026 prequali                  C3 V0 x stick^-1       0.1132     0.0337          0.2453        0.0814         0.5059       0.1650      1.6394       16
+   2026 prequali                   C3 V0 x stick^1       0.1126     0.0336          0.2462        0.0816         0.5058       0.1648      1.6303       16
+   2026 prequali                   C3 V0 x stick^2       0.1124     0.0335          0.2464        0.0816         0.5058       0.1648      1.6253       16
+   2026     grid                  C3 V0 x stick^-2       0.0748     0.0212          0.1991        0.0637         0.4941       0.1603      1.0207       16
+   2026     grid                  C3 V0 x stick^-1       0.0749     0.0212          0.1991        0.0636         0.4949       0.1605      1.0230       16
+   2026     grid                   C3 V0 x stick^1       0.0739     0.0207          0.1991        0.0635         0.4925       0.1594      1.0108       16
+   2026     grid                   C3 V0 x stick^2       0.0733     0.0205          0.1992        0.0635         0.4907       0.1587      1.0009       16
