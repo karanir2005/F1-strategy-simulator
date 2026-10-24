@@ -37,7 +37,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-029 | backend-engineer | done (no QA; stickiness and track-DNF stay off) | T-027 | Predictor: revisit track stickiness (`--stick-gamma`) and add per-track safety-car/DNF rates; keep only if walk-forward improves |
 | T-030 | backend-engineer | done (no QA; SC effect small, see handoff) | T-028 | Safety cars (and VSC) in the single-car simulator + optimizer |
 | T-031 | frontend-engineer | done (no QA; 'what changed' strip needs backend p_win_prequali, folded into T-029) | T-027 | Race-week behaviour on /predict (countdown, grid-set state, what changed since pre-quali, driver detail); phone-width browser check |
-| T-032 | backend-engineer | todo | T-031 | Deploy: Vercel frontend + Railway/Render backend, env/CORS config |
+| T-032 | backend-engineer | deferred (user: keep local for now) | T-031 | Deploy: Vercel frontend + Railway/Render backend, env/CORS config |
 | T-033 | frontend-engineer | backlog (later, user) | T-024 | Copy an optimizer plan into the manual comparison with one click |
 | T-034 | backend-engineer | backlog (after v1.0.0, user) | T-030 | Phase 1 full-grid multi-car race simulation: the 'final polishing' step that would let the winner prediction beat grid order |
 

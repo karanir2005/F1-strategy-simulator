@@ -177,6 +177,35 @@ function Podium({ data }: { data: PredictionResponse }) {
   );
 }
 
+/** Grid mode only: how the top drivers' win chance moved once the grid was set. Hidden without saved pre-quali numbers. */
+function WhatChanged({ data }: { data: PredictionResponse }) {
+  if (data.mode !== "grid") return null;
+  const rows = data.drivers
+    .slice(0, 5)
+    .filter((d) => typeof d.p_win_prequali === "number")
+    .map((d) => ({ d, delta: (d.p_win - (d.p_win_prequali as number)) * 100 }));
+  if (rows.length === 0) return null;
+  return (
+    <section aria-labelledby="hl-changed" className="border-t border-line pt-6">
+      <p id="hl-changed" className="label-mono">
+        What changed since pre-qualifying
+      </p>
+      <ul className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-5">
+        {rows.map(({ d, delta }) => (
+          <li key={d.code} className="text-[13px] leading-5 text-muted-fg">
+            <span className="font-mono text-fg">{d.code}</span>{" "}
+            <span className="tnum text-fg">{fmtPct(d.p_win)}</span>{" "}
+            <span className={`tnum ${Math.abs(delta) < 0.5 ? "" : delta > 0 ? "text-signal" : ""}`}>
+              {Math.abs(delta) < 0.5 ? "no change" : `${delta > 0 ? "+" : "−"}${Math.abs(delta).toFixed(1)} pts`}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2 text-[13px] leading-5 text-muted-fg">Win chance now versus the saved pre-qualifying prediction.</p>
+    </section>
+  );
+}
+
 export function Hero({ data }: { data: PredictionResponse }) {
   const top = data.drivers.find((d) => d.code === data.headline.winner) ?? data.drivers[0];
   const runnerUp = data.drivers.filter((d) => d.code !== top.code).sort((a, b) => b.p_win - a.p_win)[0] ?? null;
@@ -187,6 +216,9 @@ export function Hero({ data }: { data: PredictionResponse }) {
       </div>
       <div className="lg:col-span-5">
         <Podium data={data} />
+      </div>
+      <div className="lg:col-span-12">
+        <WhatChanged data={data} />
       </div>
     </div>
   );
