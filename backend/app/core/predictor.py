@@ -124,6 +124,14 @@ class PredictorConfig:
     dnf_prior_n: float = 22.0
     dnf_team_m: float = 10.0
     dnf_driver_m: float = 20.0
+    # T-029 track-level DNF component (OFF by default, 0 = off). p_dnf is multiplied by
+    #     ratio_c = (obs_c + m) / (exp_c + m),
+    # obs_c = not-classified starts at this circuit in STRICTLY EARLIER races (any
+    # season, incl. 2018-21 track_results), exp_c = what the field rate of each of
+    # those seasons would have produced; m = dnf_track_m pseudo expected-DNFs of
+    # shrinkage toward ratio 1. Season-relative so regulation eras don't leak in.
+    dnf_track_m: float = 0.0
+    dnf_track_clip: float = 0.9  # upper bound on the adjusted p_dnf
     # Monte Carlo
     n_sims: int = 20000
     seed: int = 0
@@ -550,6 +558,30 @@ def fit_outcome_model(hist, season, rnd, cfg, stores: dict) -> OutcomeModel:
                         b_fp=float(b[2]) if cfg.use_fp else 0.0)
 
 
+def track_dnf_ratio(hist: dict, season: int, rnd: int, cfg: "PredictorConfig") -> float:
+    """Shrunk circuit DNF multiplier (see PredictorConfig.dnf_track_m); 1.0 when off,
+    when the circuit is unknown or has no earlier race. Only races strictly before
+    (season, rnd) are read; a past season's field rate uses that whole season, the
+    target season's uses its earlier rounds only."""
+    if not cfg.dnf_track_m:
+        return 1.0
+    cid = circuit_of(hist, season, rnd)
+    if cid is None:
+        return 1.0
+    parts = [hist["results"]] + ([hist["track_results"]] if "track_results" in hist else [])
+    cols = ["season", "round", "circuit_id", "classified"]
+    a = pd.concat([p[cols] for p in parts], ignore_index=True)
+    a = a[(a["season"] < season) | ((a["season"] == season) & (a["round"] < rnd))]
+    a = a.assign(nf=(~a["classified"].astype(bool)).astype(float))
+    rate = a.groupby("season")["nf"].mean()
+    c = a[a["circuit_id"] == cid]
+    if c.empty:
+        return 1.0
+    obs = float(c["nf"].sum())
+    exp = float(c["season"].map(rate).sum())
+    return (obs + cfg.dnf_track_m) / (exp + cfg.dnf_track_m)
+
+
 def dnf_probabilities(hist, season, rnd, entrants: pd.DataFrame, cfg) -> np.ndarray:
     """Shrunk P(not classified) for each entrant from earlier rounds of the
     season: field <- prior, team <- field, driver <- team."""
@@ -566,7 +598,10 @@ def dnf_probabilities(hist, season, rnd, entrants: pd.DataFrame, cfg) -> np.ndar
         tr = (t_k.get(t, 0.0) + cfg.dnf_team_m * field_rate) / (t_n.get(t, 0) + cfg.dnf_team_m)
         dr = (d_k.get(d, 0.0) + cfg.dnf_driver_m * tr) / (d_n.get(d, 0) + cfg.dnf_driver_m)
         out.append(dr)
-    return np.asarray(out)
+    out = np.asarray(out)
+    if cfg.dnf_track_m:
+        out = np.minimum(out * track_dnf_ratio(hist, season, rnd, cfg), cfg.dnf_track_clip)
+    return out
 
 
 # ------------------------------------------------------------- simulation

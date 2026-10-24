@@ -114,8 +114,25 @@ def evidence(mode: str, grid_source: str | None = None) -> dict:
     return ev
 
 
+def prequali_snapshot(rnd: int) -> dict[str, tuple[float, float]]:
+    """code -> (p_win, p_podium) from the newest saved pre-quali CSV of this round (T-029).
+
+    Newest by the YYYYMMDD_HHMM stamp in the filename (not mtime, which a copy can change).
+    Empty dict when no such file exists or it is unreadable: the caller then reports null,
+    never a made-up number."""
+    files = sorted(PRED_DIR.glob(f"{SEASON}_R{int(rnd):02d}_prequali_*.csv"), key=lambda p: p.name)
+    for f in reversed(files):
+        try:
+            t = pd.read_csv(f, usecols=["code", "p_win", "p_podium"])
+        except (OSError, ValueError):
+            continue
+        return {str(c): (float(w), float(p)) for c, w, p in zip(t["code"], t["p_win"], t["p_podium"])}
+    return {}
+
+
 def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool, grid_source: str | None = None) -> dict:
     names = driver_names()
+    pq = prequali_snapshot(race.get("round")) if mode == "grid" and race.get("round") is not None else {}
     gcol = t["grid"] if "grid" in t.columns else pd.Series([None] * len(t))
     drivers = []
     for i, r in t.reset_index(drop=True).iterrows():
@@ -133,6 +150,10 @@ def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool
                 "p_dnf": float(r["p_dnf"]),
             }
         )
+        if mode == "grid":  # optional fields, null when no pre-quali snapshot exists for the driver
+            old = pq.get(r["code"])
+            drivers[-1]["p_win_prequali"] = None if old is None else old[0]
+            drivers[-1]["p_podium_prequali"] = None if old is None else old[1]
     drivers.sort(key=lambda d: (-d["p_win"], -d["p_podium"]))
     return {
         "race": race,
