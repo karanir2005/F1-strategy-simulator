@@ -64,6 +64,8 @@ def test_next_live_sorted_and_cached(monkeypatch):
 
 
 def test_cache_expires(monkeypatch):
+    # the TTL shortens on/after quali day (see test_ttl_shortens_on_quali_day); pin it so this test doesn't depend on today's date
+    monkeypatch.setattr(svc, "_ttl", lambda payload: svc.CACHE_TTL_S)
     calls = []
     _live(monkeypatch, calls)
     svc.get_next(now=1000.0)
@@ -71,6 +73,15 @@ def test_cache_expires(monkeypatch):
     assert len(calls) == 1
     svc.get_next(now=1000.0 + svc.CACHE_TTL_S + 1)
     assert len(calls) == 2
+
+
+def test_ttl_shortens_on_quali_day():
+    past = {"mode": "pre_quali", "race": {**RACE, "quali_date": "2000-01-01"}}
+    future = {"mode": "pre_quali", "race": {**RACE, "quali_date": "2999-01-01"}}
+    grid = {"mode": "grid", "race": {**RACE, "quali_date": "2000-01-01"}}
+    assert svc._ttl(past) == svc.QUALI_DAY_TTL_S
+    assert svc._ttl(future) == svc.CACHE_TTL_S
+    assert svc._ttl(grid) == svc.CACHE_TTL_S
 
 
 def test_grid_mode_has_grid(monkeypatch):
