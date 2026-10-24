@@ -8,7 +8,7 @@ F1 race strategy simulator with a Monte Carlo engine. Models tire degradation, p
 
 **Current state:** Phase 1 core simulation engine is built and validated: `data_loader.py`, `tire_model.py`, `race_simulator.py`, `monte_carlo.py`, and the `POST /simulate` API route all exist (see Build Order below). `backend/app/services/` holds the prediction service. The Next.js frontend in `frontend/` has two pages: `/predict` (race winner/podium prediction) and `/strategy` (track picker, optimal stint plans, manual comparison).
 
-**Next:** the engine still simulates one car in isolation and can't meaningfully rank strategies yet. See `team/ROADMAP.md` for why, and the phased plan (full-grid sim, safety cars, per-track calibration, optimizer).
+**Next (see `team/BOARD.md`):** v1.0.0 work is done except deployment (T-032, deferred; the app runs locally). Backlog: T-033 (copy an optimizer plan into the manual comparison with one click) and T-034 (Phase 1 full-grid multi-car race simulation, the final polishing step after v1.0.0). Why the engine can't yet rank strategies beyond the grid baseline is in `team/ROADMAP.md`.
 
 ## Agent team
 

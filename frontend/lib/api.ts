@@ -226,6 +226,9 @@ export interface DriverPrediction {
   p_top10: number;
   exp_pos: number;
   p_dnf: number;
+  /** T-029. Grid mode only: the saved pre-quali numbers for the same round; null if no saved file. */
+  p_win_prequali?: number | null;
+  p_podium_prequali?: number | null;
 }
 
 export interface Headline {
