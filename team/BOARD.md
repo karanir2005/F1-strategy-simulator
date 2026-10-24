@@ -42,6 +42,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-034 | backend-engineer | backlog (after v1.0.0, user) | T-030 | Phase 1 full-grid multi-car race simulation: the 'final polishing' step that would let the winner prediction beat grid order |
 | T-035 | backend-engineer | done (no QA) | T-027 | Qualifying prediction (pole/front row/Q3/Q1 exit/exp grid) in API, walk-forward validated vs baselines |
 | T-036 | orchestrator | done | T-035 | Qualifying columns in the /predict driver table; predicted vs actual grid after quali |
+| T-037 | backend-engineer | done | T-029 | Per-circuit grid stickiness from pole-to-win rate (2018-2026, shrunk, no leakage); default stick_mode=pole, gamma 4. 2026 grid win LL 0.0794->0.0762, podium 0.2083->0.1990; still picks pole every race |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:

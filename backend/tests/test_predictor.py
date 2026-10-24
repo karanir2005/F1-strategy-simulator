@@ -378,8 +378,8 @@ def _stick_cfg(**kw):
 
 
 def test_stickiness_off_is_identical_to_baseline_model(hist_rep):
-    a = P.predict_race(hist_rep, 2026, 6, "grid", P.PredictorConfig(n_sims=3000, seed=5))
-    b = P.predict_race(hist_rep, 2026, 6, "grid", P.PredictorConfig(n_sims=3000, seed=5, stick_gamma=0.0, stick_k=9.0))
+    a = P.predict_race(hist_rep, 2026, 6, "grid", P.PredictorConfig(n_sims=3000, seed=5, stick_gamma=0.0))
+    b = P.predict_race(hist_rep, 2026, 6, "grid", P.PredictorConfig(n_sims=3000, seed=5, stick_gamma=0.0, stick_k=9.0, stick_mode="front"))
     pd.testing.assert_frame_equal(a, b)
 
 
@@ -432,12 +432,34 @@ def test_stickiness_no_leakage_from_target_or_future(hist_rep, mode):
 
 def test_stickiness_uses_only_strictly_earlier_races(hist_rep):
     cfg = P.PredictorConfig(stick_gamma=4.0)
-    t = P._rho_table(hist_rep)
+    t = P._rho_table(hist_rep, cfg.stick_mode, cfg.stick_top)
     for rnd in (3, 6):
         st = P.track_stickiness(hist_rep, 2026, rnd, cfg)
         sub = t[(t["season"] < 2026) | ((t["season"] == 2026) & (t["round"] < rnd))]
         w = np.where(sub["season"] == 2026, 1.0, cfg.stick_w_old)
         assert st["s_global"] == pytest.approx((w * sub["rho"]).sum() / w.sum())
+
+
+@pytest.mark.parametrize("smode", ["rho", "front", "pole"])
+def test_stickiness_signal_modes_no_leakage(hist_rep, smode):
+    """T-037: front-of-grid signals ('front', 'pole') use only strictly earlier races."""
+    cfg = _stick_cfg(stick_mode=smode)
+    base = P.track_stickiness(hist_rep, 2026, 6, cfg)
+    scr = _scramble_target_and_future(hist_rep, 2026, 6)
+    scr = P.prepare_history(scr["results"], scr["qualifying"], track_results=hist_rep["track_results"])
+    st = P.track_stickiness(scr, 2026, 6, cfg)
+    for k in ("mult", "s_circuit", "s_global", "n_cur", "n_old"):
+        assert st[k] == pytest.approx(base[k]), k
+
+
+def test_pole_signal_is_winner_started_p1():
+    rows = []
+    for rnd, win_grid in [(1, 1), (2, 3)]:
+        for g in range(1, 8):
+            pos = 1 if g == win_grid else (g + 1 if g < win_grid else g)
+            rows.append(dict(season=2026, round=rnd, circuit_id="A", grid=g, position=pos, classified=True))
+    t = P._race_rho(pd.DataFrame(rows), "pole")
+    assert t["rho"].tolist() == [1.0, 0.0]
 
 
 @pytest.mark.parametrize("mode", ["grid", "prequali"])

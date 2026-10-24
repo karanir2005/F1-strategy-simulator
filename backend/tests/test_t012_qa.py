@@ -27,13 +27,16 @@ pytestmark = pytest.mark.skipif(
 def real_hist(tmp_path_factory):
     J.DERIVED_DIR = tmp_path_factory.mktemp("derived")
     res, q, spr, sched = J.load_all(current_upto_round=17, offline=True, write_csv=False)
-    return P.prepare_history(res, q, sprint=spr), sched
+    return P.prepare_history(res, q, sprint=spr, schedule=sched), sched  # schedule: truncated target race must still resolve its circuit (stickiness is on by default)
 
 
 def _truncate(hist, season, rnd):
     """Physically remove the target race and everything later."""
     out = {}
     for k, df in hist.items():
+        if k == "schedule":  # calendar (circuit of the target), not an outcome
+            out[k] = df
+            continue
         out[k] = df[~((df["season"] == season) & (df["round"] >= rnd))].reset_index(drop=True)
     return out
 
