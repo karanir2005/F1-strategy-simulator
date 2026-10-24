@@ -146,6 +146,17 @@ class PredictorConfig:
     # for the top-3 starters and the historical table is a well-calibrated
     # shrinkage target.
     blend_baseline: float = 0.25
+    # T-040: baseline weight for p_win in GRID mode only (podium/top10 keep
+    # blend_baseline). 0 = model only (QA sweep: the grid-rank table adds noise to
+    # the winner call; the model's win log-loss is better without it). Set to
+    # None to use blend_baseline for win too (pre-T-040 behaviour).
+    blend_win_grid: float | None = 0.0
+    # T-040: apply per-circuit stickiness in pre-quali mode too. Off: stickiness
+    # (T-037) made pre-quali win/winner log-loss worse in both seasons.
+    stick_prequali: bool = False
+    # T-040: drop non-starters (status "Did not start", "Withdrew", DNQ, ...)
+    # from the DNF fit. They never raced, so they say nothing about reliability.
+    dnf_exclude_dns: bool = True
     # T-014 per-track grid stickiness (see track_stickiness()). The grid term
     # of the outcome utility is scaled per race by
     #     m = exp(stick_gamma * (s_circuit - s_global)),
@@ -601,11 +612,22 @@ def track_dnf_ratio(hist: dict, season: int, rnd: int, cfg: "PredictorConfig") -
     return (obs + cfg.dnf_track_m) / (exp + cfg.dnf_track_m)
 
 
+DNS_STATUS = frozenset({"did not start", "withdrew", "did not qualify", "dnq", "excluded", "did not participate"})
+
+
+def _started(df: pd.DataFrame) -> pd.Series:
+    """False for entries that never started (see DNS_STATUS). A lap-1 'Retired'
+    with 0 laps did start and is a real DNF, so laps is deliberately not used."""
+    return ~df["status"].fillna("").str.strip().str.lower().isin(DNS_STATUS)
+
+
 def dnf_probabilities(hist, season, rnd, entrants: pd.DataFrame, cfg) -> np.ndarray:
     """Shrunk P(not classified) for each entrant from earlier rounds of the
     season: field <- prior, team <- field, driver <- team."""
     res = hist["results"]
     past = res[(res["season"] == season) & (res["round"] < rnd)]
+    if cfg.dnf_exclude_dns and "status" in past.columns:
+        past = past[_started(past)]
     nf = (~past["classified"]).astype(float)
     field_rate = (nf.sum() + cfg.dnf_prior_rate * cfg.dnf_prior_n) / (len(past) + cfg.dnf_prior_n)
     t_n = past.groupby("team_id").size()
@@ -719,6 +741,11 @@ def predict_race(
     from `grid` (aligned with the entry list) or else the race's own
     Jolpica `grid` column; it must exist.
     """
+    if mode == "prequali" and cfg.stick_gamma and not cfg.stick_prequali:
+        # stickiness off in pre-quali: refit level 2 without it too (a caller's
+        # stores were built with stickiness, so rebuild them)
+        cfg = replace(cfg, stick_gamma=0.0)
+        stores = None
     stores = stores or _stores_for(hist, cfg, season)
     if entry_list is None and grid is None:
         f = stores[season].get(season, rnd).copy()
@@ -751,9 +778,10 @@ def predict_race(
         bl = stores.setdefault(f"_baseline_{kind}", RankBaseline(hist, kind))
         bl = bl.predict(season, rnd, entrants=ent).set_index("driver_id")
         for ev in ("win", "podium", "top10"):
+            we = cfg.blend_win_grid if (ev == "win" and mode == "grid" and cfg.blend_win_grid is not None) else w
             out[f"p_{ev}_model"] = out[f"p_{ev}"]
             out[f"p_{ev}_baseline"] = out["driver_id"].map(bl[f"p_{ev}"]).to_numpy()
-            out[f"p_{ev}"] = (1 - w) * out[f"p_{ev}_model"] + w * out[f"p_{ev}_baseline"]
+            out[f"p_{ev}"] = (1 - we) * out[f"p_{ev}_model"] + we * out[f"p_{ev}_baseline"]
     if mode == "prequali":
         out["exp_grid"] = sim["exp_grid"]
         for k in ("p_pole", "p_front_row", "p_q3", "p_q1_exit"):
@@ -885,6 +913,8 @@ def walk_forward(hist, season, rounds, method, cfg=PredictorConfig()) -> pd.Data
     out = []
     if method.startswith("model_"):
         mode = method.split("_", 1)[1]
+        if mode == "prequali" and not cfg.stick_prequali:
+            cfg = replace(cfg, stick_gamma=0.0)  # same as predict_race, but keeps the store cache
         stores = _stores_for(hist, cfg, season)
         for rnd in rounds:
             p = predict_race(hist, season, rnd, mode, cfg, stores=stores)
@@ -1001,6 +1031,8 @@ def quali_walk_forward(hist, season, rounds, method, cfg=PredictorConfig()) -> p
     method: "model" or one of QUALI_BASELINES. Columns: round, driver_id, p_pole, p_q3,
     pred_rank (exp_grid for the model, baseline rank otherwise), actual (quali_position)."""
     out = []
+    if not cfg.stick_prequali:
+        cfg = replace(cfg, stick_gamma=0.0)  # pre-quali runs without stickiness (T-040)
     stores = _stores_for(hist, cfg, season) if method == "model" else None
     for rnd in rounds:
         truth = _quali_truth(hist, season, rnd)

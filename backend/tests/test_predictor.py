@@ -308,12 +308,26 @@ def test_real_data_round17_sanity():
 
 
 def test_blend_keeps_sums_and_exposes_components(hist):
-    cfg = P.PredictorConfig(n_sims=3000, seed=2, blend_baseline=0.25)
+    cfg = P.PredictorConfig(n_sims=3000, seed=2, blend_baseline=0.25, blend_win_grid=None)
     t = P.predict_race(hist, 2026, 8, "grid", cfg)
     for ev, tot in (("win", 1), ("podium", 3)):
         assert t[f"p_{ev}_model"].sum() == pytest.approx(tot)
         assert t[f"p_{ev}_baseline"].sum() == pytest.approx(tot, abs=1e-6)
         assert np.allclose(t[f"p_{ev}"], 0.75 * t[f"p_{ev}_model"] + 0.25 * t[f"p_{ev}_baseline"])
+
+
+def test_t040_grid_win_model_only_and_dns_excluded(hist):
+    t = P.predict_race(hist, 2026, 8, "grid", P.PredictorConfig(n_sims=3000, seed=2))
+    assert np.allclose(t["p_win"], t["p_win_model"])  # win: no baseline in grid mode
+    assert np.allclose(t["p_podium"], 0.75 * t["p_podium_model"] + 0.25 * t["p_podium_baseline"])
+    # DNS entries are dropped from the DNF fit: mark one early classified-False... row as DNS
+    h2 = {**hist, "results": hist["results"].copy()}
+    r = h2["results"]
+    idx = r[(r["season"] == 2026) & (r["round"] == 1)].index[0]
+    r.loc[idx, ["classified", "status"]] = [False, "Did not start"]
+    on = P.dnf_probabilities(h2, 2026, 8, t, P.PredictorConfig())
+    off = P.dnf_probabilities(h2, 2026, 8, t, P.PredictorConfig(dnf_exclude_dns=False))
+    assert (on < off).any() and (on <= off + 1e-12).all()
 
 
 def test_baseline_for_future_race_uses_given_entrants(hist):
