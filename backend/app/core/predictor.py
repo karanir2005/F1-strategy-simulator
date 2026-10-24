@@ -140,10 +140,11 @@ class PredictorConfig:
     # Final probabilities = (1 - w) * PL model + w * rank-frequency baseline
     # (grid-rank table in grid mode, championship-rank table pre-quali; see
     # RankBaseline). w picked on the 2025 walk-forward before looking at
-    # 2026: w in {0, .25, .5, .75, 1} -> .25 best/tied in both modes. The
-    # PL model's -log(grid) curve and truncated fit get the very front
-    # right but are slightly over-confident on podium for the top-3
-    # starters; the historical table is a well-calibrated shrinkage target.
+    # 2026: w in {0, .25, .5, .75, 1}. Caveat (QA sweep): on the 2025 walk-forward
+    # WIN log-loss is actually best at w=0; .25 was chosen for podium/top-10
+    # log-loss, where the PL model's -log(grid) curve is slightly over-confident
+    # for the top-3 starters and the historical table is a well-calibrated
+    # shrinkage target.
     blend_baseline: float = 0.25
     # T-014 per-track grid stickiness (see track_stickiness()). The grid term
     # of the outcome utility is scaled per race by

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   fetchTracks,
   runOptimize,
@@ -57,6 +57,9 @@ export default function StrategyPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const epoch = useRef(0);
+  const [resultsCtx, setResultsCtx] = useState<string | null>(null);
+
   const track = tracks?.find((t) => t.track_id === trackId) ?? null;
   // numbers are typed by hand when overriding a track, or when no track is available at all
   const numbersEditable = override || !track;
@@ -67,6 +70,7 @@ export default function StrategyPage() {
     nSimulations,
     pitLossSeconds,
     strategies,
+    numbersEditable ? null : track?.total_laps,
   );
   const optValidationError = !track
     ? "Pick a track to find an optimal strategy."
@@ -114,8 +118,14 @@ export default function StrategyPage() {
 
   function selectTrack(id: string) {
     setTrackId(id);
+    epoch.current += 1; // any in-flight request now belongs to a previous track
     setOptResult(null);
     setOptError(null);
+    setOptLoading(false);
+    setResults(null);
+    setResultsCtx(null);
+    setError(null);
+    setLoading(false);
     const t = tracks?.find((x) => x.track_id === id);
     if (t && override) prefillFrom(t);
     if (t) setStrategies((rows) => fitToRaceLaps(rows, t.total_laps));
@@ -128,12 +138,12 @@ export default function StrategyPage() {
 
   async function handleOptimize() {
     if (!track || optValidationError) return;
+    const myEpoch = epoch.current;
     setOptLoading(true);
     setOptError(null);
     setOptResult(null);
     try {
-      setOptResult(
-        await runOptimize({
+      const res = await runOptimize({
           track_id: track.track_id,
           max_stops: maxStops,
           safety_cars: safetyCars,
@@ -146,12 +156,12 @@ export default function StrategyPage() {
                 base_laptime_s: baseLaptime as number,
               }
             : {}),
-        }),
-      );
+      });
+      if (myEpoch === epoch.current) setOptResult(res);
     } catch (err) {
-      setOptError(err instanceof Error ? err.message : "Optimizer failed");
+      if (myEpoch === epoch.current) setOptError(err instanceof Error ? err.message : "Optimizer failed");
     } finally {
-      setOptLoading(false);
+      if (myEpoch === epoch.current) setOptLoading(false);
     }
   }
 
@@ -197,9 +207,11 @@ export default function StrategyPage() {
   async function handleRun() {
     if (validationError) return;
 
+    const myEpoch = epoch.current;
     setLoading(true);
     setError(null);
     setResults(null);
+    setResultsCtx(null);
 
     const payload: Strategy[] = strategies.map((s) => ({
       name: s.name,
@@ -212,8 +224,7 @@ export default function StrategyPage() {
     }));
 
     try {
-      setResults(
-        await runSimulation({
+      const res = await runSimulation({
           ...(track ? { track_id: track.track_id } : {}),
           // track numbers come from the backend unless overriding (or there is no track)
           ...(numbersEditable
@@ -222,12 +233,17 @@ export default function StrategyPage() {
           strategies: payload,
           n_simulations: nSimulations as number,
           safety_cars: safetyCars,
-        }),
-      );
+      });
+      if (myEpoch === epoch.current) {
+        setResults(res);
+        setResultsCtx(
+          `${track ? track.name : "Custom numbers"} · ${strategies.reduce((m, s) => Math.max(m, s.stints.reduce((a, st) => a + (typeof st.laps === "number" ? st.laps : 0), 0)), 0)} laps · safety cars ${safetyCars ? "on" : "off"}`,
+        );
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Simulation failed");
+      if (myEpoch === epoch.current) setError(err instanceof Error ? err.message : "Simulation failed");
     } finally {
-      setLoading(false);
+      if (myEpoch === epoch.current) setLoading(false);
     }
   }
 
@@ -295,10 +311,14 @@ export default function StrategyPage() {
         <ErrorBlock
           title="Simulation failed"
           message={error}
-          hint="Is the backend running? Start it with uvicorn app.main:app --reload from backend/."
+          hint={
+            error.includes("cannot reach") || error.includes("did not respond")
+              ? "Is the backend running? Start it with uvicorn app.main:app --reload from backend/."
+              : undefined
+          }
         />
       )}
-      {results && <CompareResults results={results} />}
+      {results && <CompareResults results={results} context={resultsCtx} />}
     </div>
   );
 }

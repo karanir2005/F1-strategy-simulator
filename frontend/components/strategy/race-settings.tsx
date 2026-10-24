@@ -108,6 +108,9 @@ export function RaceSettings(p: RaceSettingsProps) {
             {t.source_season ?? "?"} data{t.source_season !== 2026 ? ", not 2026" : ""}
           </Badge>
           {t.already_raced_2026 === false && <Badge variant="outline">Not raced yet in 2026</Badge>}
+          {t.notes && t.source_season !== 2026 && (
+            <p className="basis-full text-[13px] leading-5 text-muted-fg">{t.notes}</p>
+          )}
         </div>
       )}
 

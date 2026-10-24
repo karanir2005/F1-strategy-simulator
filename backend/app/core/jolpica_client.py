@@ -158,6 +158,7 @@ def schedule(season: int, offline: bool = False) -> pd.DataFrame:
                 "has_sprint": "Sprint" in r,
                 "quali_date": r.get("Qualifying", {}).get("date"),
                 "quali_time": r.get("Qualifying", {}).get("time"),
+                "race_time": r.get("time"),
             }
         )
     return pd.DataFrame(rows)
@@ -212,9 +213,17 @@ def sprint_results(season: int, round_: int | None = None, offline: bool = False
     )
 
 
+QUALI_PENDING_TTL_S = 600
+
+
 def qualifying(season: int, round_: int | None = None, offline: bool = False) -> pd.DataFrame:
     path = f"{season}/{round_}/qualifying" if round_ else f"{season}/qualifying"
-    races = _races(get_pages(path, offline=offline))
+    # Until the round has race results, the qualifying page may be partial or later corrected
+    # (DSQ, reclassification): refetch on a short TTL instead of freezing the first response.
+    ttl = None
+    if round_ and not _cache_path(f"{season}/{round_}/results", 0).exists():
+        ttl = QUALI_PENDING_TTL_S
+    races = _races(get_pages(path, ttl_s=ttl, offline=offline))
     rows = []
     for r in races:
         for res in r.get("QualifyingResults", []):

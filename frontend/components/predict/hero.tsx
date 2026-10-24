@@ -81,8 +81,8 @@ function Headline({ data, top, runnerUp }: { data: PredictionResponse; top: Driv
         </p>
         {lead !== null && runnerUp && (
           <p className="mt-1 text-[13px] leading-5 text-muted-fg">
-            {lead.toFixed(1)} points ahead of {runnerUp.code} ({fmtPct(runnerUp.p_win)}). A favourite at this level
-            still loses most of the time.
+            {lead.toFixed(1)} points ahead of {runnerUp.code} ({fmtPct(runnerUp.p_win)}).
+            {top.p_win < 0.5 && " A favourite at this level still loses most of the time."}
           </p>
         )}
       </div>

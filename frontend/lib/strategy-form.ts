@@ -82,6 +82,8 @@ export function getValidationError(
   nSimulations: NumField,
   pitLossSeconds: NumField,
   strategies: StrategyRow[],
+  /** selected track's race distance when not overriding; plans must add up to it */
+  requiredLaps?: number | null,
 ): string | null {
   if (numbersEditable) {
     const err = getNumbersError(baseLaptime, totalLaps, pitLossSeconds);
@@ -139,6 +141,12 @@ export function getValidationError(
     return `All strategies must cover the same total race laps to be compared (${totals
       .map((t) => `"${t.name}": ${t.total}`)
       .join(", ")}).`;
+  }
+  if (requiredLaps != null) {
+    const off = totals.find((t) => t.total !== requiredLaps);
+    if (off) {
+      return `"${off.name}" totals ${off.total} laps but this track's race is ${requiredLaps} laps. Adjust the stints, or tick "Override numbers" to set your own distance.`;
+    }
   }
   return null;
 }

@@ -14,6 +14,7 @@ function plural(n: number, word: string) {
 export function weekendStatus(p: PredictionResponse, now: Date): string {
   const toRace = daysUntil(p.race.date, now);
   const toQuali = p.race.quali_date ? daysUntil(p.race.quali_date, now) : null;
+  if (!Number.isFinite(toRace)) return p.mode === "grid" ? "Qualifying done, grid set." : "Race date not confirmed.";
   const race = toRace > 0 ? `lights out in ${plural(toRace, "day")}` : toRace === 0 ? "race day" : "race finished";
   if (p.mode === "grid") return `Qualifying done, grid set. ${race.charAt(0).toUpperCase()}${race.slice(1)}.`;
   if (toQuali !== null && toQuali > 0) return `Qualifying in ${plural(toQuali, "day")}. ${race.charAt(0).toUpperCase()}${race.slice(1)}.`;

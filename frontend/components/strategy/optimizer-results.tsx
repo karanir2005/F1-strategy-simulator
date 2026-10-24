@@ -139,7 +139,9 @@ export function OptimizerResults({ result, topShown = 5 }: { result: OptimizeRes
         <p className="mt-3 text-[13px] leading-5 text-muted-fg">
           {near.length > 0
             ? `${near.length} other plan${near.length === 1 ? " is" : "s are"} within ${NOISE_FLOOR_S} s of this one, which is inside the model's noise: treat ${near.length === 1 ? "it" : "them"} as equivalent, not worse.`
-            : `The next plan is ${fmtSigned(plans[1]?.delta_to_best_mean_s ?? 0, 1)} behind in the model, which is outside the ${NOISE_FLOOR_S} s noise band.`}
+            : plans.length < 2
+              ? "Only one plan came back, so there is nothing to compare it with."
+              : `The next plan is ${fmtSigned(plans[1]?.delta_to_best_mean_s ?? 0, 1)} behind in the model, which is outside the ${NOISE_FLOOR_S} s noise band.`}
         </p>
       </div>
 
@@ -166,6 +168,9 @@ export function OptimizerResults({ result, topShown = 5 }: { result: OptimizeRes
                   ) : p.delta_to_best_mean_s < NOISE_FLOOR_S ? (
                     <Badge variant="outline">within noise</Badge>
                   ) : null}
+                  {i > 0 && (
+                    <span className="text-muted-fg sm:hidden">{fmtSigned(p.delta_to_best_mean_s, 1)} vs best</span>
+                  )}
                 </p>
               </div>
               <StintStrip stints={p.stints} size="md" playKey={planKey(p)} labels={compounds} />

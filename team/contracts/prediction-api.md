@@ -49,3 +49,8 @@ Source: the newest saved `data/jolpica/predictions/2026_R{round}_prequali_<YYYYM
 - `evidence`: 2026 walk-forward vs the strongest non-uniform baseline by pole log-loss (here "championship order"; the other is "previous-race qualifying order"). null if `data/jolpica/eval/quali_walk_forward.csv` is missing. Produced by `python predict_race.py --evaluate-quali`.
 - CLI prequali CSVs gain columns `p_pole,p_front_row,p_q3,p_q1_exit` (exp_grid already existed).
 - Fix in the same change: `drivers[].p_win_prequali` / `p_podium_prequali` (T-029) were being dropped by the route's response model; they are now declared and the route uses `response_model_exclude_unset`, so they appear in grid mode and stay absent in pre_quali.
+
+## T-038 additions (optional fields, existing clients unaffected)
+- `stale_reason: string | null` on `/predict/next`: set only when `stale` is true because the live path raised (exception text, max 500 chars); logged server-side. After a failed refresh the stale payload is cached 60 s.
+- `race.race_start_utc` / `race.quali_start_utc`: ISO UTC datetimes (e.g. `2026-10-25T19:00:00Z`) from the Jolpica schedule; null when the schedule has no time. Use these for countdowns instead of `date`/`quali_date`.
+- Grid override file: `,` or `;` separator, case-insensitive headers (`code`, `grid`), codes trimmed/upper-cased, `PL`/`pit` = pit lane (0). Every entrant needs a row; unknown or missing codes and blank grid cells are errors (CLI message; API serves stale with `stale_reason`).
