@@ -4,7 +4,7 @@ import { useInView } from "motion/react";
 import * as m from "motion/react-m";
 import { useId, useMemo, useRef, useState, type ReactNode } from "react";
 import type { DriverPrediction, QualifyingBlock, QualifyingDriver } from "@/lib/api";
-import { fmtOneIn, fmtPct } from "@/lib/format";
+import { fmtPct } from "@/lib/format";
 import { teamColor, teamShort } from "@/lib/teams";
 import { PctTicker } from "@/components/viz/pct-ticker";
 import { ProbBar } from "@/components/viz/prob-bar";
@@ -17,16 +17,16 @@ type Metric = RaceMetric | QualiMetric;
 /** One table row: race prediction plus, when available, the driver's qualifying prediction. */
 type Row = DriverPrediction & { q: QualifyingDriver | null };
 
-const METRICS: Record<Session, { key: Metric; label: string; long: string; event: string }[]> = {
+const METRICS: Record<Session, { key: Metric; label: string; long: string }[]> = {
   race: [
-    { key: "p_win", label: "Win", long: "win the race", event: "simulated races end this way" },
-    { key: "p_podium", label: "Podium", long: "finish on the podium", event: "simulated races end this way" },
-    { key: "p_top10", label: "Top 10", long: "finish in the top ten", event: "simulated races end this way" },
+    { key: "p_win", label: "Win", long: "win the race" },
+    { key: "p_podium", label: "Podium", long: "finish on the podium" },
+    { key: "p_top10", label: "Top 10", long: "finish in the top ten" },
   ],
   quali: [
-    { key: "p_pole", label: "Pole", long: "take pole position", event: "simulated qualifying sessions end this way" },
-    { key: "p_front_row", label: "Front row", long: "start from the front row", event: "simulated qualifying sessions end this way" },
-    { key: "p_q3", label: "Q3", long: "reach Q3 (top ten)", event: "simulated qualifying sessions end this way" },
+    { key: "p_pole", label: "Pole", long: "take pole position" },
+    { key: "p_front_row", label: "Front row", long: "start from the front row" },
+    { key: "p_q3", label: "Q3", long: "reach Q3 (top ten)" },
   ],
 };
 
@@ -93,9 +93,6 @@ function Detail({ r, session, open, id }: { r: Row; session: Session; open: bool
                   <span className="font-mono text-fg tnum">{fmtPct(v)}</span>
                 </div>
                 <ProbBar value={v} domain={1} revealed={open} className="mt-1.5" />
-                <p className="mt-1 text-xs leading-4 text-muted-fg">
-                  {v < 0.005 ? "Almost never in the simulation." : `${fmtOneIn(v).replace(/^about/, "About")} ${mt.event}.`}
-                </p>
               </div>
             );
           })}
