@@ -54,3 +54,11 @@ Source: the newest saved `data/jolpica/predictions/2026_R{round}_prequali_<YYYYM
 - `stale_reason: string | null` on `/predict/next`: set only when `stale` is true because the live path raised (exception text, max 500 chars); logged server-side. After a failed refresh the stale payload is cached 60 s.
 - `race.race_start_utc` / `race.quali_start_utc`: ISO UTC datetimes (e.g. `2026-10-25T19:00:00Z`) from the Jolpica schedule; null when the schedule has no time. Use these for countdowns instead of `date`/`quali_date`.
 - Grid override file: `,` or `;` separator, case-insensitive headers (`code`, `grid`), codes trimmed/upper-cased, `PL`/`pit` = pit lane (0). Every entrant needs a row; unknown or missing codes and blank grid cells are errors (CLI message; API serves stale with `stale_reason`).
+
+## Addendum T-044: race picker (past 2026 races)
+No simulation at request time; both endpoints read `data/jolpica/predictions/walk_forward_2026_drivers.csv` (written by `python predict_race.py --by-race --offline`, one row per round x driver: grid-mode walk-forward prediction made from earlier rounds plus that race's own grid, plus the actual result). Re-run `--by-race` after each new race to add a round. File is re-read when its mtime changes.
+
+- `GET /predict/races` -> `[{"round": 18, "name": "United States GP", "date": "2026-10-25", "has_prediction": true, "is_next": false}, ...]`, ascending by round: every scored round plus the next unraced one (`is_next: true`, served by `/predict/next`).
+- `GET /predict/race/{round}` -> same `PredictionResponse` as `/predict/next` with `mode: "grid"`, `stale: false`, `grid_source: null`, `generated_at` = CSV mtime, `qualifying: null`, `p_win_prequali`/`p_podium_prequali` null, plus top-level `"race_done": true` and per driver
+  `"actual": {"position": 1 | null, "classified": true | null, "status": "Finished" | "+1 Lap" | "Engine" | null, "dnf": false}` (`position` is the official classification slot, DNFs get a slot too; `dnf` true when not classified and status is not "Finished"/"+N Lap"). 404 if the round has no precomputed prediction.
+- Frontend: `/predict?round=12` selects a past race; no param = next race.

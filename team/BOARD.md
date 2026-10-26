@@ -48,6 +48,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-040 | backend-engineer | done | QA sweep | Model tweaks: grid-mode p_win model-only, stickiness grid-mode only, DNS not counted as DNF; eval artifacts + R18 snapshot refreshed |
 | T-041 | data-scientist | done (not shipped) | T-040 | FP pace experiment (3 variants + T-027 long-run): no variant beats current on 2025; fastest-lap gap helps 2026 only. Revisit with more races / 2024 FP |
 | T-042 | backend-engineer | done | T-040 | R18 scored (winner called, podium 3/3 by E[pos]); history incl. Austin + latest-race card; driver table defaults to expected finish / expected grid; podium = top 3 by E[pos] |
+| T-044 | backend-engineer | done | T-042 | Race selector on /predict: /predict/races + /predict/race/{round} from precomputed walk-forward (grid mode), Actual column, ?round= URL |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:

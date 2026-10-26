@@ -316,9 +316,11 @@ def by_race(args):
     hist, _, _ = load(args.offline, rnd)
     last = int(hist["results"].query("season == @SEASON")["round"].max())
     cfg = P.PredictorConfig(**{**CONFIG.__dict__, "n_sims": args.sims})
-    t = P.by_race_table(hist, SEASON, range(1, last + 1), cfg, "grid")
+    drv: list = []
+    t = P.by_race_table(hist, SEASON, range(1, last + 1), cfg, "grid", driver_rows=drv)
     out = OUT_DIR / "predictions"
     out.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(drv).to_csv(out / f"walk_forward_{SEASON}_drivers.csv", index=False)  # T-044 race picker
     path = out / f"walk_forward_{SEASON}_by_race.csv"
     t.to_csv(path, index=False)
     pd.set_option("display.width", 250)

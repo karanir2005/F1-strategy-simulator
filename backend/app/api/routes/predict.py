@@ -20,6 +20,21 @@ class RaceInfo(BaseModel):
     quali_start_utc: str | None = None
 
 
+class ActualResult(BaseModel):
+    position: int | None = None  # official classification position (incl. classified-but-lapped and DNF slots)
+    classified: bool | None = None
+    status: str | None = None  # Jolpica status text, e.g. "Finished", "+1 Lap", "Engine"
+    dnf: bool = False
+
+
+class RaceListItem(BaseModel):
+    round: int
+    name: str
+    date: str
+    has_prediction: bool
+    is_next: bool = False
+
+
 class DriverPrediction(BaseModel):
     code: str
     name: str
@@ -33,6 +48,7 @@ class DriverPrediction(BaseModel):
     # T-029, grid mode only (absent in pre_quali). Previously dropped by this response model.
     p_win_prequali: float | None = None
     p_podium_prequali: float | None = None
+    actual: ActualResult | None = None  # T-044, only on /predict/race/{round}
 
 
 class QualiDriver(BaseModel):
@@ -92,6 +108,7 @@ class PredictionResponse(BaseModel):
     headline: Headline
     evidence: Evidence
     disclaimer: str
+    race_done: bool | None = None  # T-044, true only on /predict/race/{round}
 
 
 class HistoryRow(BaseModel):
@@ -129,3 +146,16 @@ def predict_history() -> dict:
         return {"season": svc.SEASON, "mode": "grid", "races": svc.history()}
     except svc.PredictionUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
+
+
+@router.get("/races", response_model=list[RaceListItem])
+def predict_races() -> list[dict]:
+    return svc.list_races()
+
+
+@router.get("/race/{round}", response_model=PredictionResponse, response_model_exclude_unset=True)
+def predict_race_round(round: int) -> dict:
+    try:
+        return svc.get_past_race(round)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"no precomputed prediction for round {round}")

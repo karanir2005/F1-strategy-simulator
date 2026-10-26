@@ -145,3 +145,38 @@ def test_history_503(monkeypatch):
 def test_cors_header():
     r = client.options("/predict/next", headers={"Origin": "http://localhost:3000", "Access-Control-Request-Method": "GET"})
     assert r.headers.get("access-control-allow-origin") == "http://localhost:3000"
+
+
+# ---- T-044: past-race picker
+def _past_setup(monkeypatch, tmp_path):
+    pd.DataFrame({
+        "round": [1, 1, 2], "driver_id": ["a", "b", "a"], "code": ["ANT", "HAM", "ANT"], "team": ["M", "F", "M"],
+        "grid": [1, 2, 1], "p_win": [0.6, 0.4, 1.0], "p_podium": [0.9, 0.9, 1.0], "p_top10": [1, 1, 1],
+        "exp_pos": [1.4, 1.6, 1.0], "p_dnf": [0.05, 0.05, 0.05], "actual_position": [2, 20, 1],
+        "actual_classified": [True, False, True], "actual_status": ["Finished", "Engine", "Finished"],
+    }).to_csv(tmp_path / "d.csv", index=False)
+    pd.DataFrame({"season": [2026] * 3, "round": [1, 2, 3], "race_name": ["Australian Grand Prix", "Chinese Grand Prix", "Japanese Grand Prix"],
+                  "date": ["2026-03-08", "2026-03-15", "2026-03-29"], "circuit_id": ["x", "y", "z"],
+                  "quali_date": ["2026-03-07"] * 3}).to_csv(tmp_path / "s.csv", index=False)
+    monkeypatch.setattr(svc, "DRIVERS_CSV", tmp_path / "d.csv")
+    monkeypatch.setattr(svc, "SCHEDULE_CSV", tmp_path / "s.csv")
+
+
+def test_races_list_and_past_race(monkeypatch, tmp_path):
+    _past_setup(monkeypatch, tmp_path)
+    r = client.get("/predict/races").json()
+    assert [x["round"] for x in r] == [1, 2, 3]
+    assert r[2]["is_next"] and not r[0]["is_next"]
+    j = client.get("/predict/race/1")
+    assert j.status_code == 200
+    b = j.json()
+    assert b["race_done"] is True and b["mode"] == "grid" and b["stale"] is False
+    by = {d["code"]: d for d in b["drivers"]}
+    assert by["ANT"]["actual"]["position"] == 2 and not by["ANT"]["actual"]["dnf"]
+    assert by["HAM"]["actual"]["dnf"] and by["HAM"]["actual"]["status"] == "Engine"
+
+
+def test_past_race_404(monkeypatch, tmp_path):
+    _past_setup(monkeypatch, tmp_path)
+    assert client.get("/predict/race/3").status_code == 404
+    assert client.get("/predict/race/99").status_code == 404

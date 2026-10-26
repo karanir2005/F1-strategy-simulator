@@ -1093,8 +1093,9 @@ def tune_on_season(hist, season, rounds, grid_of_cfgs) -> pd.DataFrame:
 
 
 def by_race_table(hist: dict, season: int, rounds, cfg: PredictorConfig = PredictorConfig(),
-                  mode: str = "grid") -> pd.DataFrame:
-    """T-014: one row per race of a strictly walk-forward prediction (each
+                  mode: str = "grid", driver_rows: list | None = None) -> pd.DataFrame:
+    """T-014 (T-044: if `driver_rows` is a list, per-driver prediction + actual result rows are
+    appended to it for the race-picker API): one row per race of a strictly walk-forward prediction (each
     race predicted from earlier rounds + its own grid) vs the real result:
     predicted/actual winner and podium, P(actual winner), winner NLL,
     per-race binary log-losses, Spearman(grid, finish) and the track
@@ -1110,6 +1111,18 @@ def by_race_table(hist: dict, season: int, rounds, cfg: PredictorConfig = Predic
             t[f"p_{ev}"] = np.clip(t[f"p_{ev}"], PROB_CLIP, 1 - PROB_CLIP)
         r = res[(res["season"] == season) & (res["round"] == rnd)]
         code_of = dict(zip(r["driver_id"], r["code"]))
+        if driver_rows is not None:
+            act = r.set_index("driver_id")
+            for _, d in p.iterrows():
+                a = act.loc[d["driver_id"]] if d["driver_id"] in act.index else None
+                driver_rows.append({
+                    "round": rnd, "driver_id": d["driver_id"], "code": d["code"], "team": d["team"],
+                    "grid": d["grid"], "p_win": d["p_win"], "p_podium": d["p_podium"], "p_top10": d["p_top10"],
+                    "exp_pos": d["exp_pos"], "p_dnf": d["p_dnf"],
+                    "actual_position": None if a is None else a["position"],
+                    "actual_classified": None if a is None else bool(a["classified"]),
+                    "actual_status": None if a is None else a["status"],
+                })
         win = t[t["y_win"] == 1]
         pod_act = t[t["y_podium"] == 1].sort_values("position")
         pod_pred = t.sort_values(["exp_pos", "p_podium"], ascending=[True, False]).head(3)  # T-042: top 3 by expected finish

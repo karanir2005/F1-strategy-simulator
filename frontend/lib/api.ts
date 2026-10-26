@@ -261,6 +261,26 @@ export interface DriverPrediction {
   /** T-029. Grid mode only: the saved pre-quali numbers for the same round; null if no saved file. */
   p_win_prequali?: number | null;
   p_podium_prequali?: number | null;
+  /** T-044. Only on /predict/race/{round}: what actually happened. */
+  actual?: ActualResult | null;
+}
+
+export interface ActualResult {
+  /** Official classification position; null if unknown. */
+  position: number | null;
+  classified: boolean | null;
+  /** Jolpica status text, e.g. "Finished", "+1 Lap", "Engine". */
+  status: string | null;
+  dnf: boolean;
+}
+
+export interface RaceListItem {
+  round: number;
+  name: string;
+  date: string;
+  has_prediction: boolean;
+  /** true for the upcoming race (served live by /predict/next). */
+  is_next: boolean;
 }
 
 export interface Headline {
@@ -298,6 +318,8 @@ export interface PredictionResponse {
   disclaimer: string;
   /** T-035. Predicted qualifying order; null when unavailable (e.g. grid mode without a saved pre-quali snapshot). */
   qualifying?: QualifyingBlock | null;
+  /** T-044. true on /predict/race/{round}: a finished race, drivers[].actual is filled. */
+  race_done?: boolean;
 }
 
 export interface QualifyingDriver {
@@ -365,5 +387,17 @@ export async function fetchPredictionNext(): Promise<PredictionResponse> {
 
 export async function fetchPredictionHistory(): Promise<HistoryResponse> {
   const response = await call("/predict/history", "Loading prediction history");
+  return response.json();
+}
+
+/** T-044. 2026 races that can be shown: every scored round plus the next one. */
+export async function fetchPredictionRaces(): Promise<RaceListItem[]> {
+  const response = await call("/predict/races", "Loading the race list");
+  return response.json();
+}
+
+/** T-044. Precomputed walk-forward prediction for a finished round (instant, no simulation). */
+export async function fetchPredictionRace(round: number): Promise<PredictionResponse> {
+  const response = await call(`/predict/race/${round}`, "Loading the race");
   return response.json();
 }
