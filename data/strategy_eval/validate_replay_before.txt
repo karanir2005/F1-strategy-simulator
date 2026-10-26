@@ -1,0 +1,35 @@
+data/processed/China_2026_laps.csv - GAS
+  strategy: [('MEDIUM', 10, 1), ('HARD', 46, 1)]  (compound, laps, start_age)
+  actual total:      5655.3s
+  simulated total:   5541.9s
+  error:             -113.4s (-2.01%)
+  excl. 4 SC/VSC/red laps: actual   5088.0s, sim   5123.0s, error +35.0s (+0.69%)
+
+data/processed/Britain_2026_laps.csv - GAS
+  strategy: [('MEDIUM', 23, 1), ('HARD', 25, 1), ('SOFT', 4, 1)]  (compound, laps, start_age)
+  actual total:      5234.9s
+  simulated total:   5029.3s
+  error:             -205.5s (-3.93%)
+  excl. 9 SC/VSC/red laps: actual   4145.1s, sim   4150.6s, error +5.5s (+0.13%)
+
+data/processed/Austria_2026_laps.csv - GAS
+  strategy: [('MEDIUM', 13, 1), ('HARD', 25, 1), ('MEDIUM', 13, 1), ('SOFT', 19, 1)]  (compound, laps, start_age)
+  actual total:      5237.2s
+  simulated total:   5213.4s
+  error:              -23.8s (-0.45%)
+  excl. 5 SC/VSC/red laps: actual   4804.7s, sim   4822.6s, error +17.8s (+0.37%)
+
+data/processed/Britain_2026_laps.csv - PIA
+  strategy: [('MEDIUM', 2, 1), ('HARD', 34, 1), ('MEDIUM', 11, 4), ('SOFT', 5, 4)]  (compound, laps, start_age)
+  actual total:      5235.4s
+  simulated total:   4990.9s
+  error:             -244.5s (-4.67%)
+  excl. 9 SC/VSC/red laps: actual   4148.1s, sim   4102.5s, error -45.6s (-1.10%)
+
+data/processed/Hungary_2026_laps.csv - VER
+  strategy: [('MEDIUM', 14, 1), ('HARD', 27, 1), ('SOFT', 29, 4)]  (compound, laps, start_age)
+  actual total:      6011.3s
+  simulated total:   6037.7s
+  error:              +26.4s (+0.44%)
+  excl. 2 SC/VSC/red laps: actual   5819.3s, sim   5868.5s, error +49.2s (+0.84%)
+

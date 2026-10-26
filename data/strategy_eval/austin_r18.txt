@@ -1,0 +1,39 @@
+ACTUAL top 10 (R18, 56 laps):
+  P1  ANT  M24/H32                    stops 1  pits [24]
+  P2  LEC  S15/M24/H17                stops 2  pits [15, 39]
+  P3  VER  S13/S18/M25                stops 2  pits [13, 31]
+  P4  HAM  S14/M24/H18                stops 2  pits [14, 38]
+  P5  NOR  M16/H40                    stops 1  pits [16]
+  P6  HAD  S25/H31                    stops 1  pits [25]
+  P7  PIA  M15/H41                    stops 1  pits [15]
+  P8  RUS  M22/H34                    stops 1  pits [22]
+  P9  LAW  S25/H31                    stops 1  pits [25]
+  P10 GAS  S24/H32                    stops 1  pits [24]
+
+[joint] offsets {'HARD': 0.0, 'SOFT': -0.123, 'MEDIUM': 0.0} caps {'SOFT': 28, 'MEDIUM': 33, 'HARD': 28} (shipped_track_caps(2025 Austin))
+  #1 H28/S28                pits [28]  +0.0s
+  #2 M28/S28                pits [28]  +0.7s
+  #3 H28/M28                pits [28]  +3.4s
+  #4 H17/S19/S20            pits [17, 36]  +13.6s
+  #5 S20/S20/M16            pits [20, 40]  +13.8s
+
+[joint] offsets {'HARD': 0.0, 'SOFT': -0.123, 'MEDIUM': 0.0} caps {'SOFT': 31, 'MEDIUM': 30, 'HARD': 42} (clean_pooled_2026_caps)
+  #1 H27/S29                pits [27]  +0.0s
+  #2 M26/S30                pits [26]  +0.7s
+  #3 H29/M27                pits [29]  +3.5s
+  #4 H17/S19/S20            pits [17, 36]  +13.6s
+  #5 S20/S20/M16            pits [20, 40]  +13.9s
+
+[pace_ordered] offsets {'HARD': 0.0, 'SOFT': 0.0, 'MEDIUM': 0.0} caps {'SOFT': 28, 'MEDIUM': 33, 'HARD': 28} (shipped_track_caps(2025 Austin))
+  #1 H28/M28                pits [28]  +0.0s
+  #2 H28/S28                pits [28]  +0.0s
+  #3 M28/S28                pits [28]  +0.2s
+  #4 H19/H19/M18            pits [19, 38]  +14.5s
+  #5 H19/H19/S18            pits [19, 38]  +14.5s
+
+[pace_ordered] offsets {'HARD': 0.0, 'SOFT': 0.0, 'MEDIUM': 0.0} caps {'SOFT': 31, 'MEDIUM': 30, 'HARD': 42} (clean_pooled_2026_caps)
+  #1 H28/M28                pits [28]  +0.0s
+  #2 H28/S28                pits [28]  +0.0s
+  #3 M28/S28                pits [28]  +0.2s
+  #4 H19/H19/M18            pits [19, 38]  +14.5s
+  #5 H19/H19/S18            pits [19, 38]  +14.5s

@@ -1,0 +1,222 @@
+===== joint
+==============================================================================
+VALIDATION SCORECARD v2  (16 races, LORO, base_laptime=quali_ratio)
+==============================================================================
+Per-stint MAE (excl SC/VSC/red): 1.554 s/lap   bias -0.871   relative MAE 0.730
+Per-stint MAE (incl SC/VSC/red): 4.284 s/lap
+Finishing-order Spearman: sim 0.870  vs grid 0.834
+Strategy-ranking accuracy: 0.661  (n=277 pairs, 16 races; race-bootstrap 95% CI (0.5829, 0.7397))
+
+-- base_laptime per held-out race --
+race       LORO ratio  in-race fallbacks
+Australia      1.0388   1.0340 VER,SAI,STR
+Austria        1.0373   1.0521 -
+Azerbaijan     1.0393   1.0206 -
+Barcelona      1.0376   1.0755 -
+Belgium        1.0373   1.0398 -
+Britain        1.0374   1.0426 -
+Canada         1.0382   1.0125 -
+China          1.0389   1.0265 -
+Hungary        1.0377   1.0672 -
+Italy          1.0389   1.0227 -
+Japan          1.0394   1.0362 -
+Madrid         1.0369   1.0464 BEA,STR
+Miami          1.0382   1.0359 HAD
+Monaco         1.0385   1.0258 -
+Netherlands     1.0373   1.0410 -
+Singapore      1.0371   1.0417 HAD
+
+-- per-stint error, s/lap (MAE / bias / relative MAE; n stints) --
+method                           incl_neutralised           excl_neutralised                      clean
+quali_ratio              4.284/-3.924/3.840 n=790   1.554/-0.871/0.730 n=750   1.242/-0.430/0.340 n=738
+fastest_lap (LEAKY)      3.772/-3.301/3.840 n=790   1.064/-0.221/0.730 n=750   0.734/+0.230/0.340 n=738
+oracle (LEAKY)           3.787/-3.670/3.840 n=790   0.803/-0.596/0.730 n=750   0.388/-0.144/0.340 n=738
+
+   median |err| (quali_ratio): incl_neutralised 2.055, excl_neutralised 0.994, clean 0.857
+
+   cost of not leaking (MAE excl SC/VSC/red): quali_ratio 1.554 vs fastest_lap 1.064 (+0.490) vs oracle floor 0.803 (+0.750)
+
+-- per-stint by compound (quali_ratio, incl_neutralised) --
+  HARD         n=291  MAE 2.634  median 2.263  bias -2.518  relative MAE 1.024
+  MEDIUM       n=292  MAE 3.382  median 1.586  bias -2.915  relative MAE 4.173
+  SOFT         n=207  MAE 7.876  median 2.470  bias -7.326  relative MAE 3.255
+
+-- per-stint by compound (quali_ratio, excl_neutralised) --
+  HARD         n=291  MAE 1.484  median 0.885  bias -1.131  relative MAE 0.415
+  MEDIUM       n=286  MAE 1.365  median 0.854  bias -0.572  relative MAE 1.112
+  SOFT         n=173  MAE 1.983  median 1.519  bias -0.930  relative MAE 1.092
+  (oracle base, same variant -- shape-only floor):
+  HARD    n=291  MAE 0.665  bias -0.540
+  MEDIUM  n=286  MAE 0.657  bias -0.421
+  SOFT    n=173  MAE 1.278  bias -0.980
+
+-- per-stint by race (quali_ratio, excl_neutralised) --
+  Australia  n= 49  MAE 0.421  bias +0.100  relative MAE 0.256
+  Austria    n= 61  MAE 1.012  bias -0.984  relative MAE 0.333
+  Azerbaijan n= 39  MAE 1.988  bias +1.973  relative MAE 0.204
+  Barcelona  n= 66  MAE 2.910  bias -2.910  relative MAE 0.243
+  Belgium    n= 42  MAE 0.513  bias -0.397  relative MAE 0.234
+  Britain    n= 49  MAE 0.564  bias -0.480  relative MAE 0.229
+  Canada     n= 28  MAE 1.552  bias +1.520  relative MAE 0.267
+  China      n= 35  MAE 0.859  bias +0.817  relative MAE 0.296
+  Hungary    n= 64  MAE 2.336  bias -2.336  relative MAE 0.253
+  Italy      n= 30  MAE 3.720  bias -3.018  relative MAE 4.205
+  Japan      n= 43  MAE 0.345  bias +0.086  relative MAE 0.253
+  Madrid     n= 46  MAE 1.816  bias -1.811  relative MAE 0.647
+  Miami      n= 41  MAE 0.682  bias +0.346  relative MAE 0.402
+  Monaco     n= 50  MAE 1.275  bias -0.026  relative MAE 1.157
+  Netherlands n= 63  MAE 3.233  bias -3.016  relative MAE 3.436
+  Singapore  n= 44  MAE 0.812  bias -0.397  relative MAE 0.191
+
+-- finishing order: Spearman rho vs results.csv position --
+race         n    grid quali_ord  quali_ratio  fastest_lap       oracle
+Australia   17   0.821     0.926        0.951        0.755        0.983
+Austria     18   0.922     0.922        0.965        0.932        0.981
+Azerbaijan  15   0.604     0.614        0.718        0.743        0.786
+Barcelona   15   0.950     0.950        0.957        0.786        0.986
+Belgium     19   0.810     0.956        0.898        0.925        0.953
+Britain     19   0.711     0.726        0.737        0.600        0.777
+Canada      11   0.991     0.991        1.000        0.955        0.973
+China       15   0.879     0.879        0.818        0.536        0.900
+Hungary     19   0.917     0.916        0.925        0.807        0.988
+Italy       19   0.630     0.893        0.863        0.698        0.921
+Japan       20   0.916     0.916        0.914        0.898        0.977
+Madrid      18   0.975     0.962        0.963        0.870        0.909
+Miami       18   0.880     0.886        0.893        0.919        0.969
+Monaco      15   0.696     0.696        0.639        0.625        0.596
+Netherlands  16   0.853     0.853        0.838        0.812        0.968
+Singapore   18   0.789     0.849        0.843        0.858        0.922
+mean       272   0.834     0.871        0.870        0.795        0.912
+  one-car sim (quali_ratio) minus grid: mean +0.036, race-bootstrap 95% CI (0.0031, 0.0738), beats grid in 11/16 races
+
+-- strategy ranking (similar-pace pairs on different strategies) --
+  primary: n=277 pairs over 16 races
+    sim            acc 0.661  Wilson95 (0.603, 0.7139)  race-bootstrap95 (0.5829, 0.7397)
+    strategy_only  acc 0.567  Wilson95 (0.5079, 0.6238)  race-bootstrap95 (0.4739, 0.6568)
+    grid           acc 0.625  Wilson95 (0.5662, 0.6795)  race-bootstrap95 (0.5248, 0.7224)
+    sim_minus_grid           +0.036  race-bootstrap95 (-0.0461, 0.114)
+    sim_minus_strategy_only  +0.094  race-bootstrap95 (0.0172, 0.1678)
+  broad: n=338 pairs over 16 races
+    sim            acc 0.666  Wilson95 (0.6138, 0.7139)  race-bootstrap95 (0.6022, 0.7279)
+    strategy_only  acc 0.571  Wilson95 (0.5177, 0.6227)  race-bootstrap95 (0.4932, 0.6447)
+    grid           acc 0.633  Wilson95 (0.5805, 0.6828)  race-bootstrap95 (0.5466, 0.7197)
+    sim_minus_grid           +0.033  race-bootstrap95 (-0.0374, 0.0961)
+    sim_minus_strategy_only  +0.095  race-bootstrap95 (0.0182, 0.1627)
+
+-- race totals, Finished drivers (mean |%| / mean %; all laps | excl SC/VSC/red) --
+  quali_ratio            n=167  8.95% / -8.91%  |  1.26% / -0.53%
+  fastest_lap (LEAKY)    n=167  8.63% / -8.56%  |  0.89% / -0.21%
+  oracle (LEAKY)         n=167  9.04% / -9.00%  |  0.79% / -0.70%
+
+skipped (strategy not simulatable): Canada: BOR, BOT, HUL, NOR, PER, PIA, SAI; Hungary: PER
+===== pace_ordered
+==============================================================================
+VALIDATION SCORECARD v2  (16 races, LORO, base_laptime=quali_ratio)
+==============================================================================
+Per-stint MAE (excl SC/VSC/red): 1.547 s/lap   bias -0.854   relative MAE 0.729
+Per-stint MAE (incl SC/VSC/red): 4.270 s/lap
+Finishing-order Spearman: sim 0.870  vs grid 0.834
+Strategy-ranking accuracy: 0.675  (n=277 pairs, 16 races; race-bootstrap 95% CI (0.6026, 0.7482))
+
+-- base_laptime per held-out race --
+race       LORO ratio  in-race fallbacks
+Australia      1.0385   1.0328 VER,SAI,STR
+Austria        1.0368   1.0517 -
+Azerbaijan     1.0390   1.0195 -
+Barcelona      1.0369   1.0752 -
+Belgium        1.0370   1.0396 -
+Britain        1.0371   1.0424 -
+Canada         1.0374   1.0114 -
+China          1.0388   1.0263 -
+Hungary        1.0372   1.0656 -
+Italy          1.0385   1.0224 -
+Japan          1.0390   1.0358 -
+Madrid         1.0366   1.0462 BEA,STR
+Miami          1.0379   1.0357 HAD
+Monaco         1.0381   1.0248 -
+Netherlands     1.0369   1.0400 -
+Singapore      1.0368   1.0411 HAD
+
+-- per-stint error, s/lap (MAE / bias / relative MAE; n stints) --
+method                           incl_neutralised           excl_neutralised                      clean
+quali_ratio              4.270/-3.904/3.836 n=790   1.547/-0.854/0.729 n=750   1.240/-0.412/0.342 n=738
+fastest_lap (LEAKY)      3.748/-3.248/3.836 n=790   1.063/-0.170/0.729 n=750   0.743/+0.280/0.342 n=738
+oracle (LEAKY)           3.784/-3.663/3.836 n=790   0.805/-0.593/0.729 n=750   0.391/-0.140/0.342 n=738
+
+   median |err| (quali_ratio): incl_neutralised 2.042, excl_neutralised 1.000, clean 0.853
+
+   cost of not leaking (MAE excl SC/VSC/red): quali_ratio 1.547 vs fastest_lap 1.063 (+0.484) vs oracle floor 0.805 (+0.741)
+
+-- per-stint by compound (quali_ratio, incl_neutralised) --
+  HARD         n=291  MAE 2.637  median 2.277  bias -2.521  relative MAE 1.023
+  MEDIUM       n=292  MAE 3.387  median 1.587  bias -2.928  relative MAE 4.176
+  SOFT         n=207  MAE 7.812  median 2.379  bias -7.224  relative MAE 3.255
+
+-- per-stint by compound (quali_ratio, excl_neutralised) --
+  HARD         n=291  MAE 1.489  median 0.880  bias -1.135  relative MAE 0.415
+  MEDIUM       n=286  MAE 1.367  median 0.853  bias -0.584  relative MAE 1.113
+  SOFT         n=173  MAE 1.943  median 1.444  bias -0.826  relative MAE 1.092
+  (oracle base, same variant -- shape-only floor):
+  HARD    n=291  MAE 0.672  bias -0.548
+  MEDIUM  n=286  MAE 0.668  bias -0.442
+  SOFT    n=173  MAE 1.258  bias -0.919
+
+-- per-stint by race (quali_ratio, excl_neutralised) --
+  Australia  n= 49  MAE 0.429  bias +0.127  relative MAE 0.257
+  Austria    n= 61  MAE 1.002  bias -0.971  relative MAE 0.333
+  Azerbaijan n= 39  MAE 2.021  bias +2.005  relative MAE 0.228
+  Barcelona  n= 66  MAE 2.917  bias -2.917  relative MAE 0.258
+  Belgium    n= 42  MAE 0.508  bias -0.389  relative MAE 0.236
+  Britain    n= 49  MAE 0.570  bias -0.491  relative MAE 0.227
+  Canada     n= 28  MAE 1.591  bias +1.555  relative MAE 0.299
+  China      n= 35  MAE 0.864  bias +0.830  relative MAE 0.296
+  Hungary    n= 64  MAE 2.303  bias -2.303  relative MAE 0.257
+  Italy      n= 30  MAE 3.703  bias -3.005  relative MAE 4.200
+  Japan      n= 43  MAE 0.347  bias +0.075  relative MAE 0.258
+  Madrid     n= 46  MAE 1.801  bias -1.795  relative MAE 0.631
+  Miami      n= 41  MAE 0.685  bias +0.356  relative MAE 0.398
+  Monaco     n= 50  MAE 1.250  bias +0.003  relative MAE 1.122
+  Netherlands n= 63  MAE 3.196  bias -2.976  relative MAE 3.415
+  Singapore  n= 44  MAE 0.780  bias -0.350  relative MAE 0.209
+
+-- finishing order: Spearman rho vs results.csv position --
+race         n    grid quali_ord  quali_ratio  fastest_lap       oracle
+Australia   17   0.821     0.926        0.953        0.757        0.983
+Austria     18   0.922     0.922        0.965        0.932        0.981
+Azerbaijan  15   0.604     0.614        0.718        0.743        0.789
+Barcelona   15   0.950     0.950        0.957        0.811        0.986
+Belgium     19   0.810     0.956        0.898        0.925        0.953
+Britain     19   0.711     0.726        0.746        0.600        0.779
+Canada      11   0.991     0.991        1.000        0.918        0.973
+China       15   0.879     0.879        0.818        0.536        0.900
+Hungary     19   0.917     0.916        0.923        0.800        0.984
+Italy       19   0.630     0.893        0.867        0.700        0.912
+Japan       20   0.916     0.916        0.914        0.898        0.977
+Madrid      18   0.975     0.962        0.963        0.870        0.915
+Miami       18   0.880     0.886        0.893        0.919        0.971
+Monaco      15   0.696     0.696        0.621        0.643        0.646
+Netherlands  16   0.853     0.853        0.847        0.803        0.974
+Singapore   18   0.789     0.849        0.843        0.858        0.919
+mean       272   0.834     0.871        0.870        0.794        0.915
+  one-car sim (quali_ratio) minus grid: mean +0.036, race-bootstrap 95% CI (0.0017, 0.0748), beats grid in 11/16 races
+
+-- strategy ranking (similar-pace pairs on different strategies) --
+  primary: n=277 pairs over 16 races
+    sim            acc 0.675  Wilson95 (0.6179, 0.7275)  race-bootstrap95 (0.6026, 0.7482)
+    strategy_only  acc 0.628  Wilson95 (0.5699, 0.683)  race-bootstrap95 (0.5771, 0.6849)
+    grid           acc 0.625  Wilson95 (0.5662, 0.6795)  race-bootstrap95 (0.5248, 0.7224)
+    sim_minus_grid           +0.051  race-bootstrap95 (-0.0364, 0.1295)
+    sim_minus_strategy_only  +0.047  race-bootstrap95 (-0.029, 0.1273)
+  broad: n=338 pairs over 16 races
+    sim            acc 0.677  Wilson95 (0.6259, 0.7251)  race-bootstrap95 (0.62, 0.7333)
+    strategy_only  acc 0.621  Wilson95 (0.5685, 0.6714)  race-bootstrap95 (0.5724, 0.6739)
+    grid           acc 0.633  Wilson95 (0.5805, 0.6828)  race-bootstrap95 (0.5466, 0.7197)
+    sim_minus_grid           +0.044  race-bootstrap95 (-0.0296, 0.1094)
+    sim_minus_strategy_only  +0.056  race-bootstrap95 (-0.0181, 0.1258)
+
+-- race totals, Finished drivers (mean |%| / mean %; all laps | excl SC/VSC/red) --
+  quali_ratio            n=167  8.95% / -8.90%  |  1.26% / -0.52%
+  fastest_lap (LEAKY)    n=167  8.60% / -8.53%  |  0.89% / -0.16%
+  oracle (LEAKY)         n=167  9.04% / -9.00%  |  0.79% / -0.70%
+
+skipped (strategy not simulatable): Canada: BOR, BOT, HUL, NOR, PER, PIA, SAI; Hungary: PER

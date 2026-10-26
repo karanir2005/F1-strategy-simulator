@@ -192,6 +192,28 @@ test used instead is a split-half by driver inside the held-out race. See
 team/handoffs/T-028-data-scientist.md for the numbers and for what is
 shipped as default.
 
+UPDATE (2026-10-25, T-043): pace offsets are now fitted WITHOUT the wear-ordering
+coupling (build_tire_model offset_mode="pace_ordered", the default). Found by comparing
+what the optimizer recommends with what top-10 teams actually ran in 34 dry races
+(data/strategy_eval/, leave-one-race-out): in the 2026 fit the -0.123 s SOFT offset was an
+artefact of the wear ordering. The FREE 2026 fit has SOFT +0.13 s / MEDIUM +0.19 s (slower
+than HARD) and SOFT wear 0.025 < HARD 0.036; forcing wear SOFT >= MEDIUM >= HARD (T-020)
+raises SOFT wear by ~0.012 s/lap and the joint solution compensates by moving the SOFT
+offset by -0.25 s, onto the boundary at -0.123. Nothing in the lap times says SOFT is faster;
+the optimizer nevertheless put SOFT in half of all 2026 plan laps (teams: 16%) and never used
+MEDIUM. Now: offsets = the free fit's, projected onto SOFT <= MEDIUM <= HARD(=0) only
+(project_pace_ordering), then wear refitted with those offsets fixed under the wear ordering.
+2026: offsets (0, 0, 0), wear 0.0369 / 0.0369 / 0.0364, fuel -0.0513. 2025 data already
+satisfy the ordering, so its offsets/wear are unchanged (SOFT -0.35, MEDIUM -0.12).
+LORO scorecard (16 races): per-stint MAE 1.554 -> 1.547, rho 0.870 -> 0.870, pair accuracy
+0.661 -> 0.675 (noise-level; no regression). Optimizer vs actual 2026 (14 dry races, clean
+caps): plans containing the same compound set as the top-10 mode 0 -> 7, mode strategy in
+top-3 plans 8 -> 11, SOFT share of plan laps 0.50 -> 0.17 (actual 0.16), MEDIUM 0 -> 0.32
+(0.35). Tried and NOT shipped (same evaluation): cross-era per-track wear
+(transfer_track_wear, no change in stop counts), a stint-life cliff (the lap-time residual
+has no extra slope past the typical stint length: k = 0.00 in 2026, negative in 2025, so any k
+would be tuned to team behaviour, not measured), SC-aware ranking, p60/p75 stint caps.
+
 Known remaining gaps: MEDIUM is dominated by HARD in this model (same pace,
 slightly more wear), so M appears in a top plan only when stint caps force
 it; the ordered S/M wear is a tie, not a measurement; one global fuel slope
@@ -249,6 +271,10 @@ COMPOUND_CLIFF_PENALTY_PLACEHOLDER = {"SOFT": 1.0, "MEDIUM": 0.5, "HARD": 0.2}
 
 
 DRY_COMPOUNDS = ("SOFT", "MEDIUM", "HARD")
+
+# T-043: how build_tire_model() obtains the pace offsets, see its docstring and the module docstring's
+# 2026-10-25 UPDATE. Switched by the strategy-vs-actual evaluation (data/strategy_eval/).
+DEFAULT_OFFSET_MODE = "pace_ordered"
 
 
 def era_of_year(year: int) -> str:
@@ -409,10 +435,10 @@ def clean_laps(laps: pd.DataFrame, drop_red_flag_stints: bool = True) -> pd.Data
     return clean
 
 
-def _joint_design(clean: pd.DataFrame, quadratic: bool) -> Tuple[pd.DataFrame, list]:
+def _joint_design(clean: pd.DataFrame, quadratic: bool, with_offsets: bool = True) -> Tuple[pd.DataFrame, list]:
     """Design matrix for fit_joint_model (before the within transformation)."""
     X = pd.DataFrame(index=clean.index)
-    for compound in ("SOFT", "MEDIUM"):  # HARD is the reference level
+    for compound in (("SOFT", "MEDIUM") if with_offsets else ()):  # HARD is the reference level
         X[f"off_{compound}"] = (clean["compound"] == compound).astype(float)
     for race in sorted(clean["race_file"].unique()):
         X[f"fuel_{race}"] = (clean["race_file"] == race) * clean["lap_number"].astype(float)
@@ -468,6 +494,7 @@ def fit_joint_model(
     quadratic: bool = False,
     constrain: bool = False,
     weights: Optional[pd.Series] = None,
+    fixed_offsets: Optional[dict] = None,
 ) -> dict:
     """
     One least-squares fit of lap time on
@@ -488,6 +515,10 @@ def fit_joint_model(
     identical; where it doesn't the solution sits on the boundary (e.g.
     two compounds get the same slope). Linear wear only.
 
+    fixed_offsets (T-043): {"SOFT": s, "MEDIUM": m} pace offsets taken as known
+    (subtracted from lap time, no offset columns fitted); only wear and fuel are
+    estimated. Used by build_tire_model(offset_mode="pace_ordered").
+
     weights: optional per-lap weight (aligned to clean.index), e.g. to
     down-weight a prior era. Must be constant within a (race_file, driver)
     group so the exact within transformation stays valid (era weights are).
@@ -501,9 +532,11 @@ def fit_joint_model(
     """
     if constrain and quadratic:
         raise ValueError("ordering constraints are only implemented for linear wear")
-    X, cols = _joint_design(clean, quadratic)
+    X, cols = _joint_design(clean, quadratic, with_offsets=fixed_offsets is None)
     groups = [clean["race_file"], clean["driver"]]
     y = clean["lap_time_seconds"].astype(float)
+    if fixed_offsets is not None:
+        y = y - clean["compound"].map(lambda c: float(fixed_offsets.get(c, 0.0))).astype(float)
     Xw = X - X.groupby(groups).transform("mean")
     yw = y - y.groupby(groups).transform("mean")
     sw = np.ones(len(clean)) if weights is None else np.sqrt(np.asarray(weights, dtype=float))
@@ -536,7 +569,9 @@ def fit_joint_model(
     )
     offsets = {"HARD": 0.0}
     for compound in ("SOFT", "MEDIUM"):
-        offsets[compound] = float(coef.get(f"off_{compound}", 0.0))
+        offsets[compound] = (
+            float(fixed_offsets.get(compound, 0.0)) if fixed_offsets is not None else float(coef.get(f"off_{compound}", 0.0))
+        )
     wear = {
         compound: (float(coef.get(f"age_{compound}", 0.0)), float(coef.get(f"age2_{compound}", 0.0)))
         for compound in DRY_COMPOUNDS
@@ -860,6 +895,71 @@ def model_for_track(model: dict, track_id: Optional[str]) -> dict:
     return out
 
 
+def project_pace_ordering(offsets: dict) -> dict:
+    """
+    Project free-fit pace offsets {"SOFT", "MEDIUM", "HARD"=0} onto the physical ordering
+    SOFT <= MEDIUM <= HARD(=0) (T-043). Pool-adjacent-violators from the HARD end: MEDIUM is
+    clipped to <= 0, SOFT to <= the clipped MEDIUM. A pair that already satisfies the ordering is
+    untouched, so a data set with a textbook ordering (2025: SOFT -0.37, MEDIUM -0.05) keeps its
+    offsets; the inverted 2026 fit (SOFT +0.13, MEDIUM +0.19) projects to (0, 0).
+    """
+    medium = min(float(offsets.get("MEDIUM", 0.0)), 0.0)
+    soft = min(float(offsets.get("SOFT", 0.0)), medium)
+    return {"SOFT": soft, "MEDIUM": medium, "HARD": 0.0}
+
+
+def _track_severity(model: dict, track_id: str) -> Optional[float]:
+    """Track wear relative to the global fit: mean over MEDIUM/HARD of track slope / global slope (None if unfitted)."""
+    tw = (model.get("_track_wear") or {}).get(track_id)
+    if not tw:
+        return None
+    r = [tw[c]["age_coef"] / model[c]["age_coef"] for c in ("MEDIUM", "HARD") if c in tw and model[c]["age_coef"] > 0]
+    return float(np.mean(r)) if r else None
+
+
+def transfer_track_wear(model: dict, other: dict, track_id: str, lam: Optional[float] = None) -> Tuple[dict, Optional[float]]:
+    """
+    Per-track wear for a circuit this model has NO race at, borrowed from another regulation
+    era's fit (T-043). `other["_track_wear"][track_id]` gives that circuit's wear relative to
+    `other`'s own global slopes (its severity); the target model's global slopes are scaled by
+    1 + lam * (severity - 1) per compound, then forced back onto SOFT >= MEDIUM >= HARD >= 0.
+
+    lam (how much of an other-era circuit effect carries over) is estimated, not assumed:
+    least squares through the origin of (this-era severity - 1) on (other-era severity - 1) over
+    the circuits BOTH eras fitted, excluding track_id itself, clipped to [0, 1]. With ~8-10
+    circuits it is a noisy number (reported in the T-043 handoff), which is why it is shrunk
+    to [0, 1] and why this is off by default unless the evaluation says otherwise.
+
+    Returns (model copy with ["_track_wear"][track_id] set, lam), or (model, None) when the
+    other era has no fit for the circuit.
+    """
+    sev_o = _track_severity(other, track_id)
+    if sev_o is None:
+        return model, None
+    if lam is None:
+        xs, ys = [], []
+        for t in (model.get("_track_wear") or {}):
+            if t == track_id:
+                continue
+            a, b = _track_severity(other, t), _track_severity(model, t)
+            if a is not None and b is not None:
+                xs.append(a - 1.0)
+                ys.append(b - 1.0)
+        xs, ys = np.array(xs), np.array(ys)
+        lam = float(np.clip((xs @ ys) / (xs @ xs), 0.0, 1.0)) if len(xs) >= 3 and (xs @ xs) > 0 else 0.0
+    scale = 1.0 + lam * (sev_o - 1.0)
+    h = model["HARD"]["age_coef"] * scale
+    m = max(model["MEDIUM"]["age_coef"] * scale, h)
+    sft = max(model["SOFT"]["age_coef"] * scale, m)
+    out = dict(model)
+    tw = dict(model.get("_track_wear") or {})
+    tw[track_id] = {c: {"age_coef": float(v), "global_age_coef": float(model[c]["age_coef"]), "n_stints": 0, "n_laps": 0,
+                        "pooled": False, "transferred_from_other_era": True}
+                    for c, v in (("HARD", h), ("MEDIUM", m), ("SOFT", sft))}
+    out["_track_wear"] = tw
+    return out, lam
+
+
 def build_tire_model(
     min_samples_per_age: int = 3,
     quadratic: bool = False,
@@ -870,6 +970,7 @@ def build_tire_model(
     fitted_offsets: bool = True,
     drop_red_flag_stints: bool = True,
     track_wear_tau: Optional[float] = TRACK_WEAR_TAU,
+    offset_mode: str = DEFAULT_OFFSET_MODE,
 ) -> dict:
     """
     Full pipeline: load -> era filter -> stints -> clean -> joint fit
@@ -894,6 +995,10 @@ def build_tire_model(
         (model["_compound_offsets"]); False restores the old
         COMPOUND_PACE_OFFSET_PLACEHOLDER.
     drop_red_flag_stints: see clean_laps.
+    offset_mode (T-043): "joint" = the T-020 fit (offsets and wear estimated together under the
+        pace AND wear ordering constraints); "pace_ordered" = offsets are the FREE fit's, projected
+        onto SOFT <= MEDIUM <= HARD(=0) only, then wear is refitted with those offsets held fixed
+        under the wear ordering. See project_pace_ordering() for why.
     track_wear_tau: prior sd for the per-track wear fit (fit_track_wear) that
         fills model["_track_wear"]; None skips it. Linear-wear fits only.
         The returned model's own compound curves are always the GLOBAL ones;
@@ -935,8 +1040,19 @@ def build_tire_model(
     filtered = filtered[counts >= min_samples_per_age]
 
     w_final = era_weight_of(filtered)
-    final = fit_joint_model(filtered, quadratic=quadratic, constrain=constrain, weights=w_final)
-    free = final if not constrain else fit_joint_model(filtered, quadratic=quadratic, weights=w_final)
+    if offset_mode not in ("joint", "pace_ordered"):
+        raise ValueError(f"offset_mode must be 'joint' or 'pace_ordered', got {offset_mode!r}")
+    if offset_mode == "pace_ordered" and not constrain:
+        raise ValueError("offset_mode='pace_ordered' needs the constrained linear fit")
+    if offset_mode == "joint":
+        final = fit_joint_model(filtered, quadratic=quadratic, constrain=constrain, weights=w_final)
+        free = final if not constrain else fit_joint_model(filtered, quadratic=quadratic, weights=w_final)
+    else:
+        free = fit_joint_model(filtered, quadratic=quadratic, weights=w_final)
+        final = fit_joint_model(
+            filtered, quadratic=quadratic, constrain=True, weights=w_final,
+            fixed_offsets=project_pace_ordering(free["offsets"]),
+        )
 
     model = {}
     # dry slicks only: rain compounds (INTERMEDIATE/WET) need their own
@@ -969,6 +1085,7 @@ def build_tire_model(
     model["_compound_offsets_unconstrained"] = dict(free["offsets"])
     model["_wear_unconstrained"] = {c: free["wear"][c][0] for c in DRY_COMPOUNDS if c in model}
     model["_constrained"] = bool(constrain)
+    model["_offset_mode"] = offset_mode
     model["_cliff_penalties"] = dict(COMPOUND_CLIFF_PENALTY_PLACEHOLDER)
     if track_wear_tau is not None and not quadratic and len(filtered):
         model["_track_wear"] = fit_track_wear(filtered, final, tau=track_wear_tau)
