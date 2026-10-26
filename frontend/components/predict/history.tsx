@@ -182,7 +182,7 @@ function LatestRace({ r }: { r: HistoryRow }) {
       </div>
       <dl className="mt-3 grid gap-x-8 gap-y-2 text-[13px] sm:grid-cols-2">
         <div>
-          <dt className="text-muted-fg">Predicted podium (top 3 by expected finish, with the grid)</dt>
+          <dt className="text-muted-fg">Predicted podium (top 3 by expected points, with the grid)</dt>
           <dd>{line(r.predicted_podium)}</dd>
         </div>
         <div>

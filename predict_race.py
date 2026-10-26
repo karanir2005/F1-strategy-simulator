@@ -64,9 +64,10 @@ def override_grid_path(rnd: int, base_dir: Path | None = None) -> Path:
 
 
 def headline(t: pd.DataFrame) -> dict:
-    """Winner = highest P(win); podium = top 3 by expected finish (lowest E[pos], T-042). Same rule as the API's headline."""
+    """Winner = highest P(win); podium = top 3 by predicted order (expected FIA points, T-045; T-042 used
+    lowest E[pos]). Same rule as the API's headline."""
     w = t.sort_values(["p_win", "p_podium"], ascending=False, kind="stable")
-    pod = t.sort_values(["exp_pos", "p_podium"], ascending=[True, False], kind="stable")
+    pod = t.sort_values("pred_rank", kind="stable")
     return {"winner": str(w["code"].iloc[0]), "podium": [str(c) for c in pod["code"].iloc[:3]]}
 
 
@@ -192,12 +193,12 @@ def print_table(t: pd.DataFrame, mode: str, title: str):
     if mode == "prequali" and "p_pole" in t.columns:
         print("qualifying: " + ", ".join(
             f"{r['code']} pole {100 * r['p_pole']:.0f}%" for _, r in t.sort_values("p_pole", ascending=False).head(4).iterrows()))
-    print(f"{'#':>2}  {'Driver':<4} {'Team':<16} {ghdr:>7} {'P(win)':>7} {'P(pod)':>7} {'P(top10)':>8} {'P(DNF)':>7} {'E[pos]':>6}")
+    print(f"{'#':>2}  {'Driver':<4} {'Team':<16} {ghdr:>7} {'P(win)':>7} {'P(pod)':>7} {'P(top10)':>8} {'P(DNF)':>7} {'E[pos]':>6} {'E[pts]':>6}")
     for i, r in t.iterrows():
         print(
             f"{i + 1:>2}  {r['code']:<4} {str(r['team'])[:16]:<16} {r[gcol]:>7.1f} "
             f"{100 * r['p_win']:>6.1f}% {100 * r['p_podium']:>6.1f}% {100 * r['p_top10']:>7.1f}% "
-            f"{100 * r['p_dnf']:>6.1f}% {r['exp_pos']:>6.1f}"
+            f"{100 * r['p_dnf']:>6.1f}% {r['exp_pos']:>6.1f} {r['exp_pts']:>6.1f}"
         )
     print(f"    sums: win {t['p_win'].sum():.3f}, podium {t['p_podium'].sum():.3f}, top10 {t['p_top10'].sum():.3f}")
 

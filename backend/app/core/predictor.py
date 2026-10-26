@@ -46,7 +46,8 @@ was chosen on the 2025 walk-forward; on 2026 the blend beats both of its
 parts on win and podium log-loss (T-011 handoff has the table).
 
 DNF component. P(not classified) per driver = beta-binomial shrinkage
-(driver -> team -> 2026 field rate -> prior 15%) over earlier 2026 races.
+(driver -> team -> 2026 field rate -> prior 15%) over earlier 2026 races
+(T-045: shrinkage 20/60, plus a grid-slot factor in grid mode; see PredictorConfig).
 T-010: 20.9% of 2026 starts are not classified, 6-50% by team, so ignoring
 DNFs makes the front-runners' probabilities far too confident.
 
@@ -84,6 +85,8 @@ import pandas as pd
 from scipy.optimize import minimize
 
 PROB_CLIP = 1e-4
+# FIA race points by finishing position (P1..P10), 0 beyond; no fastest-lap point since 2025.
+FIA_POINTS = np.array([25, 18, 15, 12, 10, 8, 6, 4, 2, 1] + [0] * 12, dtype=float)
 
 
 @dataclass(frozen=True)
@@ -122,8 +125,18 @@ class PredictorConfig:
     # DNF model: field rate <- prior, team <- field, driver <- team
     dnf_prior_rate: float = 0.15
     dnf_prior_n: float = 22.0
-    dnf_team_m: float = 10.0
-    dnf_driver_m: float = 20.0
+    # T-045 (2026-10-26): shrinkage raised 10/20 -> 20/60 (tuned on 2025, confirmed better on
+    # 2026: DNF log-loss 2025 .3503 -> .3434, 2026 .4356 -> .4334; see eval/dnf_audit.py).
+    # The gains are small (SE of one season's log-loss is ~.03) but go the same way in both seasons.
+    dnf_team_m: float = 20.0
+    dnf_driver_m: float = 60.0
+    # T-045 grid-slot DNF factor (GRID MODE ONLY; 0 = off). Top-3 starters retired 5.5% of the time in
+    # 2022-25 vs 11-13% for the field (fewer first-lap/midfield incidents), 2026 not different enough to
+    # reject it. p_dnf *= f_bucket ** dnf_grid_power, f_bucket = (bucket DNF rate in EARLIER seasons,
+    # 20-start shrinkage to the overall rate) / overall rate, buckets 1-3 / 4-6 / 7-10 / 11-15 / 16-22,
+    # then rescaled so the field's expected DNFs are unchanged. Power .5 beat 1.0 and 0 on 2025
+    # (.3425 vs .3432/.3434) and on 2026 (.4307 vs .4310/.4334). Not used pre-quali (no grid).
+    dnf_grid_power: float = 0.5
     # T-029 track-level DNF component (OFF by default, 0 = off). p_dnf is multiplied by
     #     ratio_c = (obs_c + m) / (exp_c + m),
     # obs_c = not-classified starts at this circuit in STRICTLY EARLIER races (any
@@ -621,9 +634,29 @@ def _started(df: pd.DataFrame) -> pd.Series:
     return ~df["status"].fillna("").str.strip().str.lower().isin(DNS_STATUS)
 
 
-def dnf_probabilities(hist, season, rnd, entrants: pd.DataFrame, cfg) -> np.ndarray:
+GRID_DNF_BINS = [0, 3, 6, 10, 15, 22]
+
+
+def grid_dnf_factors(hist, season, cfg) -> np.ndarray | None:
+    """Per grid-bucket DNF multiplier from seasons strictly before `season` (see
+    PredictorConfig.dnf_grid_power); None if there is no earlier season in `hist`."""
+    res = hist["results"]
+    h = res[res["season"] < season]
+    if h.empty:
+        return None
+    if cfg.dnf_exclude_dns and "status" in h.columns:
+        h = h[_started(h)]
+    nf = (~h["classified"]).astype(float)
+    b = pd.cut(pd.to_numeric(h["grid"], errors="coerce").fillna(0).replace(0, 22).clip(upper=22), GRID_DNF_BINS, labels=False)
+    ov = nf.mean()
+    g = nf.groupby(b).agg(["sum", "count"]).reindex(range(len(GRID_DNF_BINS) - 1), fill_value=0)
+    return (((g["sum"] + 20 * ov) / (g["count"] + 20)) / ov).to_numpy()
+
+
+def dnf_probabilities(hist, season, rnd, entrants: pd.DataFrame, cfg, use_grid: bool = False) -> np.ndarray:
     """Shrunk P(not classified) for each entrant from earlier rounds of the
-    season: field <- prior, team <- field, driver <- team."""
+    season: field <- prior, team <- field, driver <- team. use_grid (grid mode
+    only): scale by the starting-slot factor of grid_dnf_factors()."""
     res = hist["results"]
     past = res[(res["season"] == season) & (res["round"] < rnd)]
     if cfg.dnf_exclude_dns and "status" in past.columns:
@@ -640,6 +673,12 @@ def dnf_probabilities(hist, season, rnd, entrants: pd.DataFrame, cfg) -> np.ndar
         dr = (d_k.get(d, 0.0) + cfg.dnf_driver_m * tr) / (d_n.get(d, 0) + cfg.dnf_driver_m)
         out.append(dr)
     out = np.asarray(out)
+    if use_grid and cfg.dnf_grid_power and "grid_eff" in entrants.columns and entrants["grid_eff"].notna().all():
+        fac = grid_dnf_factors(hist, season, cfg)
+        if fac is not None:
+            b = pd.cut(entrants["grid_eff"].to_numpy(dtype=float), GRID_DNF_BINS, labels=False)
+            adj = out * fac[b] ** cfg.dnf_grid_power
+            out = adj * out.sum() / adj.sum()
     if cfg.dnf_track_m:
         out = np.minimum(out * track_dnf_ratio(hist, season, rnd, cfg), cfg.dnf_track_clip)
     return out
@@ -684,12 +723,33 @@ def simulate(
         "p_top10": (pos <= 10).mean(0),
         "exp_pos": pos.mean(0),
         "med_pos": np.median(pos, axis=0),
+        # T-045 ranking statistics: expected position given classified, expected FIA points
+        "exp_pos_cls": np.array([pos[~dnf[:, j], j].mean() if (~dnf[:, j]).any() else float(n) for j in range(n)]),
+        "exp_pts": FIA_POINTS[np.minimum(pos.astype(int), len(FIA_POINTS)) - 1].mean(0),
         "p_dnf_sim": dnf.mean(0),
         "exp_grid": g.mean(0),
     }
     if mode == "prequali":  # T-035: expose the simulated qualifying distribution
         out.update(quali_events(g))
     return out
+
+
+def rank_by_points(exp_pts, exp_pos) -> np.ndarray:
+    """1-based predicted finishing order: highest expected FIA points first, expected position as the
+    tie-break (the back of the grid, where expected points are ~0 for everyone).
+
+    Why this and not the mean position (T-045, 2026-10-26): a DNF puts a car ~18th-20th, so a >50% win
+    favourite with a 15-18% DNF chance has a mean position of 3-4.5 and was listed below drivers it beats
+    in every other statistic (Dutch GP 2026: NOR p_win .78 behind ANT p_win .05). Expected points is
+    linear in the finishing distribution like the mean position, but weights the front by the points
+    scale (25-18-15...), so a 25-point win outweighs a 0-point DNF tail rather than a 20-place one.
+    Over 41 walk-forward races (2025 R2-24, 2026 R1-18) it had the best rank correlation and MAE of the
+    candidates and zero favourite/podium inversions; see data/jolpica/eval/rank_stat_eval.py."""
+    exp_pts, exp_pos = np.asarray(exp_pts, dtype=float), np.asarray(exp_pos, dtype=float)
+    order = np.lexsort((exp_pos, -exp_pts))
+    rank = np.empty(len(order), dtype=int)
+    rank[order] = np.arange(1, len(order) + 1)
+    return rank
 
 
 def q1_cutoff(n: int) -> int:
@@ -755,7 +815,7 @@ def predict_race(
     if mode == "grid" and f["grid_eff"].isna().any():
         raise ValueError("grid mode needs a grid for every entrant")
     model = fit_outcome_model(hist, season, rnd, cfg, stores)
-    p_dnf = dnf_probabilities(hist, season, rnd, f, cfg)
+    p_dnf = dnf_probabilities(hist, season, rnd, f, cfg, use_grid=(mode == "grid"))
     sim = simulate(
         f["theta_race"].to_numpy(),
         f["theta_quali"].to_numpy(),
@@ -770,7 +830,7 @@ def predict_race(
     )
     out = f[["driver_id", "code", "team_id", "team", "theta_race", "theta_quali", "grid", "fp_feat"]].copy()
     out["p_dnf"] = p_dnf
-    for k in ("p_win", "p_podium", "p_top10", "exp_pos", "med_pos"):
+    for k in ("p_win", "p_podium", "p_top10", "exp_pos", "med_pos", "exp_pos_cls", "exp_pts"):
         out[k] = sim[k]
     w = cfg.blend_baseline
     if w > 0:
@@ -783,6 +843,7 @@ def predict_race(
             out[f"p_{ev}_model"] = out[f"p_{ev}"]
             out[f"p_{ev}_baseline"] = out["driver_id"].map(bl[f"p_{ev}"]).to_numpy()
             out[f"p_{ev}"] = (1 - we) * out[f"p_{ev}_model"] + we * out[f"p_{ev}_baseline"]
+    out["pred_rank"] = rank_by_points(out["exp_pts"], out["exp_pos"])
     if mode == "prequali":
         out["exp_grid"] = sim["exp_grid"]
         for k in ("p_pole", "p_front_row", "p_q3", "p_q1_exit"):
@@ -1106,7 +1167,7 @@ def by_race_table(hist: dict, season: int, rounds, cfg: PredictorConfig = Predic
     rows = []
     for rnd in rounds:
         p = predict_race(hist, season, rnd, mode, cfg, stores=stores)
-        t = _attach_truth(p[["driver_id", "code", "p_win", "p_podium", "p_top10", "exp_pos"]], hist, season, rnd)
+        t = _attach_truth(p[["driver_id", "code", "p_win", "p_podium", "p_top10", "exp_pos", "exp_pts", "pred_rank"]], hist, season, rnd)
         for ev in ("win", "podium", "top10"):
             t[f"p_{ev}"] = np.clip(t[f"p_{ev}"], PROB_CLIP, 1 - PROB_CLIP)
         r = res[(res["season"] == season) & (res["round"] == rnd)]
@@ -1118,14 +1179,14 @@ def by_race_table(hist: dict, season: int, rounds, cfg: PredictorConfig = Predic
                 driver_rows.append({
                     "round": rnd, "driver_id": d["driver_id"], "code": d["code"], "team": d["team"],
                     "grid": d["grid"], "p_win": d["p_win"], "p_podium": d["p_podium"], "p_top10": d["p_top10"],
-                    "exp_pos": d["exp_pos"], "p_dnf": d["p_dnf"],
+                    "exp_pos": d["exp_pos"], "exp_pts": d["exp_pts"], "pred_rank": d["pred_rank"], "p_dnf": d["p_dnf"],
                     "actual_position": None if a is None else a["position"],
                     "actual_classified": None if a is None else bool(a["classified"]),
                     "actual_status": None if a is None else a["status"],
                 })
         win = t[t["y_win"] == 1]
         pod_act = t[t["y_podium"] == 1].sort_values("position")
-        pod_pred = t.sort_values(["exp_pos", "p_podium"], ascending=[True, False]).head(3)  # T-042: top 3 by expected finish
+        pod_pred = t.sort_values("pred_rank").head(3)  # T-045: top 3 by expected points (T-042 used expected finish)
         ll = lambda ev: float(np.mean(-(t[f"y_{ev}"] * np.log(t[f"p_{ev}"]) + (1 - t[f"y_{ev}"]) * np.log(1 - t[f"p_{ev}"]))))
         st = track_stickiness(hist, season, rnd, cfg)
         rr = rho[(rho["season"] == season) & (rho["round"] == rnd)]
