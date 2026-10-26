@@ -1,0 +1,104 @@
+{
+  "all": {
+    "n_races": 34,
+    "stops_match_modal": "23/34",
+    "stops_match_modal_green": "19/34",
+    "one_stop_always_baseline": "21/34",
+    "seq_match_modal": "2/34",
+    "set_match_modal": "7/34",
+    "modal_in_opt_top3": "22/34",
+    "stops_match_winner": "22/34",
+    "median_winner_gap_s": 6.7,
+    "median_winner_rank": 3.0,
+    "winner_in_opt_top20": "29/34",
+    "median_pit_err_green_laps": 5.8,
+    "n_pit_err_green": 25,
+    "median_pit_err_laps": 5.0,
+    "mean_opt_stops": 1.15,
+    "mean_modal_stops": 1.41,
+    "soft_share_opt": 0.337,
+    "soft_share_actual": 0.142,
+    "med_share_opt": 0.34,
+    "med_share_actual": 0.397,
+    "hard_share_opt": 0.323,
+    "hard_share_actual": 0.461
+  },
+  "2025_regs": {
+    "n_races": 20,
+    "stops_match_modal": "13/20",
+    "stops_match_modal_green": "15/20",
+    "one_stop_always_baseline": "11/20",
+    "seq_match_modal": "0/20",
+    "set_match_modal": "0/20",
+    "modal_in_opt_top3": "11/20",
+    "stops_match_winner": "13/20",
+    "median_winner_gap_s": 6.0,
+    "median_winner_rank": 3.0,
+    "winner_in_opt_top20": "19/20",
+    "median_pit_err_green_laps": 6.15,
+    "n_pit_err_green": 16,
+    "median_pit_err_laps": 5.0,
+    "mean_opt_stops": 1.25,
+    "mean_modal_stops": 1.5,
+    "soft_share_opt": 0.458,
+    "soft_share_actual": 0.126,
+    "med_share_opt": 0.352,
+    "med_share_actual": 0.432,
+    "hard_share_opt": 0.189,
+    "hard_share_actual": 0.442
+  },
+  "2026_regs": {
+    "n_races": 14,
+    "stops_match_modal": "10/14",
+    "stops_match_modal_green": "4/14",
+    "one_stop_always_baseline": "10/14",
+    "seq_match_modal": "2/14",
+    "set_match_modal": "7/14",
+    "modal_in_opt_top3": "11/14",
+    "stops_match_winner": "9/14",
+    "median_winner_gap_s": 8.0,
+    "median_winner_rank": 1.0,
+    "winner_in_opt_top20": "10/14",
+    "median_pit_err_green_laps": 4.0,
+    "n_pit_err_green": 9,
+    "median_pit_err_laps": 5.0,
+    "mean_opt_stops": 1.0,
+    "mean_modal_stops": 1.29,
+    "soft_share_opt": 0.165,
+    "soft_share_actual": 0.164,
+    "med_share_opt": 0.321,
+    "med_share_actual": 0.348,
+    "hard_share_opt": 0.514,
+    "hard_share_actual": 0.488
+  },
+  "skipped": [
+    [
+      "Italy_2026",
+      "red flag (free tyre changes, stints not comparable)"
+    ],
+    [
+      "Monaco_2026",
+      "red flag (free tyre changes, stints not comparable)"
+    ],
+    [
+      "Netherlands_2026",
+      "red flag (free tyre changes, stints not comparable)"
+    ],
+    [
+      "Australia_2025",
+      "wet / missing laps (tire_model.EXCLUDED_2025_RACES)"
+    ],
+    [
+      "Belgium_2025",
+      "wet / missing laps (tire_model.EXCLUDED_2025_RACES)"
+    ],
+    [
+      "Britain_2025",
+      "wet / missing laps (tire_model.EXCLUDED_2025_RACES)"
+    ],
+    [
+      "Miami_2025",
+      "wet / missing laps (tire_model.EXCLUDED_2025_RACES)"
+    ]
+  ]
+}
