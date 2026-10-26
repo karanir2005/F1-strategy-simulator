@@ -63,9 +63,9 @@ function gridLabel(g: number | null): string {
 }
 
 const COLS_BASE = "grid items-center gap-x-3 grid-cols-[1.75rem_minmax(0,1fr)_3.75rem]";
-const COLS_QUALI = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr)_4.25rem_4.25rem_4.25rem_4rem_3.5rem]`;
+const COLS_QUALI = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr)_4rem_5.5rem_4rem_5.5rem_4.5rem]`;
 // race view has a third trailing column (starting grid)
-const COLS_RACE = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr)_4.25rem_4.25rem_4.25rem_3.25rem_5rem_3.5rem]`;
+const COLS_RACE = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr)_4rem_4.5rem_4.5rem_3.5rem_6rem_3.5rem]`;
 
 function Detail({ r, session, open, id }: { r: Row; session: Session; open: boolean; id: string }) {
   const metrics = METRICS[session];
@@ -171,7 +171,7 @@ export function ProbabilityTable({
   );
   const domain = barDomain(rows, metric);
   const active = metrics.find((x) => x.key === metric) ?? metrics[0];
-  const expLabel = view === "race" ? "finish" : "grid";
+  const expLabel = view === "race" ? "finish" : "qualifying";
 
   function pickSession(s: Session) {
     setSession(s);
@@ -180,7 +180,7 @@ export function ProbabilityTable({
 
   // two trailing columns differ per session
   const COLS = view === "race" ? COLS_RACE : COLS_QUALI;
-  const tailHeads = view === "race" ? ["Grid", "Exp pos", "DNF"] : ["Exp grid", hasActual ? "Actual" : "Q1 out"];
+  const tailHeads = view === "race" ? ["Grid", "Exp finish", "DNF"] : ["Exp quali", hasActual ? "Actual" : "Q1 out"];
   const tail = (r: Row): ReactNode[] =>
     view === "race"
       ? [
@@ -197,7 +197,7 @@ export function ProbabilityTable({
 
   return (
     <section aria-labelledby="table-h" ref={ref}>
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-col gap-3">
         <div>
           <h2 id="table-h" className="display text-3xl text-fg">
             Driver probabilities
@@ -236,7 +236,7 @@ export function ProbabilityTable({
                 expMode ? "bg-signal text-signal-fg" : "text-muted-fg hover:text-fg"
               }`}
             >
-              <span className="sm:hidden">{view === "race" ? "Finish" : "Grid"}</span>
+              <span className="sm:hidden">{view === "race" ? "Finish" : "Quali"}</span>
               <span className="hidden sm:inline">Expected {expLabel}</span>
             </button>
             {metrics.map((mt) => (
@@ -261,21 +261,21 @@ export function ProbabilityTable({
         <div className={`${COLS} border-b border-line bg-sunken px-3 py-2`}>
           <span className="label-mono">#</span>
           <span className="label-mono">Driver</span>
-          <span className="label-mono hidden md:block">{active.label} chance</span>
-          <span className="label-mono text-right md:hidden">{expMode ? (view === "race" ? "Exp pos" : "Exp grid") : active.label}</span>
+          <span className="label-mono hidden whitespace-nowrap md:block">{active.label} chance</span>
+          <span className="label-mono text-right md:hidden">{expMode ? (view === "race" ? "Exp finish" : "Exp quali") : active.label}</span>
           {metrics.map((mt) => (
             <button
               key={mt.key}
               type="button"
               onClick={() => setSortBy(mt.key)}
-              className={`label-mono hidden text-right md:block ${!expMode && active.key === mt.key ? "!text-fg" : ""}`}
+              className={`label-mono hidden whitespace-nowrap text-right md:block ${!expMode && active.key === mt.key ? "!text-fg" : ""}`}
               aria-label={`Rank by ${mt.label}`}
             >
               {mt.label}
             </button>
           ))}
           {tailHeads.map((h) => (
-            <span key={h} className="label-mono hidden text-right md:block">
+            <span key={h} className="label-mono hidden whitespace-nowrap text-right md:block">
               {h}
             </span>
           ))}
@@ -360,8 +360,8 @@ export function ProbabilityTable({
       </div>
       <p className="mt-3 text-xs leading-4 text-muted-fg">
         {view === "race"
-          ? "Exp pos is the expected finishing position from the simulation; the small +/- beside it is the places gained or lost versus the starting grid. DNF is the chance of not finishing."
-          : `Exp grid is the expected qualifying position from the simulation. ${
+          ? "Exp finish is the average finishing position over all simulated races (lower is better); the small +/- beside it is the places gained or lost versus the starting grid. DNF is the chance of not finishing."
+          : `Exp quali is the average qualifying position over all simulated sessions. ${
               hasActual
                 ? "Actual is the starting grid in use (penalties applied only if an override file was set)."
                 : "Q1 out is the chance of being knocked out in Q1."
