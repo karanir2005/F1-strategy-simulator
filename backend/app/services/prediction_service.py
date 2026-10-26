@@ -407,3 +407,77 @@ def history() -> list[dict]:
             }
         )
     return out
+
+
+# ------------------------------------------------------------------ past races (T-044)
+
+DRIVERS_CSV = PRED_DIR / "walk_forward_2026_drivers.csv"
+SCHEDULE_CSV = REPO_ROOT / "data" / "jolpica" / "derived" / "schedule.csv"
+_races_cache: dict = {"mtime": None, "df": None}
+
+
+def _drivers_table() -> pd.DataFrame | None:
+    """Per-driver walk-forward predictions + actual results (written by predict_race.py --by-race).
+    Read once per file mtime; no simulation happens at request time."""
+    try:
+        m = DRIVERS_CSV.stat().st_mtime
+    except OSError:
+        return None
+    if _races_cache["mtime"] != (str(DRIVERS_CSV), m):
+        _races_cache.update(mtime=(str(DRIVERS_CSV), m), df=pd.read_csv(DRIVERS_CSV))
+    return _races_cache["df"]
+
+
+def _schedule() -> pd.DataFrame:
+    try:
+        s = pd.read_csv(SCHEDULE_CSV)
+        return s[s["season"] == SEASON]
+    except (OSError, ValueError):
+        return pd.DataFrame(columns=["round", "race_name", "date", "circuit_id"])
+
+
+def list_races() -> list[dict]:
+    """Rounds with a precomputed walk-forward prediction, plus the next unraced round (served live
+    by /predict/next)."""
+    t = _drivers_table()
+    done = set() if t is None else {int(r) for r in t["round"].unique()}
+    out = []
+    for r in _schedule().to_dict("records"):
+        rnd = int(r["round"])
+        if rnd in done or rnd == max(done, default=0) + 1:
+            out.append({"round": rnd, "name": str(r["race_name"]).replace("Grand Prix", "GP"),
+                        "date": str(r["date"]), "has_prediction": True, "is_next": rnd not in done})
+    return out
+
+
+def get_past_race(rnd: int) -> dict:
+    """Same shape as /predict/next (mode grid, stale false) plus `race_done` and per-driver `actual`.
+    Raises KeyError when the round has no precomputed prediction."""
+    t = _drivers_table()
+    if t is None or rnd not in set(t["round"]):
+        raise KeyError(rnd)
+    sub = t[t["round"] == rnd]
+    sch = _schedule()
+    ev = sch[sch["round"] == rnd].iloc[0]
+    race = {"round": rnd, "name": str(ev["race_name"]).replace("Grand Prix", "GP"),
+            "circuit": _circuit_name(str(ev["circuit_id"])), "date": str(ev["date"]),
+            "quali_date": None if pd.isna(ev.get("quali_date")) else str(ev["quali_date"]), **_start_times(ev)}
+    generated = datetime.fromtimestamp(DRIVERS_CSV.stat().st_mtime, tz=timezone.utc).isoformat()
+    payload = shape(sub, "grid", race, generated, False, None)
+    payload["qualifying"] = None
+    payload["race_done"] = True
+    payload["evidence"]["notes"].append(
+        "Walk-forward prediction: made from earlier rounds plus this race's own starting grid (no leakage)."
+    )
+    act = {r["code"]: r for r in sub.to_dict("records")}
+    for d in payload["drivers"]:
+        a = act[d["code"]]
+        pos = a["actual_position"]
+        status = None if pd.isna(a["actual_status"]) else str(a["actual_status"])
+        d["actual"] = {
+            "position": None if pd.isna(pos) else int(pos),
+            "classified": None if pd.isna(a["actual_classified"]) else bool(a["actual_classified"]),
+            "status": status,
+            "dnf": status is not None and not bool(a["actual_classified"]) and not status.startswith("+") and status != "Finished",
+        }
+    return payload

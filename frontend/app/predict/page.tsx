@@ -1,9 +1,13 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import {
   fetchPredictionHistory,
   fetchPredictionNext,
+  fetchPredictionRace,
+  fetchPredictionRaces,
+  type RaceListItem,
   type HistoryResponse,
   type PredictionResponse,
 } from "@/lib/api";
@@ -12,7 +16,7 @@ import { useApi } from "@/lib/use-api";
 import { EvidencePanel, HistoryStates } from "@/components/predict/history";
 import { Hero } from "@/components/predict/hero";
 import { ProbabilityTable } from "@/components/predict/probability-table";
-import { RaceHeader } from "@/components/predict/race-header";
+import { RaceHeader, RacePicker } from "@/components/predict/race-header";
 import { EmptyBlock, ErrorBlock, Sk } from "@/components/viz/states";
 
 function PredictSkeleton() {
@@ -51,21 +55,46 @@ function PredictSkeleton() {
 }
 
 export default function PredictPage() {
-  const next = useApi<PredictionResponse>("predict-next", fetchPredictionNext);
+  // T-044: ?round=N selects a finished race; absent = the upcoming race
+  const [round, setRound] = useState<number | null>(null);
+  useEffect(() => {
+    const r = Number(new URLSearchParams(window.location.search).get("round"));
+    if (Number.isInteger(r) && r > 0) setRound(r);
+  }, []);
+  const pick = useCallback((r: number | null) => {
+    setRound(r);
+    const url = new URL(window.location.href);
+    if (r == null) url.searchParams.delete("round");
+    else url.searchParams.set("round", String(r));
+    window.history.replaceState(null, "", url);
+  }, []);
+  const races = useApi<RaceListItem[]>("predict-races", fetchPredictionRaces);
+  const fetchSel = useCallback(() => (round == null ? fetchPredictionNext() : fetchPredictionRace(round)), [round]);
+  const next = useApi<PredictionResponse>(round == null ? "predict-next" : `predict-race-${round}`, fetchSel);
   const hist = useApi<HistoryResponse>("predict-history", fetchPredictionHistory);
   const data = next.data;
+
+  const picker = <RacePicker races={races.data ?? []} value={round} onChange={pick} />;
 
   if (!data) {
     if (next.error)
       return (
-        <ErrorBlock
+        <div className="space-y-6">
+          {picker}
+          <ErrorBlock
           title="Could not load the prediction"
           message={next.error}
           hint="Is the backend running? Start it with uvicorn app.main:app --reload from backend/."
           onRetry={next.reload}
         />
+        </div>
       );
-    return <PredictSkeleton />;
+    return (
+      <div className="space-y-6">
+        {picker}
+        <PredictSkeleton />
+      </div>
+    );
   }
 
   return (
@@ -83,6 +112,7 @@ export default function PredictPage() {
         </div>
       )}
 
+      {picker}
       <RaceHeader data={data} />
 
       {data.drivers.length === 0 ? (

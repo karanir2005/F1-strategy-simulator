@@ -66,6 +66,7 @@ const COLS_BASE = "grid items-center gap-x-3 grid-cols-[1.75rem_minmax(0,1fr)_3.
 const COLS_QUALI = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr)_4rem_5.5rem_4rem_5.5rem_4.5rem]`;
 // race view has a third trailing column (starting grid)
 const COLS_RACE = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr)_4rem_4.5rem_4.5rem_3.5rem_6rem_3.5rem]`;
+const COLS_RACE_ACTUAL = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr)_4rem_4.5rem_4.5rem_3.5rem_6rem_3.5rem_4.5rem]`;
 
 function Detail({ r, session, open, id }: { r: Row; session: Session; open: boolean; id: string }) {
   const metrics = METRICS[session];
@@ -138,6 +139,7 @@ export function ProbabilityTable({
   qualifying?: QualifyingBlock | null;
 }) {
   const hasQuali = !!qualifying?.available && qualifying.drivers.length > 0;
+  const hasResult = drivers.some((d) => d.actual != null);
   const hasActual = hasQuali && qualifying!.drivers.some((d) => d.actual_grid != null);
   const [session, setSession] = useState<Session>("race");
   // "exp" = order by expected finish (race) / expected grid (qualifying); the default view
@@ -176,8 +178,8 @@ export function ProbabilityTable({
   }
 
   // two trailing columns differ per session
-  const COLS = view === "race" ? COLS_RACE : COLS_QUALI;
-  const tailHeads = view === "race" ? ["Grid", "Exp finish", "DNF"] : ["Exp quali", hasActual ? "Actual" : "Q1 out"];
+  const COLS = view === "race" ? (hasResult ? COLS_RACE_ACTUAL : COLS_RACE) : COLS_QUALI;
+  const tailHeads = view === "race" ? ["Grid", "Exp finish", "DNF", ...(hasResult ? ["Actual"] : [])] : ["Exp quali", hasActual ? "Actual" : "Q1 out"];
   const tail = (r: Row): ReactNode[] =>
     view === "race"
       ? [
@@ -187,6 +189,21 @@ export function ProbabilityTable({
             <DeltaVsGrid r={r} />
           </span>,
           fmtPct(r.p_dnf),
+          ...(hasResult
+            ? [
+                r.actual == null ? (
+                  "–"
+                ) : r.actual.dnf ? (
+                  <span key="a" title={r.actual.status ?? undefined} className="text-warn">
+                    DNF
+                  </span>
+                ) : r.actual.position == null ? (
+                  "–"
+                ) : (
+                  `P${r.actual.position}`
+                ),
+              ]
+            : []),
         ]
       : r.q
         ? [r.q.exp_grid.toFixed(1), hasActual ? gridLabel(r.q.actual_grid) : fmtPct(r.q.p_q1_exit)]
