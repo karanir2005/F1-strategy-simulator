@@ -235,7 +235,7 @@ def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool
         "stale": stale,
         "grid_source": grid_source if mode == "grid" else None,
         "drivers": drivers,
-        "headline": {"winner": drivers[0]["code"], "podium": [d["code"] for d in sorted(drivers, key=lambda d: -d["p_podium"])[:3]]},
+        "headline": {"winner": drivers[0]["code"], "podium": [d["code"] for d in sorted(drivers, key=lambda d: (d["exp_pos"], -d["p_podium"]))[:3]]},
         "evidence": evidence(mode, grid_source),
         "disclaimer": DISCLAIMER,
     }

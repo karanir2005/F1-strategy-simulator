@@ -2211,3 +2211,25 @@ season,round,race_name,circuit_id,date,session,driver_id,code,team_id,team,posit
 2026,17,Singapore Grand Prix,marina_bay,2026-10-11,race,stroll,STR,aston_martin,Aston Martin,20,R,False,21,Retired,0.0,36
 2026,17,Singapore Grand Prix,marina_bay,2026-10-11,race,colapinto,COL,alpine,Alpine F1 Team,21,R,False,15,Retired,0.0,29
 2026,17,Singapore Grand Prix,marina_bay,2026-10-11,race,bortoleto,BOR,audi,Audi,22,R,False,14,Retired,0.0,7
+2026,18,United States Grand Prix,americas,2026-10-25,race,antonelli,ANT,mercedes,Mercedes,1,1,True,1,Finished,25.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,leclerc,LEC,ferrari,Ferrari,2,2,True,4,Finished,18.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,max_verstappen,VER,red_bull,Red Bull,3,3,True,2,Finished,15.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,hamilton,HAM,ferrari,Ferrari,4,4,True,5,Finished,12.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,norris,NOR,mclaren,McLaren,5,5,True,8,Finished,10.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,hadjar,HAD,red_bull,Red Bull,6,6,True,3,Finished,8.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,piastri,PIA,mclaren,McLaren,7,7,True,7,Finished,6.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,russell,RUS,mercedes,Mercedes,8,8,True,6,Finished,4.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,lawson,LAW,rb,RB F1 Team,9,9,True,9,Finished,2.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,gasly,GAS,alpine,Alpine F1 Team,10,10,True,10,Finished,1.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,hulkenberg,HUL,audi,Audi,11,11,True,11,Finished,0.0,56
+2026,18,United States Grand Prix,americas,2026-10-25,race,arvid_lindblad,LIN,rb,RB F1 Team,12,12,True,14,Lapped,0.0,55
+2026,18,United States Grand Prix,americas,2026-10-25,race,bortoleto,BOR,audi,Audi,13,13,True,21,Lapped,0.0,55
+2026,18,United States Grand Prix,americas,2026-10-25,race,ocon,OCO,haas,Haas F1 Team,14,14,True,15,Lapped,0.0,55
+2026,18,United States Grand Prix,americas,2026-10-25,race,stroll,STR,aston_martin,Aston Martin,15,15,True,22,Lapped,0.0,55
+2026,18,United States Grand Prix,americas,2026-10-25,race,alonso,ALO,aston_martin,Aston Martin,16,16,True,12,Lapped,0.0,55
+2026,18,United States Grand Prix,americas,2026-10-25,race,albon,ALB,williams,Williams,17,17,True,17,Lapped,0.0,55
+2026,18,United States Grand Prix,americas,2026-10-25,race,sainz,SAI,williams,Williams,18,18,True,16,Lapped,0.0,55
+2026,18,United States Grand Prix,americas,2026-10-25,race,perez,PER,cadillac,Cadillac F1 Team,19,19,True,18,Lapped,0.0,55
+2026,18,United States Grand Prix,americas,2026-10-25,race,bottas,BOT,cadillac,Cadillac F1 Team,20,R,False,19,Retired,0.0,48
+2026,18,United States Grand Prix,americas,2026-10-25,race,colapinto,COL,alpine,Alpine F1 Team,21,R,False,20,Retired,0.0,35
+2026,18,United States Grand Prix,americas,2026-10-25,race,bearman,BEA,haas,Haas F1 Team,22,R,False,13,Retired,0.0,24

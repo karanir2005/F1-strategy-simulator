@@ -683,6 +683,7 @@ def simulate(
         "p_podium": (pos <= 3).mean(0),
         "p_top10": (pos <= 10).mean(0),
         "exp_pos": pos.mean(0),
+        "med_pos": np.median(pos, axis=0),
         "p_dnf_sim": dnf.mean(0),
         "exp_grid": g.mean(0),
     }
@@ -769,7 +770,7 @@ def predict_race(
     )
     out = f[["driver_id", "code", "team_id", "team", "theta_race", "theta_quali", "grid", "fp_feat"]].copy()
     out["p_dnf"] = p_dnf
-    for k in ("p_win", "p_podium", "p_top10", "exp_pos"):
+    for k in ("p_win", "p_podium", "p_top10", "exp_pos", "med_pos"):
         out[k] = sim[k]
     w = cfg.blend_baseline
     if w > 0:
@@ -1104,14 +1105,14 @@ def by_race_table(hist: dict, season: int, rounds, cfg: PredictorConfig = Predic
     rows = []
     for rnd in rounds:
         p = predict_race(hist, season, rnd, mode, cfg, stores=stores)
-        t = _attach_truth(p[["driver_id", "code", "p_win", "p_podium", "p_top10"]], hist, season, rnd)
+        t = _attach_truth(p[["driver_id", "code", "p_win", "p_podium", "p_top10", "exp_pos"]], hist, season, rnd)
         for ev in ("win", "podium", "top10"):
             t[f"p_{ev}"] = np.clip(t[f"p_{ev}"], PROB_CLIP, 1 - PROB_CLIP)
         r = res[(res["season"] == season) & (res["round"] == rnd)]
         code_of = dict(zip(r["driver_id"], r["code"]))
         win = t[t["y_win"] == 1]
         pod_act = t[t["y_podium"] == 1].sort_values("position")
-        pod_pred = t.sort_values("p_podium", ascending=False).head(3)
+        pod_pred = t.sort_values(["exp_pos", "p_podium"], ascending=[True, False]).head(3)  # T-042: top 3 by expected finish
         ll = lambda ev: float(np.mean(-(t[f"y_{ev}"] * np.log(t[f"p_{ev}"]) + (1 - t[f"y_{ev}"]) * np.log(1 - t[f"p_{ev}"]))))
         st = track_stickiness(hist, season, rnd, cfg)
         rr = rho[(rho["season"] == season) & (rho["round"] == rnd)]

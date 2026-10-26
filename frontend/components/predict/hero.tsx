@@ -135,7 +135,7 @@ function Podium({ data }: { data: PredictionResponse }) {
   const picks = data.headline.podium
     .map((c) => data.drivers.find((d) => d.code === c))
     .filter((d): d is DriverPrediction => !!d);
-  // highest podium chance in the centre, then left, then right
+  // best expected finish in the centre, then left, then right
   const order = [picks[1], picks[0], picks[2]].filter((d): d is DriverPrediction => !!d);
   const delays: Record<string, number> = {};
   if (picks[1]) delays[picks[1].code] = 0.1;
@@ -145,7 +145,7 @@ function Podium({ data }: { data: PredictionResponse }) {
   return (
     <section aria-labelledby="hl-podium" className="min-w-0">
       <p id="hl-podium" className="label-mono">
-        Podium: three highest podium chances
+        Podium: top three by expected finish
       </p>
       <ol className="mt-3 flex items-end gap-2 sm:gap-3" style={{ height: Math.max(...picks.map((d) => d.p_podium), 0.2) * PODIUM_H + 96 }}>
         {order.map((d) => (
@@ -170,7 +170,7 @@ function Podium({ data }: { data: PredictionResponse }) {
       </ol>
       <div className="h-px w-full bg-line-strong" aria-hidden />
       <p className="mt-3 max-w-md text-[13px] leading-5 text-muted-fg">
-        Block height is each driver&apos;s own chance of a top-three finish. It is not the chance that exactly these
+        The podium is the three best expected finishing positions. Block height is each driver&apos;s own chance of a top-three finish. It is not the chance that exactly these
         three share the podium, which is much lower.
       </p>
     </section>
