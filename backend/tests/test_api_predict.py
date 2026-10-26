@@ -58,7 +58,7 @@ def test_next_live_sorted_and_cached(monkeypatch):
     assert [x["code"] for x in d["drivers"]] == ["HAM", "ANT", "RUS", "LEC"]
     assert d["drivers"][1]["name"] == "Kimi Antonelli" and d["drivers"][0]["name"] == "Hamilton"
     assert d["drivers"][0]["grid"] is None
-    assert d["headline"] == {"winner": "HAM", "podium": ["RUS", "HAM", "ANT"]}
+    assert d["headline"] == {"winner": "HAM", "podium": ["HAM", "ANT", "RUS"]}  # T-042: by lowest exp_pos
     client.get("/predict/next")
     assert len(calls) == 1  # second call served from cache
 

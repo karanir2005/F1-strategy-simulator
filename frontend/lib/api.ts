@@ -265,7 +265,7 @@ export interface DriverPrediction {
 
 export interface Headline {
   winner: string;
-  /** Top 3 by p_podium (not an ordered finish). */
+  /** Top 3 by expected finish (lowest exp_pos, T-042), best first; each driver's own p_podium is still the number to show. */
   podium: string[];
 }
 

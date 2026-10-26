@@ -159,6 +159,44 @@ function Row({ r, i }: { r: HistoryRow; i: number }) {
   );
 }
 
+/** Latest completed race: predicted vs actual podium, shown above the table so the newest result is unmissable. */
+function LatestRace({ r }: { r: HistoryRow }) {
+  const line = (codes: string[]) => (
+    <span className="font-mono text-fg">{codes.length ? codes.join(" ") : "n/a"}</span>
+  );
+  return (
+    <div className="panel mt-5 p-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="label-mono">Latest race</span>
+        <span className="text-[15px] text-fg">
+          R{r.round} {shortRace(r.race)}
+        </span>
+        <span
+          className={`inline-flex h-5 items-center rounded-sm px-1.5 font-mono text-[11px] uppercase ${
+            r.winner_correct ? "bg-good/15 text-good" : "border border-line-strong text-muted-fg"
+          }`}
+        >
+          Winner {r.winner_correct ? "called" : "missed"}
+        </span>
+        <Pips hits={r.podium_hits} />
+      </div>
+      <dl className="mt-3 grid gap-x-8 gap-y-2 text-[13px] sm:grid-cols-2">
+        <div>
+          <dt className="text-muted-fg">Predicted podium (top 3 by expected finish, with the grid)</dt>
+          <dd>{line(r.predicted_podium)}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-fg">Actual podium</dt>
+          <dd>{line(r.actual_podium)}</dd>
+        </div>
+      </dl>
+      <p className="mt-2 text-[13px] text-muted-fg">
+        The model gave the actual winner <span className="font-mono text-fg">{r.actual_winner}</span> {fmtPct(r.p_actual_winner)}.
+      </p>
+    </div>
+  );
+}
+
 export function HistoryTable({ history }: { history: HistoryResponse }) {
   const [all, setAll] = useState(false);
   const rows = useMemo(() => [...history.races].sort((a, b) => b.round - a.round), [history.races]);
@@ -195,6 +233,8 @@ export function HistoryTable({ history }: { history: HistoryResponse }) {
         {stats.n > 0 && stats.pickedPole === stats.n &&
           " Here the model's pick was the pole sitter in every race, so its winner record is the pole sitter's record."}
       </p>
+
+      {rows[0] && <LatestRace r={rows[0]} />}
 
       <div className="mt-4 overflow-hidden rounded-panel border border-line">
         <div className={`hidden gap-x-3 border-b border-line bg-sunken px-3 py-2 md:grid ${ROW_COLS}`}>

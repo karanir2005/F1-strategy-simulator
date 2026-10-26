@@ -64,9 +64,9 @@ def override_grid_path(rnd: int, base_dir: Path | None = None) -> Path:
 
 
 def headline(t: pd.DataFrame) -> dict:
-    """Winner = highest P(win); podium = top 3 by P(podium). Same rule as the API's headline."""
+    """Winner = highest P(win); podium = top 3 by expected finish (lowest E[pos], T-042). Same rule as the API's headline."""
     w = t.sort_values(["p_win", "p_podium"], ascending=False, kind="stable")
-    pod = t.sort_values("p_podium", ascending=False, kind="stable")
+    pod = t.sort_values(["exp_pos", "p_podium"], ascending=[True, False], kind="stable")
     return {"winner": str(w["code"].iloc[0]), "podium": [str(c) for c in pod["code"].iloc[:3]]}
 
 
