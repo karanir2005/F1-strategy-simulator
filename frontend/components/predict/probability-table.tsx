@@ -41,15 +41,21 @@ function barDomain(rows: Row[], key: Metric): number {
   return Math.min(1, Math.ceil(max * 20) / 20);
 }
 
-/** Places the model expects the driver to gain (+) or lose (-) versus the starting grid; grid mode only. */
-function DeltaVsGrid({ r }: { r: Row }) {
+/** True when every driver carries the T-045 expected-points fields (otherwise: legacy order by expected finish). */
+function hasPoints(rows: DriverPrediction[]): boolean {
+  return rows.length > 0 && rows.every((r) => r.exp_points != null && r.pred_rank != null);
+}
+
+/** Places the model expects the driver to gain (+) or lose (-) versus the starting grid, using the predicted
+ * finishing place (pred_rank) so it always agrees with the table order; grid mode only. */
+function DeltaVsGrid({ r, pts }: { r: Row; pts: boolean }) {
   if (r.grid == null || r.grid === 0) return null;
-  const d = Math.round(r.grid - r.exp_pos);
+  const d = Math.round(r.grid - (pts ? (r.pred_rank as number) : r.exp_pos));
   if (d === 0) return <span className="ml-1.5 text-faint">=</span>;
   return (
     <span
       className={`ml-1.5 ${d > 0 ? "text-good" : "text-muted-fg"}`}
-      title={`Expected finish vs starting position P${r.grid}`}
+      title={`Predicted finish vs starting position P${r.grid}`}
       aria-label={`${d > 0 ? "gains" : "loses"} ${Math.abs(d)} places versus the grid`}
     >
       {d > 0 ? "+" : "-"}
@@ -68,7 +74,7 @@ const COLS_QUALI = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr
 const COLS_RACE = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr)_4rem_4.5rem_4.5rem_3.5rem_6rem_3.5rem]`;
 const COLS_RACE_ACTUAL = `${COLS_BASE} md:grid-cols-[2rem_minmax(0,1.5fr)_minmax(0,2fr)_4rem_4.5rem_4.5rem_3.5rem_6rem_3.5rem_4.5rem]`;
 
-function Detail({ r, session, open, id }: { r: Row; session: Session; open: boolean; id: string }) {
+function Detail({ r, session, open, id, pts }: { r: Row; session: Session; open: boolean; id: string; pts: boolean }) {
   const metrics = METRICS[session];
   const extra =
     session === "race"
@@ -109,7 +115,13 @@ function Detail({ r, session, open, id }: { r: Row; session: Session; open: bool
           <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-[13px] sm:col-span-3 sm:max-w-md">
             {session === "race" ? (
               <>
-                <dt className="text-muted-fg">Expected finish</dt>
+                {pts && (
+                  <>
+                    <dt className="text-muted-fg">Expected points</dt>
+                    <dd className="font-mono text-fg tnum">{(r.exp_points as number).toFixed(1)}</dd>
+                  </>
+                )}
+                <dt className="text-muted-fg">Average finish (incl. retirements)</dt>
                 <dd className="font-mono text-fg tnum">P{r.exp_pos.toFixed(1)}</dd>
               </>
             ) : (
@@ -138,6 +150,7 @@ export function ProbabilityTable({
   drivers: DriverPrediction[];
   qualifying?: QualifyingBlock | null;
 }) {
+  const pts = hasPoints(drivers);
   const hasQuali = !!qualifying?.available && qualifying.drivers.length > 0;
   const hasResult = drivers.some((d) => d.actual != null);
   const hasActual = hasQuali && qualifying!.drivers.some((d) => d.actual_grid != null);
@@ -159,7 +172,7 @@ export function ProbabilityTable({
   const expMode = sortBy === "exp";
   // in expected-order mode the bars and highlighted column show the headline probability (win / pole)
   const metric: Metric = expMode ? metrics[0].key : (metrics.find((x) => x.key === sortBy)?.key ?? metrics[0].key);
-  const expOf = (r: Row) => (view === "race" ? r.exp_pos : (r.q?.exp_grid ?? 99));
+  const expOf = (r: Row) => (view === "race" ? (pts ? (r.pred_rank as number) : r.exp_pos) : (r.q?.exp_grid ?? 99));
   const sorted = useMemo(
     () =>
       [...rows].sort((a, b) =>
@@ -170,7 +183,7 @@ export function ProbabilityTable({
   );
   const domain = barDomain(rows, metric);
   const active = metrics.find((x) => x.key === metric) ?? metrics[0];
-  const expLabel = view === "race" ? "finish" : "qualifying";
+  const expLabel = view === "race" ? (pts ? "points" : "finish") : "qualifying";
 
   function pickSession(s: Session) {
     setSession(s);
@@ -179,14 +192,14 @@ export function ProbabilityTable({
 
   // two trailing columns differ per session
   const COLS = view === "race" ? (hasResult ? COLS_RACE_ACTUAL : COLS_RACE) : COLS_QUALI;
-  const tailHeads = view === "race" ? ["Grid", "Exp finish", "DNF", ...(hasResult ? ["Actual"] : [])] : ["Exp quali", hasActual ? "Actual" : "Q1 out"];
+  const tailHeads = view === "race" ? ["Grid", pts ? "Exp pts" : "Exp finish", "DNF", ...(hasResult ? ["Actual"] : [])] : ["Exp quali", hasActual ? "Actual" : "Q1 out"];
   const tail = (r: Row): ReactNode[] =>
     view === "race"
       ? [
           r.grid == null ? "–" : r.grid === 0 ? "pit" : `P${r.grid}`,
           <span key="e">
-            {r.exp_pos.toFixed(1)}
-            <DeltaVsGrid r={r} />
+            {pts ? (r.exp_points as number).toFixed(1) : r.exp_pos.toFixed(1)}
+            <DeltaVsGrid r={r} pts={pts} />
           </span>,
           fmtPct(r.p_dnf),
           ...(hasResult
@@ -217,7 +230,11 @@ export function ProbabilityTable({
             Driver probabilities
           </h2>
           <p className="mt-1 text-[13px] text-muted-fg">
-            {expMode ? `Ordered by expected ${expLabel === "finish" ? "finishing position" : "qualifying position"}. ` : ""}
+            {expMode
+              ? expLabel === "points"
+                ? "Ordered by expected points (the championship points a driver averages over the simulated races). "
+                : `Ordered by expected ${expLabel === "finish" ? "finishing position" : "qualifying position"}. `
+              : ""}
             Bars show the chance to {active.long}, scaled 0 to {Math.round(domain * 100)}%. Select a row for detail.
           </p>
         </div>
@@ -250,7 +267,7 @@ export function ProbabilityTable({
                 expMode ? "bg-signal text-signal-fg" : "text-muted-fg hover:text-fg"
               }`}
             >
-              <span className="sm:hidden">{view === "race" ? "Finish" : "Quali"}</span>
+              <span className="sm:hidden">{view === "race" ? (pts ? "Points" : "Finish") : "Quali"}</span>
               <span className="hidden sm:inline">Expected {expLabel}</span>
             </button>
             {metrics.map((mt) => (
@@ -276,7 +293,7 @@ export function ProbabilityTable({
           <span className="label-mono">#</span>
           <span className="label-mono">Driver</span>
           <span className="label-mono hidden whitespace-nowrap md:block">{active.label} chance</span>
-          <span className="label-mono text-right md:hidden">{expMode ? (view === "race" ? "Exp finish" : "Exp quali") : active.label}</span>
+          <span className="label-mono text-right md:hidden">{expMode ? (view === "race" ? (pts ? "Exp pts" : "Exp finish") : "Exp quali") : active.label}</span>
           {metrics.map((mt) => (
             <button
               key={mt.key}
@@ -339,8 +356,8 @@ export function ProbabilityTable({
                   <span className="text-right font-mono text-[15px] font-semibold text-fg md:hidden">
                     {expMode ? (
                       <>
-                        P{expOf(r).toFixed(1)}
-                        {view === "race" && <DeltaVsGrid r={r} />}
+                        {view === "race" && pts ? (r.exp_points as number).toFixed(1) : `P${expOf(r).toFixed(1)}`}
+                        {view === "race" && <DeltaVsGrid r={r} pts={pts} />}
                       </>
                     ) : (
                       <PctTicker value={v} duration={0.6} />
@@ -366,7 +383,7 @@ export function ProbabilityTable({
                     <ProbBar value={v} domain={domain} revealed={inView} delay={Math.min(i, 11) * 0.025} />
                   </span>
                 </button>
-                <Detail r={r} session={view} open={open} id={detailId} />
+                <Detail r={r} session={view} open={open} id={detailId} pts={pts} />
               </m.li>
             );
           })}
@@ -374,7 +391,9 @@ export function ProbabilityTable({
       </div>
       <p className="mt-3 text-xs leading-4 text-muted-fg">
         {view === "race"
-          ? "Exp finish is the average finishing position over all simulated races (lower is better); the small +/- beside it is the places gained or lost versus the starting grid. DNF is the chance of not finishing."
+          ? pts
+            ? "Exp pts is the average championship points over all simulated races and sets the order (a likely winner outranks a driver who is steadier but slower). The small +/- beside it is the places gained or lost versus the starting grid. Average finish (in the detail) is dragged down by retirements, which put a car near the back, so it can rank a favourite below slower, safer cars. DNF is the chance of not finishing."
+            : "Exp finish is the average finishing position over all simulated races (lower is better); the small +/- beside it is the places gained or lost versus the starting grid. DNF is the chance of not finishing."
           : `Exp quali is the average qualifying position over all simulated sessions. ${
               hasActual
                 ? "Actual is the starting grid in use (penalties applied only if an override file was set)."

@@ -258,6 +258,10 @@ export interface DriverPrediction {
   p_top10: number;
   exp_pos: number;
   p_dnf: number;
+  /** T-045. Expected FIA points over the simulated races; null/absent for stale CSVs saved before T-045. */
+  exp_points?: number | null;
+  /** T-045. 1-based predicted finishing order (by exp_points, ties by exp_pos). The default table order. */
+  pred_rank?: number | null;
   /** T-029. Grid mode only: the saved pre-quali numbers for the same round; null if no saved file. */
   p_win_prequali?: number | null;
   p_podium_prequali?: number | null;
@@ -285,7 +289,7 @@ export interface RaceListItem {
 
 export interface Headline {
   winner: string;
-  /** Top 3 by expected finish (lowest exp_pos, T-042), best first; each driver's own p_podium is still the number to show. */
+  /** Top 3 by predicted order (pred_rank: expected points, T-045; T-042 used lowest exp_pos), best first; each driver's own p_podium is still the number to show. */
   podium: string[];
 }
 

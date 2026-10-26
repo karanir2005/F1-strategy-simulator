@@ -62,3 +62,10 @@ No simulation at request time; both endpoints read `data/jolpica/predictions/wal
 - `GET /predict/race/{round}` -> same `PredictionResponse` as `/predict/next` with `mode: "grid"`, `stale: false`, `grid_source: null`, `generated_at` = CSV mtime, `qualifying: null`, `p_win_prequali`/`p_podium_prequali` null, plus top-level `"race_done": true` and per driver
   `"actual": {"position": 1 | null, "classified": true | null, "status": "Finished" | "+1 Lap" | "Engine" | null, "dnf": false}` (`position` is the official classification slot, DNFs get a slot too; `dnf` true when not classified and status is not "Finished"/"+N Lap"). 404 if the round has no precomputed prediction.
 - Frontend: `/predict?round=12` selects a past race; no param = next race.
+
+## Addendum T-045: predicted order by expected points (data-scientist)
+Why: sorting by mean finishing position (T-042) listed a 78% win favourite below a 5% driver whenever the favourite's DNF tail (a retirement puts a car ~18th-20th) dragged his mean up (Dutch GP 2026: NOR p_win 0.78, E[pos] 4.07 vs ANT p_win 0.05, E[pos] 4.05). The default order and the predicted podium are now by **expected FIA points** (25-18-15-12-10-8-6-4-2-1 over the simulated finishing orders), ties broken by `exp_pos`.
+- `drivers[]` gains two optional fields: `"exp_points": number | null` (expected points, 0..25) and `"pred_rank": int | null` (1-based predicted order). Both are null/absent for stale CSVs saved before T-045; `exp_pos` and `p_dnf` are unchanged and remain in the payload.
+- `headline.podium` = the three drivers with `pred_rank` 1-3 (was lowest `exp_pos`). If any driver lacks `exp_points` (legacy CSV) the old `exp_pos` rule is used and `pred_rank` follows it.
+- Clients should sort the default view by `pred_rank` and label the column "Exp pts"; fall back to `exp_pos` when `exp_points` is null.
+- `walk_forward_2026_drivers.csv` gains `exp_pts` and `pred_rank`; `walk_forward_2026_by_race.csv` `pred_podium` is the top 3 by `pred_rank`. Saved prediction CSVs gain `exp_pts`, `exp_pos_cls`, `pred_rank`, `med_pos` columns.

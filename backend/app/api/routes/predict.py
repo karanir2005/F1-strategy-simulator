@@ -45,6 +45,10 @@ class DriverPrediction(BaseModel):
     p_top10: float
     exp_pos: float
     p_dnf: float
+    # T-045: expected FIA points from the simulation (null for stale CSVs saved before T-045) and the
+    # 1-based predicted finishing order (by exp_points, ties by exp_pos; by exp_pos for legacy CSVs).
+    exp_points: float | None = None
+    pred_rank: int | None = None
     # T-029, grid mode only (absent in pre_quali). Previously dropped by this response model.
     p_win_prequali: float | None = None
     p_podium_prequali: float | None = None

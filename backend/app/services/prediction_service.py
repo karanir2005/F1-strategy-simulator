@@ -219,12 +219,22 @@ def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool
                 "p_top10": float(r["p_top10"]),
                 "exp_pos": float(r["exp_pos"]),
                 "p_dnf": float(r["p_dnf"]),
+                # T-045: expected FIA points (null for CSVs saved before T-045)
+                "exp_points": float(r["exp_pts"]) if "exp_pts" in r.index and pd.notna(r["exp_pts"]) else None,
             }
         )
         if mode == "grid":  # optional fields, null when no pre-quali snapshot exists for the driver
             old = pq.get(r["code"])
             drivers[-1]["p_win_prequali"] = None if old is None else old[0]
             drivers[-1]["p_podium_prequali"] = None if old is None else old[1]
+    # T-045 predicted order: expected points (tie-break expected position); legacy CSVs without
+    # exp_pts fall back to expected position, which is what T-042 used.
+    if all(d["exp_points"] is not None for d in drivers):
+        by_pred = sorted(drivers, key=lambda d: (-d["exp_points"], d["exp_pos"]))
+    else:
+        by_pred = sorted(drivers, key=lambda d: (d["exp_pos"], -d["p_podium"]))
+    for i, d in enumerate(by_pred, 1):
+        d["pred_rank"] = i
     drivers.sort(key=lambda d: (-d["p_win"], -d["p_podium"]))
     actual = {d["code"]: d["grid"] for d in drivers} if mode == "grid" else {}
     return {
@@ -235,7 +245,7 @@ def shape(t: pd.DataFrame, mode: str, race: dict, generated_at: str, stale: bool
         "stale": stale,
         "grid_source": grid_source if mode == "grid" else None,
         "drivers": drivers,
-        "headline": {"winner": drivers[0]["code"], "podium": [d["code"] for d in sorted(drivers, key=lambda d: (d["exp_pos"], -d["p_podium"]))[:3]]},
+        "headline": {"winner": drivers[0]["code"], "podium": [d["code"] for d in sorted(drivers, key=lambda d: d["pred_rank"])[:3]]},
         "evidence": evidence(mode, grid_source),
         "disclaimer": DISCLAIMER,
     }
