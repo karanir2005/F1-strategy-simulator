@@ -86,6 +86,16 @@ def pr(tmp_path, monkeypatch):
 
     monkeypatch.setattr(pr_, "OUT_DIR", tmp_path)
     monkeypatch.setattr(J, "DERIVED_DIR", tmp_path / "derived")
+    # these tests treat R19 as "qualifying not run yet"; hide the real R19 qualifying once it exists
+    real_load = pr_.load
+
+    def load_without_r19_quali(offline, rnd, with_fp=False):
+        hist, spr, sched = real_load(offline, rnd, with_fp)
+        q = hist["qualifying"]
+        hist["qualifying"] = q[~((q["season"] == 2026) & (q["round"] == 19))].reset_index(drop=True)
+        return hist, spr, sched
+
+    monkeypatch.setattr(pr_, "load", load_without_r19_quali)
     return pr_
 
 
