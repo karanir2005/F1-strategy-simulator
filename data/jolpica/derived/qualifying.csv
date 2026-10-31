@@ -2228,3 +2228,25 @@ season,round,circuit_id,driver_id,code,team_id,team,quali_position,q1,q2,q3
 2026,18,americas,albon,ALB,williams,Williams,20,1:36.967,,
 2026,18,americas,perez,PER,cadillac,Cadillac F1 Team,21,1:37.433,,
 2026,18,americas,bottas,BOT,cadillac,Cadillac F1 Team,22,1:37.523,,
+2026,19,rodriguez,hamilton,HAM,ferrari,Ferrari,1,1:17.341,1:16.953,1:16.514
+2026,19,rodriguez,russell,RUS,mercedes,Mercedes,2,1:17.659,1:17.027,1:16.523
+2026,19,rodriguez,leclerc,LEC,ferrari,Ferrari,3,1:17.506,1:16.944,1:16.633
+2026,19,rodriguez,max_verstappen,VER,red_bull,Red Bull,4,1:17.942,1:16.876,1:16.692
+2026,19,rodriguez,antonelli,ANT,mercedes,Mercedes,5,1:17.918,1:17.133,1:16.707
+2026,19,rodriguez,norris,NOR,mclaren,McLaren,6,1:17.733,1:16.728,1:16.824
+2026,19,rodriguez,hadjar,HAD,red_bull,Red Bull,7,1:17.385,1:17.047,1:16.900
+2026,19,rodriguez,lawson,LAW,rb,RB F1 Team,8,1:18.097,1:17.207,1:17.029
+2026,19,rodriguez,arvid_lindblad,LIN,rb,RB F1 Team,9,1:18.210,1:17.135,1:17.117
+2026,19,rodriguez,gasly,GAS,alpine,Alpine F1 Team,10,1:18.194,1:17.278,1:17.153
+2026,19,rodriguez,hulkenberg,HUL,audi,Audi,11,1:17.868,1:17.306,
+2026,19,rodriguez,colapinto,COL,alpine,Alpine F1 Team,12,1:18.517,1:17.640,
+2026,19,rodriguez,piastri,PIA,mclaren,McLaren,13,1:17.659,1:17.646,
+2026,19,rodriguez,bortoleto,BOR,audi,Audi,14,1:17.727,1:17.680,
+2026,19,rodriguez,bearman,BEA,haas,Haas F1 Team,15,1:18.083,1:18.083,
+2026,19,rodriguez,sainz,SAI,williams,Williams,16,1:18.521,1:18.885,
+2026,19,rodriguez,albon,ALB,williams,Williams,17,1:18.630,,
+2026,19,rodriguez,alonso,ALO,aston_martin,Aston Martin,18,1:18.908,,
+2026,19,rodriguez,ryo_hirakawa,HIR,haas,Haas F1 Team,19,1:18.958,,
+2026,19,rodriguez,stroll,STR,aston_martin,Aston Martin,20,1:19.072,,
+2026,19,rodriguez,perez,PER,cadillac,Cadillac F1 Team,21,1:19.105,,
+2026,19,rodriguez,bottas,BOT,cadillac,Cadillac F1 Team,22,1:19.852,,
