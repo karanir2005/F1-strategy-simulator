@@ -74,8 +74,15 @@ def test_sums_real_data_all_rounds(real_hist):
             assert t[["p_win", "p_podium", "p_top10"]].min().min() >= 0
 
 
+def _next_round():
+    """Next unraced 2026 round: these tests stay valid as the season moves on."""
+    import predict_race as pr_
+
+    return pr_.next_round(True)
+
+
 def _args(**kw):
-    d = dict(round=19, mode="auto", grid_file=None, offline=True, sims=2000, fp=False)
+    d = dict(round=_next_round(), mode="auto", grid_file=None, offline=True, sims=2000, fp=False)
     d.update(kw)
     return Namespace(**d)
 
@@ -86,37 +93,39 @@ def pr(tmp_path, monkeypatch):
 
     monkeypatch.setattr(pr_, "OUT_DIR", tmp_path)
     monkeypatch.setattr(J, "DERIVED_DIR", tmp_path / "derived")
-    # these tests treat R19 as "qualifying not run yet"; hide the real R19 qualifying once it exists
+    # these tests treat the target as "qualifying not run yet"; hide its real qualifying once it exists
     real_load = pr_.load
+    target = _next_round()
 
-    def load_without_r19_quali(offline, rnd, with_fp=False):
+    def load_without_target_quali(offline, rnd, with_fp=False):
         hist, spr, sched = real_load(offline, rnd, with_fp)
         q = hist["qualifying"]
-        hist["qualifying"] = q[~((q["season"] == 2026) & (q["round"] == 19))].reset_index(drop=True)
+        hist["qualifying"] = q[~((q["season"] == 2026) & (q["round"] == target))].reset_index(drop=True)
         return hist, spr, sched
 
-    monkeypatch.setattr(pr_, "load", load_without_r19_quali)
+    monkeypatch.setattr(pr_, "load", load_without_target_quali)
     return pr_
 
 
-def _hist18(pr, extra_quali=None):
-    hist, _, _ = pr.load(True, 19)
+def _hist_before(pr, extra_quali=None):
+    hist, _, _ = pr.load(True, _next_round())
     if extra_quali is not None:
         hist["qualifying"] = pd.concat([hist["qualifying"], extra_quali], ignore_index=True)
     return hist
 
 
-def _fake_quali18(hist, drop=()):
+def _fake_quali(hist, drop=()):
+    """Latest real qualifying, relabelled as the target's."""
     q = hist["qualifying"]
-    q = q[(q["season"] == 2026) & (q["round"] == 18)].copy()
-    q["round"] = 19
+    q = q[(q["season"] == 2026) & (q["round"] == _next_round() - 1)].copy()
+    q["round"] = _next_round()
     return q[~q["code"].isin(drop)]
 
 
 def test_grid_file_path_end_to_end(pr, tmp_path, capsys):
     """--mode grid --grid-file with a pit-lane start (0), lowercase code."""
-    hist = _hist18(pr)
-    ent = P.entrants_for(hist, 2026, 18)
+    hist = _hist_before(pr)
+    ent = P.entrants_for(hist, 2026, _next_round() - 1)
     codes = ent["code"].tolist()
     g = pd.DataFrame({"code": [c.lower() for c in codes], "grid": range(1, len(codes) + 1)})
     g.loc[g["code"] == "ver", "grid"] = 0  # pit-lane start
@@ -125,7 +134,7 @@ def test_grid_file_path_end_to_end(pr, tmp_path, capsys):
     pr.predict(_args(mode="grid", grid_file=str(p)))
     out = capsys.readouterr().out
     assert "grid from" in out and "sums: win 1.000, podium 3.000, top10 10.000" in out
-    saved = list((tmp_path / "predictions").glob("2026_R19_grid_*.csv"))
+    saved = list((tmp_path / "predictions").glob(f"2026_R{_next_round()}_grid_*.csv"))
     assert len(saved) == 1
     t = pd.read_csv(saved[0])
     assert len(t) == 22
@@ -134,8 +143,8 @@ def test_grid_file_path_end_to_end(pr, tmp_path, capsys):
 
 
 def test_grid_file_unknown_code_stops_clearly(pr, tmp_path):
-    hist = _hist18(pr)
-    codes = P.entrants_for(hist, 2026, 18)["code"].tolist()
+    hist = _hist_before(pr)
+    codes = P.entrants_for(hist, 2026, _next_round() - 1)["code"].tolist()
     g = pd.DataFrame({"code": codes[:-1] + ["XXX"], "grid": range(1, len(codes) + 1)})
     p = tmp_path / "grid.csv"
     g.to_csv(p, index=False)
@@ -143,12 +152,12 @@ def test_grid_file_unknown_code_stops_clearly(pr, tmp_path):
         pr.predict(_args(mode="grid", grid_file=str(p)))
 
 
-def test_auto_switches_to_grid_when_round18_quali_exists(pr, monkeypatch, capsys):
+def test_auto_switches_to_grid_when_target_quali_exists(pr, monkeypatch, capsys):
     real_load = pr.load
 
     def fake_load(offline, rnd, with_fp=False):
         hist, spr, sched = real_load(offline, rnd, with_fp)
-        hist["qualifying"] = pd.concat([hist["qualifying"], _fake_quali18(hist)], ignore_index=True)
+        hist["qualifying"] = pd.concat([hist["qualifying"], _fake_quali(hist)], ignore_index=True)
         return hist, spr, sched
 
     monkeypatch.setattr(pr, "load", fake_load)
@@ -174,13 +183,13 @@ def test_drivers_missing_from_jolpica_quali_still_in_field(pr, monkeypatch, caps
     def fake_load(offline, rnd, with_fp=False):
         hist, spr, sched = real_load(offline, rnd, with_fp)
         hist["qualifying"] = pd.concat(
-            [hist["qualifying"], _fake_quali18(hist, drop=("VER", "STR"))], ignore_index=True
+            [hist["qualifying"], _fake_quali(hist, drop=("VER", "STR"))], ignore_index=True
         )
         return hist, spr, sched
 
     monkeypatch.setattr(pr, "load", fake_load)
     pr.predict(_args(mode="auto"))
-    saved = list((pr.OUT_DIR / "predictions").glob("2026_R19_grid_*.csv"))
+    saved = list((pr.OUT_DIR / "predictions").glob(f"2026_R{_next_round()}_grid_*.csv"))
     t = pd.read_csv(saved[0])
     assert len(t) == 22 and {"VER", "STR"} <= set(t["code"])
     assert "WARNING" in capsys.readouterr().out

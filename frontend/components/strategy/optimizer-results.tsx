@@ -4,10 +4,11 @@ import { AlertTriangle } from "lucide-react";
 import { useMemo } from "react";
 import type { OptimizeResponse, StrategyOut } from "@/lib/api";
 import { fmtRaceTime, fmtSigned } from "@/lib/format";
-import { NOISE_FLOOR_S } from "@/lib/strategy-form";
+import { NOISE_FLOOR_S, planSignature } from "@/lib/strategy-form";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { PlanTimeline } from "@/components/strategy/plan-timeline";
 import { RangePlot, type RangeRow } from "@/components/viz/range-plot";
-import { StintStrip } from "@/components/viz/stint-strip";
 
 /** Plans identical up to stint order are the same plan for display purposes: key = sorted (compound, laps) multiset. */
 export function dedupeStrategies(strategies: StrategyOut[]): StrategyOut[] {
@@ -27,6 +28,25 @@ export function dedupeStrategies(strategies: StrategyOut[]): StrategyOut[] {
 
 const planKey = (s: StrategyOut) => s.stints.map((x) => `${x.compound[0]}${x.laps}`).join("-");
 const stopsLabel = (n: number) => (n === 0 ? "No stop" : `${n}-stop`);
+const STOP_WORDS = ["No stop", "One stop", "Two stops", "Three stops"];
+const stopsWords = (n: number) => STOP_WORDS[n] ?? `${n} stops`;
+const lower = (c: string) => c.toLowerCase();
+
+/** A plan is level with the best when its mean gap is under the noise floor, or the paired p10 gap reaches 0 (it beats the best in 10%+ of runs). */
+const isTie = (p: StrategyOut) => p.delta_to_best_mean_s < NOISE_FLOOR_S || p.delta_to_best_p10_s <= 0;
+
+function joinLaps(laps: number[]): string {
+  if (laps.length <= 1) return laps.join("");
+  return `${laps.slice(0, -1).join(", ")} and ${laps[laps.length - 1]}`;
+}
+
+/** "One stop, medium then hard, pit around lap 24" */
+function describePlan(s: StrategyOut): string {
+  const tyres = s.stints.map((x) => lower(x.compound)).join(" then ");
+  if (s.pit_laps.length === 0) return `${stopsWords(0)}, ${tyres} all the way`;
+  return `${stopsWords(s.n_stops)}, ${tyres}, pit around lap${s.pit_laps.length > 1 ? "s" : ""} ${joinLaps(s.pit_laps)}`;
+}
+
 const pitText = (s: StrategyOut) => (s.pit_laps.length ? `pit on lap ${s.pit_laps.join(", ")}` : "no pit stop");
 
 function Caps({ result }: { result: OptimizeResponse }) {
@@ -74,12 +94,43 @@ function Caps({ result }: { result: OptimizeResponse }) {
   );
 }
 
-export function OptimizerResults({ result, topShown = 5 }: { result: OptimizeResponse; topShown?: number }) {
-  const plans = useMemo(() => dedupeStrategies(result.strategies).slice(0, topShown), [result.strategies, topShown]);
+export function OptimizerResults({
+  result,
+  topShown = 5,
+  onCompare,
+  compareFull = false,
+  contrast = null,
+}: {
+  result: OptimizeResponse;
+  topShown?: number;
+  /** copy a plan into the manual comparison */
+  onCompare?: (plan: StrategyOut, result: OptimizeResponse) => void;
+  /** the manual comparison already holds the maximum number of strategies */
+  compareFull?: boolean;
+  /** an earlier run for the same track and settings with the safety-car flag flipped */
+  contrast?: OptimizeResponse | null;
+}) {
+  const allPlans = useMemo(() => dedupeStrategies(result.strategies), [result.strategies]);
+  const plans = useMemo(() => allPlans.slice(0, topShown), [allPlans, topShown]);
   const best = plans[0];
   const compounds = result.track.compounds ?? {};
   const placeholders = result.assumptions.filter((a) => /placeholder/i.test(a));
-  const near = best ? plans.slice(1).filter((p) => p.delta_to_best_mean_s < NOISE_FLOOR_S) : [];
+  const near = best ? plans.slice(1).filter(isTie) : [];
+  const otherStops = best ? allPlans.find((p) => p.n_stops !== best.n_stops) : undefined;
+  const scOn = !!result.params_used.safety_cars;
+  const contrastBest = contrast ? dedupeStrategies(contrast.strategies)[0] : undefined;
+  const compareBtn = (p: StrategyOut) =>
+    onCompare && (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onCompare(p, result)}
+        disabled={compareFull}
+        title={compareFull ? "Remove a strategy below to make room" : undefined}
+      >
+        Compare this plan
+      </Button>
+    );
 
   const rows: RangeRow[] = plans.map((p, i) => ({
     id: planKey(p),
@@ -89,7 +140,7 @@ export function OptimizerResults({ result, topShown = 5 }: { result: OptimizeRes
     mean: p.delta_to_best_mean_s,
     p90: p.delta_to_best_p90_s,
     best: i === 0,
-    right: i === 0 ? "best" : fmtSigned(p.delta_to_best_mean_s, 1),
+    right: i === 0 ? "best" : isTie(p) ? `${fmtSigned(p.delta_to_best_mean_s, 1)} tied` : fmtSigned(p.delta_to_best_mean_s, 1),
   }));
   const lo = Math.min(0, ...rows.map((r) => r.p10));
   const hi = Math.max(NOISE_FLOOR_S, ...rows.map((r) => r.p90));
@@ -114,10 +165,38 @@ export function OptimizerResults({ result, topShown = 5 }: { result: OptimizeRes
       )}
 
       <div className="panel p-4 sm:p-5">
+        <p className="text-[15px] leading-6 text-fg">
+          <span className="font-medium">{describePlan(best)}.</span>{" "}
+          {otherStops ? (
+            isTie(otherStops) ? (
+              <span className="text-muted-fg">
+                The best {otherStops.n_stops}-stop plan is level with it ({fmtSigned(otherStops.delta_to_best_mean_s, 1)}, inside the
+                model&apos;s noise), so stop count is a judgement call.
+              </span>
+            ) : (
+              <span className="text-muted-fg">
+                That is {otherStops.delta_to_best_mean_s.toFixed(1)} s faster than the best {otherStops.n_stops}-stop plan.
+              </span>
+            )
+          ) : (
+            <span className="text-muted-fg">No plan with a different stop count made the shortlist.</span>
+          )}
+        </p>
+        {contrast && contrastBest && (
+          <p className="mt-1 text-[13px] leading-5 text-muted-fg">
+            Safety cars {scOn ? "on" : "off"} here. In your earlier run with them {scOn ? "off" : "on"}, the best plan was{" "}
+            {planSignature(contrastBest) === planSignature(best)
+              ? "the same."
+              : `${describePlan(contrastBest).toLowerCase()}.`}
+          </p>
+        )}
+      </div>
+
+      <div className="panel p-4 sm:p-5">
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
           <div>
             <h2 id="opt-h" className="label-mono">
-              Optimal plan · {result.track.name}
+              {near.length > 0 ? "Top plan" : "Optimal plan"} · {result.track.name}
             </h2>
             <p className="display mt-1 text-4xl text-fg sm:text-5xl">
               {stopsLabel(best.n_stops)}
@@ -134,11 +213,12 @@ export function OptimizerResults({ result, topShown = 5 }: { result: OptimizeRes
           </div>
         </div>
         <div className="mt-4">
-          <StintStrip stints={best.stints} size="lg" playKey={planKey(best)} labels={compounds} />
+          <PlanTimeline stints={best.stints} pitLaps={best.pit_laps} size="lg" playKey={planKey(best)} labels={compounds} />
         </div>
+        {onCompare && <div className="mt-3">{compareBtn(best)}</div>}
         <p className="mt-3 text-[13px] leading-5 text-muted-fg">
           {near.length > 0
-            ? `${near.length} other plan${near.length === 1 ? " is" : "s are"} within ${NOISE_FLOOR_S} s of this one, which is inside the model's noise: treat ${near.length === 1 ? "it" : "them"} as equivalent, not worse.`
+            ? `${near.length} other plan${near.length === 1 ? " is" : "s are"} level with this one (under ${NOISE_FLOOR_S} s behind, inside the model's noise): treat ${near.length === 1 ? "it" : "them"} as equivalent, not worse.`
             : plans.length < 2
               ? "Only one plan came back, so there is nothing to compare it with."
               : `The next plan is ${fmtSigned(plans[1]?.delta_to_best_mean_s ?? 0, 1)} behind in the model, which is outside the ${NOISE_FLOOR_S} s noise band.`}
@@ -158,22 +238,25 @@ export function OptimizerResults({ result, topShown = 5 }: { result: OptimizeRes
             <li key={planKey(p)} className="grid gap-2 py-3 first:pt-0 sm:grid-cols-[11rem_1fr] sm:items-center sm:gap-4">
               <div className="min-w-0 text-[13px] leading-5">
                 <p className="font-medium text-fg">
-                  <span className="font-mono text-muted-fg">#{i + 1}</span> {stopsLabel(p.n_stops)}
+                  <span className="font-mono text-muted-fg">{i > 0 && isTie(p) ? "=1" : `#${i + 1}`}</span> {stopsLabel(p.n_stops)}
                 </p>
                 <p className="text-muted-fg">{pitText(p)}</p>
                 <p className="mt-0.5 flex flex-wrap items-center gap-1.5 font-mono text-xs text-fg tnum">
                   {fmtRaceTime(p.mean_s)}
                   {i === 0 ? (
                     <Badge variant="best">best</Badge>
-                  ) : p.delta_to_best_mean_s < NOISE_FLOOR_S ? (
-                    <Badge variant="outline">within noise</Badge>
+                  ) : isTie(p) ? (
+                    <Badge variant="outline">tied with best</Badge>
                   ) : null}
                   {i > 0 && (
                     <span className="text-muted-fg sm:hidden">{fmtSigned(p.delta_to_best_mean_s, 1)} vs best</span>
                   )}
                 </p>
               </div>
-              <StintStrip stints={p.stints} size="md" playKey={planKey(p)} labels={compounds} />
+              <div className="min-w-0 space-y-2">
+                <PlanTimeline stints={p.stints} pitLaps={p.pit_laps} size="md" playKey={planKey(p)} labels={compounds} />
+                {i > 0 && onCompare && <div>{compareBtn(p)}</div>}
+              </div>
             </li>
           ))}
         </ul>

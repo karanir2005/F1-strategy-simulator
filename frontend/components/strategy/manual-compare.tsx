@@ -20,13 +20,16 @@ export interface ManualCompareProps {
   onRun: () => void;
   loading: boolean;
   validationError: string | null;
+  /** T-048: strategy just copied from the optimizer; gets a highlight ring and a status line */
+  highlightId?: string | null;
+  notice?: string | null;
 }
 
 const COMPOUND_NAME: Record<Compound, string> = { SOFT: "Soft", MEDIUM: "Medium", HARD: "Hard" };
 
 export function ManualCompare(p: ManualCompareProps) {
   return (
-    <section aria-labelledby="manual-h" className="space-y-4">
+    <section id="manual-compare" aria-labelledby="manual-h" className="scroll-mt-20 space-y-4">
       <div>
         <h2 id="manual-h" className="display text-3xl text-fg">
           Compare your own strategies
@@ -35,6 +38,11 @@ export function ManualCompare(p: ManualCompareProps) {
           Build up to {MAX_STRATEGIES} plans, each with the same total laps. The result is the paired gap between them
           over thousands of noisy runs.
         </p>
+        {p.notice && (
+          <p role="status" className="mt-2 text-[13px] font-medium text-fg">
+            {p.notice}
+          </p>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -44,7 +52,7 @@ export function ManualCompare(p: ManualCompareProps) {
             .filter((st) => typeof st.laps === "number" && st.laps > 0)
             .map((st) => ({ compound: st.compound, laps: st.laps as number }));
           return (
-            <div key={strategy.id} className="panel p-4">
+            <div key={strategy.id} className={`panel p-4 ${p.highlightId === strategy.id ? "ring-2 ring-signal" : ""}`}>
               <div className="flex items-center justify-between gap-3">
                 <Input
                   value={strategy.name}

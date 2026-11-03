@@ -2,11 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  fetchPredictionRaces,
   fetchTracks,
   runOptimize,
   runSimulation,
+  MAX_STRATEGIES,
+  type Compound,
   type OptimizeResponse,
   type SimulateResponse,
+  type StrategyOut,
   type Strategy,
   type TrackOut,
 } from "@/lib/api";
@@ -18,6 +22,7 @@ import {
   newId,
   nextStrategyName,
   parseNum,
+  trackIdForRaceName,
   type NumField,
   type StrategyRow,
 } from "@/lib/strategy-form";
@@ -50,6 +55,11 @@ export default function StrategyPage() {
   const [safetyCars, setSafetyCars] = useState(false);
   const [trackWear, setTrackWear] = useState(false);
   const [optResult, setOptResult] = useState<OptimizeResponse | null>(null);
+  // T-048: earlier optimizer runs, keyed by settings + safety-car flag, so a safety-car flip can be compared
+  const [optRuns, setOptRuns] = useState<Record<string, OptimizeResponse>>({});
+  const [optKey, setOptKey] = useState<string>("");
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [copyNotice, setCopyNotice] = useState<string | null>(null);
   const [optLoading, setOptLoading] = useState(false);
   const [optError, setOptError] = useState<string | null>(null);
   const [strategies, setStrategies] = useState<StrategyRow[]>(initialStrategies);
@@ -80,11 +90,19 @@ export default function StrategyPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchTracks()
-      .then((list) => {
+    // T-048: default to the next race. A failed lookup just means the old default.
+    Promise.all([
+      fetchTracks(),
+      fetchPredictionRaces()
+        .then((races) => races.find((r) => r.is_next)?.name ?? null)
+        .catch(() => null),
+    ])
+      .then(([list, nextName]) => {
         if (cancelled) return;
         setTracks(list);
-        const first = list.find((t) => t.track_id === "austin") ?? list[0];
+        const nextId = nextName ? trackIdForRaceName(list, nextName) : null;
+        const first =
+          list.find((t) => t.track_id === nextId) ?? list.find((t) => t.track_id === "austin") ?? list[0];
         if (first) {
           setTrackId(first.track_id);
           setStrategies((rows) => fitToRaceLaps(rows, first.total_laps));
@@ -120,6 +138,7 @@ export default function StrategyPage() {
     setTrackId(id);
     epoch.current += 1; // any in-flight request now belongs to a previous track
     setOptResult(null);
+    setOptRuns({});
     setOptError(null);
     setOptLoading(false);
     setResults(null);
@@ -142,6 +161,7 @@ export default function StrategyPage() {
     setOptLoading(true);
     setOptError(null);
     setOptResult(null);
+    const baseKey = [track.track_id, maxStops, trackWear, override ? `${totalLaps}/${pitLossSeconds}/${baseLaptime}` : ""].join("|");
     try {
       const res = await runOptimize({
           track_id: track.track_id,
@@ -157,13 +177,55 @@ export default function StrategyPage() {
               }
             : {}),
       });
-      if (myEpoch === epoch.current) setOptResult(res);
+      if (myEpoch === epoch.current) {
+        setOptResult(res);
+        setOptKey(baseKey);
+        setOptRuns((prev) => ({ ...prev, [`${baseKey}|${safetyCars}`]: res }));
+      }
     } catch (err) {
       if (myEpoch === epoch.current) setOptError(err instanceof Error ? err.message : "Optimizer failed");
     } finally {
       if (myEpoch === epoch.current) setOptLoading(false);
     }
   }
+
+  // T-048: copy an optimizer plan into the manual comparison, then bring it into view
+  function copyPlan(plan: StrategyOut, res: OptimizeResponse) {
+    if (strategies.length >= MAX_STRATEGIES) return;
+    const key = plan.stints.map((x) => `${x.compound[0]}${x.laps}`).join("-");
+    const taken = new Set(strategies.map((x) => x.name.trim()));
+    let name = `${plan.n_stops}-stop ${key}`;
+    for (let n = 2; taken.has(name); n++) name = `${plan.n_stops}-stop ${key} (${n})`;
+    const id = newId();
+    const row: StrategyRow = {
+      id,
+      name,
+      stints: plan.stints.map((st) => ({
+        id: newId(),
+        compound: st.compound as Compound,
+        laps: st.laps,
+        usedSet: false,
+        startAge: 2,
+      })),
+    };
+    const total = res.params_used.total_laps;
+    setStrategies((prev) => [...fitToRaceLaps(prev, total), row]);
+    setResults(null);
+    setResultsCtx(null);
+    setHighlightId(id);
+    setCopyNotice(`Added "${name}" below. Press Run simulation to test it against your other plans.`);
+  }
+
+  useEffect(() => {
+    if (!highlightId) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("manual-compare")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    const t = window.setTimeout(() => {
+      setHighlightId(null);
+      setCopyNotice(null);
+    }, 8000);
+    return () => window.clearTimeout(t);
+  }, [highlightId]);
 
   const mapStrategy = (id: string, f: (s: StrategyRow) => StrategyRow) =>
     setStrategies((prev) => prev.map((s) => (s.id === id ? f(s) : s)));
@@ -288,7 +350,14 @@ export default function StrategyPage() {
 
       {optLoading && <ResultsSkeleton label="Searching for the best plan" />}
       {optError && <ErrorBlock title="Optimizer failed" message={optError} onRetry={handleOptimize} />}
-      {optResult && <OptimizerResults result={optResult} />}
+      {optResult && (
+        <OptimizerResults
+          result={optResult}
+          onCompare={copyPlan}
+          compareFull={strategies.length >= MAX_STRATEGIES}
+          contrast={optRuns[`${optKey}|${!optResult.params_used.safety_cars}`] ?? null}
+        />
+      )}
 
       <ManualCompare
         strategies={strategies}
@@ -304,6 +373,8 @@ export default function StrategyPage() {
         onRun={handleRun}
         loading={loading}
         validationError={validationError}
+        highlightId={highlightId}
+        notice={copyNotice}
       />
 
       {loading && <ResultsSkeleton label="Running the simulation" />}

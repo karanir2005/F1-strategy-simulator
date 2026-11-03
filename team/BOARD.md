@@ -38,7 +38,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-030 | backend-engineer | done (no QA; SC effect small, see handoff) | T-028 | Safety cars (and VSC) in the single-car simulator + optimizer |
 | T-031 | frontend-engineer | done (no QA; 'what changed' strip needs backend p_win_prequali, folded into T-029) | T-027 | Race-week behaviour on /predict (countdown, grid-set state, what changed since pre-quali, driver detail); phone-width browser check |
 | T-032 | backend-engineer | deferred (user: keep local for now) | T-031 | Deploy: Vercel frontend + Railway/Render backend, env/CORS config |
-| T-033 | frontend-engineer | backlog (later, user) | T-024 | Copy an optimizer plan into the manual comparison with one click |
+| T-033 | frontend-engineer | done (T-048) | T-024 | Copy an optimizer plan into the manual comparison with one click |
 | T-034 | backend-engineer | backlog (after v1.0.0, user) | T-030 | Phase 1 full-grid multi-car race simulation: the 'final polishing' step that would let the winner prediction beat grid order |
 | T-035 | backend-engineer | done (no QA) | T-027 | Qualifying prediction (pole/front row/Q3/Q1 exit/exp grid) in API, walk-forward validated vs baselines |
 | T-036 | orchestrator | done | T-035 | Qualifying columns in the /predict driver table; predicted vs actual grid after quali |
@@ -51,6 +51,10 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-044 | backend-engineer | done | T-042 | Race selector on /predict: /predict/races + /predict/race/{round} from precomputed walk-forward (grid mode), Actual column, ?round= URL |
 | T-043 | data-scientist | done | T-020 | Optimizer vs actual strategies, 34 dry races: offset_mode="pace_ordered" default (compound mix 0/14 -> 7/14, top-10 mode in top 3 8/14 -> 11/14); stop count unchanged; SC timing is the biggest gap. Note: build_track_params.py resets Austin compounds to C1 |
 | T-045 | data-scientist | done | T-044 | Predicted order = expected FIA points (0 inversions vs 7 by E[pos], better Spearman/MAE, podium 35/54); DNF model: stronger shrinkage + grid-slot factor (DNF LL better both seasons) |
+| T-046 | orchestrator | done | T-045 | R19 scored: winner 13/19, podium hits 36/57. Stickiness sweep (0-8) keeps gamma 4. Crash fix for an extra car in the DNF grid bins; T-012 tests no longer hardcode the next round |
+| T-047 | data-scientist | in progress | T-043, T-049 | Realistic optimizer: Austin/Mexico 2026 track params, stint caps, compound durability, wear fixes from the audit |
+| T-048 | frontend-engineer | done | T-024 | /strategy: default next race, Compare this plan (T-033), near-ties, stint timeline, summary sentence, safety-car wording |
+| T-049 | researcher | done | T-043 | Tyre wear audit: linear equal-slope wear cannot decide stops or splits; caps supply the structure |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:

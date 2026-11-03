@@ -198,6 +198,7 @@ export function RaceSettings(p: RaceSettingsProps) {
               onChange={(e) => p.onSafetyCars(e.target.checked)}
             />
             Safety cars
+            <span className="text-[13px] text-muted-fg">{p.safetyCars ? "on: random SC/VSC periods" : "off: green-flag race"}</span>
           </label>
           {t && (
             <label
@@ -216,8 +217,9 @@ export function RaceSettings(p: RaceSettingsProps) {
           )}
         </div>
         <p className="mt-1 text-[13px] leading-5 text-muted-fg">
-          Safety cars add random SC/VSC periods, the same for every plan in a run, so gaps stay comparable. Pit plans are
-          fixed, so they can&apos;t react by pitting under a safety car yet. Track wear uses this circuit&apos;s own
+          Turning safety cars on adds random safety car and virtual safety car periods to every run, the same ones for
+          every plan, so gaps stay comparable. That can change which plan comes out best. Pit plans are fixed, so they can&apos;t react by pitting under a safety car yet. Run the
+          optimizer both ways to see whether the recommendation changes. Track wear uses this circuit&apos;s own
           tyre fit where there is enough data (optimizer only); it hasn&apos;t been shown to beat the global fit.
         </p>
       </fieldset>

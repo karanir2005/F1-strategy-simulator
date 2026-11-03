@@ -676,7 +676,7 @@ def dnf_probabilities(hist, season, rnd, entrants: pd.DataFrame, cfg, use_grid: 
     if use_grid and cfg.dnf_grid_power and "grid_eff" in entrants.columns and entrants["grid_eff"].notna().all():
         fac = grid_dnf_factors(hist, season, cfg)
         if fac is not None:
-            b = pd.cut(entrants["grid_eff"].to_numpy(dtype=float), GRID_DNF_BINS, labels=False)
+            b = pd.cut(np.clip(entrants["grid_eff"].to_numpy(dtype=float), GRID_DNF_BINS[0] + 1, GRID_DNF_BINS[-1]), GRID_DNF_BINS, labels=False)  # a slot outside the bins (extra car in the field) would give NaN
             adj = out * fac[b] ** cfg.dnf_grid_power
             out = adj * out.sum() / adj.sum()
     if cfg.dnf_track_m:

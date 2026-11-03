@@ -157,3 +157,19 @@ export const DEFAULT_PIT_LOSS_SECONDS = 23.5;
 
 /** Seconds below which a gap between plans is smaller than the model can resolve (T-017 note). */
 export const NOISE_FLOOR_S = 5;
+
+/**
+ * T-048. Map the upcoming race (GET /predict/races, is_next) onto a track id.
+ * Relies on the track `name` being "<race name> (<place>)", e.g. "Brazilian GP (Brazil)" for the race "Brazilian GP":
+ * both come from the same Jolpica race names, so the part before " (" is compared exactly. Null if nothing matches.
+ */
+export function trackIdForRaceName(tracks: { track_id: string; name: string }[], raceName: string): string | null {
+  const want = raceName.trim().toLowerCase();
+  const hit = tracks.find((t) => t.name.split(" (")[0].trim().toLowerCase() === want);
+  return hit?.track_id ?? null;
+}
+
+/** Plan signature for comparing two optimizer answers: stops, compounds and stint lengths. */
+export function planSignature(p: { stints: { compound: string; laps: number }[] }): string {
+  return p.stints.map((s) => `${s.compound[0]}${s.laps}`).join("-");
+}
