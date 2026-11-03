@@ -1,0 +1,44 @@
+{
+  "year": 2026,
+  "season": 2026,
+  "era": "2026_regs",
+  "gp": "Mexico",
+  "event_name": "Mexico City Grand Prix",
+  "round": 19,
+  "circuit": "Mexico City",
+  "event_date": "2026-11-01",
+  "event_format": "unknown",
+  "total_laps": 71,
+  "num_laps": 71,
+  "num_drivers": 22,
+  "compound_map": null,
+  "compound_map_source": null,
+  "openf1_session_key": 11404,
+  "source": "openf1+jolpica",
+  "data_quality": {
+    "self_coverage": 0.9934,
+    "jolpica_ratio": 0.9934,
+    "inner_missing_laps": 9,
+    "drivers_with_gaps": [
+      "ANT",
+      "COL",
+      "HAM",
+      "LEC",
+      "LIN",
+      "NOR",
+      "PIA",
+      "RUS",
+      "VER"
+    ],
+    "finishers_no_final_time": 0,
+    "post_race_rows_trimmed": 5,
+    "lap_time_nan_frac": 0.0,
+    "usable": true,
+    "pit_vs_jolpica": {
+      "jolpica_stops": 58,
+      "matched": 58,
+      "match_rate": 1.0,
+      "openf1_only": 9
+    }
+  }
+}

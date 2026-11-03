@@ -49,6 +49,18 @@ def min_stint_laps(total_laps: int) -> int:
     return max(1, min(max(MIN_STINT_LAPS, round(MIN_STINT_FRACTION * total_laps)), total_laps // 2))
 
 
+# T-047: start-tyre preference. The engine's cost is a SUM over (compound, stint length) pairs, so the same stints
+# in a different order are an exact model tie; the old tie-break was alphabetical (HARD < MEDIUM < SOFT), i.e.
+# "start on the hard" by accident, which is the opposite of what teams do. Real top-10 one-stoppers whose two
+# compounds differ start on the SOFTER one in 70 of 84 cases in 2026 (83%) and 69 of 103 in 2025 (67%) -- see
+# data/strategy_eval/start_tyre_stats.py. A first-stint grip / track-position / undercut-flexibility value that
+# the single-car engine cannot price is the usual explanation, so among exact ties the softer-first order wins.
+# Only orderings of the SAME compound multiset are ranked this way; ties between different compound sets keep the old
+# (alphabetical multiset) resolution -- ranking SOFT-first across sets collapsed set agreement 7/14 -> 0/14 in 2026.
+# JUDGEMENT CALL on the mechanism (a tie-break, no seconds attached); the direction is the measured one.
+START_RANK = {"SOFT": 0, "MEDIUM": 1, "HARD": 2}
+TIE_TOLERANCE_S = 1e-3
+
 MAX_FINALISTS = 20
 # how many compound sequences (best grid plan each) get hill-climbed
 MAX_REFINED_SEQUENCES = 30
@@ -67,7 +79,8 @@ ASSUMPTIONS = [
     "stints were seen, with a floor of 15 laps because some compounds only had short observed "
     "stints; plans needing longer stints are not considered.",
     "Every stint (first and last included) is at least max(8 laps, 10% of race distance); real teams do not stop on lap 5.",
-    "Plans that are the same stints in a different order are shown once (the best-ordered one).",
+    "Plans that are the same stints in a different order are shown once, in the order that starts on the softest tyre "
+    "(the model cannot price grip or track position at the start, but 83% of 2026 top-10 one-stoppers did start on the softer tyre).",
     "All stints start on new tyres; at least 2 distinct dry compounds are used (two-compound rule).",
     "Gaps between plans are model gaps (paired, common random numbers); replay error vs real "
     "races is tens of seconds, so differences of a few seconds are not meaningful.",
@@ -224,11 +237,11 @@ def optimize(
             f"caps {caps} for {total_laps} laps with up to {max_stops} stops"
         )
 
-    seeds = sorted(best_per_seq.values(), key=lambda p: (p.det_total, p.compounds))[:MAX_REFINED_SEQUENCES]
+    seeds = sorted(best_per_seq.values(), key=lambda p: (round(p.det_total / TIE_TOLERANCE_S), tuple(sorted(p.compounds)), START_RANK[p.compounds[0]], p.compounds))[:MAX_REFINED_SEQUENCES]
     refined = [_refine(cost, p.compounds, p.laps, caps, min_lap) for p in seeds]
     # same stints in a different order differ only by a fuel-timing sliver: keep the best order
     finalists, seen = [], set()
-    for p in sorted(refined, key=lambda p: (p.det_total, p.compounds, p.laps)):
+    for p in sorted(refined, key=lambda p: (round(p.det_total / TIE_TOLERANCE_S), tuple(sorted(p.compounds)), START_RANK[p.compounds[0]], p.compounds, p.laps)):
         key = tuple(sorted(zip(p.compounds, p.laps)))
         if key not in seen:
             seen.add(key)

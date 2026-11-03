@@ -9,9 +9,9 @@ from app.core import tire_model as tm
 SIX = ("Barcelona", "Madrid", "Italy", "Azerbaijan", "Singapore", "Netherlands")
 
 
-def test_six_races_promoted_and_16_total():
+def test_six_races_promoted_and_18_total():
     files = glob.glob("data/processed/*_2026_laps.csv")
-    assert len(files) == 16
+    assert len(files) == 18  # T-047: + Austin_2026, Mexico_2026
     for gp in SIX:
         assert any(f"{gp}_2026_laps" in f for f in files)
     assert not any("Malaysia" in f for f in files)
@@ -35,7 +35,7 @@ def test_default_model_is_ordered_and_sensible():
     o = m["_compound_offsets"]
     assert o["SOFT"] <= o["MEDIUM"] <= o["HARD"] == 0.0
     assert -0.08 < m["_fuel_coef"] < -0.03
-    assert 13000 < m["_n_laps_fitted"] < 15000
+    assert 13000 < m["_n_laps_fitted"] < 17000  # T-047: 18 races
 
 
 def test_constrained_equals_free_when_data_already_ordered():

@@ -1,0 +1,50 @@
+{
+  "2026_regs": {
+    "one_stop_two_compound_first_stint": {
+      "softer_first": 70,
+      "harder_first": 14
+    },
+    "softer_first_share": 0.833,
+    "closed_stint_laps": {
+      "SOFT": {
+        "n": 36,
+        "median": 24.0,
+        "p90": 31.0
+      },
+      "MEDIUM": {
+        "n": 116,
+        "median": 19.0,
+        "p90": 28.0
+      },
+      "HARD": {
+        "n": 55,
+        "median": 22.0,
+        "p90": 30.6
+      }
+    }
+  },
+  "2025_regs": {
+    "one_stop_two_compound_first_stint": {
+      "softer_first": 69,
+      "harder_first": 34
+    },
+    "softer_first_share": 0.67,
+    "closed_stint_laps": {
+      "SOFT": {
+        "n": 57,
+        "median": 14.0,
+        "p90": 24.0
+      },
+      "MEDIUM": {
+        "n": 184,
+        "median": 23.0,
+        "p90": 33.0
+      },
+      "HARD": {
+        "n": 78,
+        "median": 29.0,
+        "p90": 41.3
+      }
+    }
+  }
+}

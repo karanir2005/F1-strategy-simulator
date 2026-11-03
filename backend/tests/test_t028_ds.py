@@ -17,7 +17,7 @@ def test_track_ids_map_to_track_params():
 
 def test_track_wear_keeps_ordering_and_pins_sparse_compounds(model):
     tw = model["_track_wear"]
-    assert len(tw) == 16
+    assert len(tw) == 18  # T-047: + Austin, Mexico
     for tid, v in tw.items():
         s, m, h = (v[c]["age_coef"] for c in ("SOFT", "MEDIUM", "HARD"))
         assert s >= m - 1e-9 >= h - 2e-9 >= -2e-9, tid

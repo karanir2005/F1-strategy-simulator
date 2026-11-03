@@ -6,7 +6,7 @@
     "total_laps": 58,
     "pit_loss_s": 19.06,
     "pit_loss_noise_std_s": 7.11,
-    "base_laptime_s": 81.4,
+    "base_laptime_s": 81.46,
     "compounds": {
       "HARD": "C3",
       "MEDIUM": "C4",
@@ -28,27 +28,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Australia_2025 excluded (wet race). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (148 laps, race_simulator convention); pit stops n=8.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.03774,
-        "global_age_coef": 0.0364,
-        "n_stints": 20,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.03774,
-        "global_age_coef": 0.03687,
-        "n_stints": 18,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.04133,
-        "global_age_coef": 0.03687,
-        "n_stints": 11,
-        "pooled": false
-      }
-    }
+    "notes": "Australia_2025 excluded (wet race). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (148 laps, race_simulator convention); pit stops n=8."
   },
   {
     "track_id": "china",
@@ -57,7 +37,7 @@
     "total_laps": 56,
     "pit_loss_s": 22.95,
     "pit_loss_noise_std_s": 5.29,
-    "base_laptime_s": 94.65,
+    "base_laptime_s": 94.75,
     "compounds": {
       "HARD": "C2",
       "MEDIUM": "C3",
@@ -80,27 +60,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Only 10 clean green-flag stops in China_2026; pit loss pooled with China_2025 (pit lane is a track property). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (140 laps, race_simulator convention); pit stops n=35.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.02984,
-        "global_age_coef": 0.0364,
-        "n_stints": 19,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.03687,
-        "global_age_coef": 0.03687,
-        "n_stints": 14,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.03687,
-        "global_age_coef": 0.03687,
-        "n_stints": 2,
-        "pooled": true
-      }
-    }
+    "notes": "Only 10 clean green-flag stops in China_2026; pit loss pooled with China_2025 (pit lane is a track property). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (140 laps, race_simulator convention); pit stops n=35."
   },
   {
     "track_id": "japan",
@@ -109,7 +69,7 @@
     "total_laps": 53,
     "pit_loss_s": 23.52,
     "pit_loss_noise_std_s": 0.9,
-    "base_laptime_s": 92.41,
+    "base_laptime_s": 92.43,
     "compounds": {
       "HARD": "C1",
       "MEDIUM": "C2",
@@ -132,27 +92,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Only 12 clean green-flag stops in Japan_2026; pit loss pooled with Japan_2025 (pit lane is a track property). SOFT stints not run in Japan_2026; max_stint_laps filled from Japan_2025. base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (137 laps, race_simulator convention); pit stops n=33.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.03535,
-        "global_age_coef": 0.0364,
-        "n_stints": 20,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.03687,
-        "global_age_coef": 0.03687,
-        "n_stints": 25,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.03687,
-        "global_age_coef": 0.03687,
-        "n_stints": 0,
-        "pooled": true
-      }
-    }
+    "notes": "Only 12 clean green-flag stops in Japan_2026; pit loss pooled with Japan_2025 (pit lane is a track property). SOFT stints not run in Japan_2026; max_stint_laps filled from Japan_2025. base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (137 laps, race_simulator convention); pit stops n=33."
   },
   {
     "track_id": "miami",
@@ -161,7 +101,7 @@
     "total_laps": 57,
     "pit_loss_s": 23.18,
     "pit_loss_noise_std_s": 2.5,
-    "base_laptime_s": 91.25,
+    "base_laptime_s": 91.32,
     "compounds": {
       "HARD": "C3",
       "MEDIUM": "C4",
@@ -183,27 +123,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (128 laps, race_simulator convention); pit stops n=19.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.03676,
-        "global_age_coef": 0.0364,
-        "n_stints": 16,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.03736,
-        "global_age_coef": 0.03687,
-        "n_stints": 22,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.03736,
-        "global_age_coef": 0.03687,
-        "n_stints": 4,
-        "pooled": false
-      }
-    }
+    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (128 laps, race_simulator convention); pit stops n=19."
   },
   {
     "track_id": "canada",
@@ -212,7 +132,7 @@
     "total_laps": 68,
     "pit_loss_s": 24.91,
     "pit_loss_noise_std_s": 3.41,
-    "base_laptime_s": 73.45,
+    "base_laptime_s": 73.37,
     "compounds": {
       "HARD": "C3",
       "MEDIUM": "C4",
@@ -234,27 +154,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (138 laps, race_simulator convention); pit stops n=16.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.0364,
-        "global_age_coef": 0.0364,
-        "n_stints": 2,
-        "pooled": true
-      },
-      "MEDIUM": {
-        "age_coef": 0.0364,
-        "global_age_coef": 0.03687,
-        "n_stints": 22,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.0364,
-        "global_age_coef": 0.03687,
-        "n_stints": 23,
-        "pooled": false
-      }
-    }
+    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (138 laps, race_simulator convention); pit stops n=16."
   },
   {
     "track_id": "monaco",
@@ -263,7 +163,7 @@
     "total_laps": 78,
     "pit_loss_s": 25.43,
     "pit_loss_noise_std_s": 1.73,
-    "base_laptime_s": 74.1,
+    "base_laptime_s": 74.24,
     "compounds": {
       "HARD": "C3",
       "MEDIUM": "C4",
@@ -286,27 +186,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "max_stint_laps from Monaco_2025 (Monaco_2026 red-flag stints unreliable). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (186 laps, race_simulator convention); pit stops n=20.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.03117,
-        "global_age_coef": 0.0364,
-        "n_stints": 7,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.03747,
-        "global_age_coef": 0.03687,
-        "n_stints": 19,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.03747,
-        "global_age_coef": 0.03687,
-        "n_stints": 19,
-        "pooled": false
-      }
-    }
+    "notes": "max_stint_laps from Monaco_2025 (Monaco_2026 red-flag stints unreliable). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (211 laps, race_simulator convention); pit stops n=20."
   },
   {
     "track_id": "barcelona",
@@ -315,7 +195,7 @@
     "total_laps": 66,
     "pit_loss_s": 22.63,
     "pit_loss_noise_std_s": 1.15,
-    "base_laptime_s": 80.14,
+    "base_laptime_s": 80.13,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 21,
@@ -333,27 +213,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (158 laps, race_simulator convention); pit stops n=42.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.07857,
-        "global_age_coef": 0.0364,
-        "n_stints": 37,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.08695,
-        "global_age_coef": 0.03687,
-        "n_stints": 19,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.08695,
-        "global_age_coef": 0.03687,
-        "n_stints": 13,
-        "pooled": false
-      }
-    }
+    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (158 laps, race_simulator convention); pit stops n=42."
   },
   {
     "track_id": "austria",
@@ -362,7 +222,7 @@
     "total_laps": 71,
     "pit_loss_s": 21.58,
     "pit_loss_noise_std_s": 1.42,
-    "base_laptime_s": 69.64,
+    "base_laptime_s": 69.7,
     "compounds": {
       "HARD": "C3",
       "MEDIUM": "C4",
@@ -384,27 +244,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (173 laps, race_simulator convention); pit stops n=36.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.0573,
-        "global_age_coef": 0.0364,
-        "n_stints": 24,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.06545,
-        "global_age_coef": 0.03687,
-        "n_stints": 30,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.06545,
-        "global_age_coef": 0.03687,
-        "n_stints": 8,
-        "pooled": false
-      }
-    }
+    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (173 laps, race_simulator convention); pit stops n=36."
   },
   {
     "track_id": "britain",
@@ -413,7 +253,7 @@
     "total_laps": 52,
     "pit_loss_s": 29.47,
     "pit_loss_noise_std_s": 4.95,
-    "base_laptime_s": 92.07,
+    "base_laptime_s": 92.11,
     "compounds": {
       "HARD": "C1",
       "MEDIUM": "C2",
@@ -435,27 +275,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Britain_2025 excluded (wet race). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (111 laps, race_simulator convention); pit stops n=27.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.04704,
-        "global_age_coef": 0.0364,
-        "n_stints": 22,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.04704,
-        "global_age_coef": 0.03687,
-        "n_stints": 27,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.04704,
-        "global_age_coef": 0.03687,
-        "n_stints": 4,
-        "pooled": false
-      }
-    }
+    "notes": "Britain_2025 excluded (wet race). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (111 laps, race_simulator convention); pit stops n=27."
   },
   {
     "track_id": "belgium",
@@ -464,7 +284,7 @@
     "total_laps": 44,
     "pit_loss_s": 24.74,
     "pit_loss_noise_std_s": 3.37,
-    "base_laptime_s": 108.94,
+    "base_laptime_s": 108.96,
     "compounds": {
       "HARD": "C2",
       "MEDIUM": "C3",
@@ -486,27 +306,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Belgium_2025 excluded (wet start, phantom lap-2 tyre changes). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (103 laps, race_simulator convention); pit stops n=11.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.04047,
-        "global_age_coef": 0.0364,
-        "n_stints": 23,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.04047,
-        "global_age_coef": 0.03687,
-        "n_stints": 13,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.04047,
-        "global_age_coef": 0.03687,
-        "n_stints": 6,
-        "pooled": false
-      }
-    }
+    "notes": "Belgium_2025 excluded (wet start, phantom lap-2 tyre changes). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (103 laps, race_simulator convention); pit stops n=11."
   },
   {
     "track_id": "hungary",
@@ -515,7 +315,7 @@
     "total_laps": 70,
     "pit_loss_s": 22.0,
     "pit_loss_noise_std_s": 1.25,
-    "base_laptime_s": 82.55,
+    "base_laptime_s": 82.5,
     "compounds": {
       "HARD": "C3",
       "MEDIUM": "C4",
@@ -537,27 +337,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (162 laps, race_simulator convention); pit stops n=38.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.05547,
-        "global_age_coef": 0.0364,
-        "n_stints": 28,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.05547,
-        "global_age_coef": 0.03687,
-        "n_stints": 19,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.05547,
-        "global_age_coef": 0.03687,
-        "n_stints": 18,
-        "pooled": false
-      }
-    }
+    "notes": "base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (162 laps, race_simulator convention); pit stops n=38."
   },
   {
     "track_id": "netherlands",
@@ -566,7 +346,7 @@
     "total_laps": 72,
     "pit_loss_s": 18.0,
     "pit_loss_noise_std_s": 1.54,
-    "base_laptime_s": 74.14,
+    "base_laptime_s": 74.15,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 32,
@@ -584,27 +364,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (130 laps, race_simulator convention); pit stops n=39.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.04242,
-        "global_age_coef": 0.0364,
-        "n_stints": 29,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.04642,
-        "global_age_coef": 0.03687,
-        "n_stints": 10,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.04642,
-        "global_age_coef": 0.03687,
-        "n_stints": 24,
-        "pooled": false
-      }
-    }
+    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (118 laps, race_simulator convention); pit stops n=39."
   },
   {
     "track_id": "italy",
@@ -613,7 +373,7 @@
     "total_laps": 53,
     "pit_loss_s": 24.97,
     "pit_loss_noise_std_s": 3.45,
-    "base_laptime_s": 83.68,
+    "base_laptime_s": 83.71,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 24,
@@ -632,27 +392,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Only 2 clean green-flag stops in Italy_2026; pit loss pooled with Italy_2025 (pit lane is a track property). Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (110 laps, race_simulator convention); pit stops n=21.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.02856,
-        "global_age_coef": 0.0364,
-        "n_stints": 14,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.03345,
-        "global_age_coef": 0.03687,
-        "n_stints": 12,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.04509,
-        "global_age_coef": 0.03687,
-        "n_stints": 4,
-        "pooled": false
-      }
-    }
+    "notes": "Only 2 clean green-flag stops in Italy_2026; pit loss pooled with Italy_2025 (pit lane is a track property). Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (110 laps, race_simulator convention); pit stops n=21."
   },
   {
     "track_id": "madrid",
@@ -661,7 +401,7 @@
     "total_laps": 57,
     "pit_loss_s": 31.4,
     "pit_loss_noise_std_s": 4.01,
-    "base_laptime_s": 96.19,
+    "base_laptime_s": 96.24,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 23,
@@ -679,27 +419,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (175 laps, race_simulator convention); pit stops n=14.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.0212,
-        "global_age_coef": 0.0364,
-        "n_stints": 26,
-        "pooled": false
-      },
-      "MEDIUM": {
-        "age_coef": 0.04623,
-        "global_age_coef": 0.03687,
-        "n_stints": 13,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.04623,
-        "global_age_coef": 0.03687,
-        "n_stints": 6,
-        "pooled": false
-      }
-    }
+    "notes": "Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (175 laps, race_simulator convention); pit stops n=14."
   },
   {
     "track_id": "azerbaijan",
@@ -708,7 +428,7 @@
     "total_laps": 51,
     "pit_loss_s": 20.55,
     "pit_loss_noise_std_s": 1.36,
-    "base_laptime_s": 105.54,
+    "base_laptime_s": 105.42,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 31,
@@ -727,27 +447,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "Only 2 clean green-flag stops in Azerbaijan_2026; pit loss pooled with Azerbaijan_2025 (pit lane is a track property). HARD stints not run in Azerbaijan_2026; max_stint_laps filled from Azerbaijan_2025. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (127 laps, race_simulator convention); pit stops n=20.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.0364,
-        "global_age_coef": 0.0364,
-        "n_stints": 0,
-        "pooled": true
-      },
-      "MEDIUM": {
-        "age_coef": 0.0364,
-        "global_age_coef": 0.03687,
-        "n_stints": 18,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.0364,
-        "global_age_coef": 0.03687,
-        "n_stints": 21,
-        "pooled": false
-      }
-    }
+    "notes": "Only 2 clean green-flag stops in Azerbaijan_2026; pit loss pooled with Azerbaijan_2025 (pit lane is a track property). HARD stints not run in Azerbaijan_2026; max_stint_laps filled from Azerbaijan_2025. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (127 laps, race_simulator convention); pit stops n=20."
   },
   {
     "track_id": "malaysia",
@@ -756,7 +456,7 @@
     "total_laps": 55,
     "pit_loss_s": 29.1,
     "pit_loss_noise_std_s": 4.34,
-    "base_laptime_s": 99.67,
+    "base_laptime_s": 99.49,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 25,
@@ -783,7 +483,7 @@
     "total_laps": 62,
     "pit_loss_s": 24.4,
     "pit_loss_noise_std_s": 1.26,
-    "base_laptime_s": 95.15,
+    "base_laptime_s": 95.06,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 44,
@@ -802,85 +502,66 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": true,
-    "notes": "HARD stints not run in Singapore_2026; max_stint_laps filled from Singapore_2025. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (165 laps, race_simulator convention); pit stops n=18.",
-    "tire_wear": {
-      "HARD": {
-        "age_coef": 0.0364,
-        "global_age_coef": 0.0364,
-        "n_stints": 0,
-        "pooled": true
-      },
-      "MEDIUM": {
-        "age_coef": 0.0364,
-        "global_age_coef": 0.03687,
-        "n_stints": 21,
-        "pooled": false
-      },
-      "SOFT": {
-        "age_coef": 0.0364,
-        "global_age_coef": 0.03687,
-        "n_stints": 23,
-        "pooled": false
-      }
-    }
+    "notes": "HARD stints not run in Singapore_2026; max_stint_laps filled from Singapore_2025. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (165 laps, race_simulator convention); pit stops n=18."
   },
   {
     "track_id": "austin",
     "name": "United States GP (Austin)",
     "circuit": "Circuit of the Americas",
     "total_laps": 56,
-    "pit_loss_s": 24.03,
-    "pit_loss_noise_std_s": 0.76,
-    "base_laptime_s": 97.54,
+    "pit_loss_s": 24.23,
+    "pit_loss_noise_std_s": 3.88,
+    "base_laptime_s": 98.47,
     "compounds": {
       "HARD": "C2",
       "MEDIUM": "C3",
       "SOFT": "C4"
     },
     "max_stint_laps": {
-      "SOFT": 28,
-      "MEDIUM": 34,
-      "HARD": 28
+      "SOFT": 29,
+      "MEDIUM": 25,
+      "HARD": 41
     },
     "typical_stint_laps": {
-      "SOFT": 28,
-      "MEDIUM": 33,
-      "HARD": null
+      "SOFT": 26,
+      "MEDIUM": 24,
+      "HARD": 36
     },
-    "source_season": 2025,
+    "source_season": 2026,
     "source_races": [
-      "Austin_2025"
+      "Austin_2026"
     ],
     "on_2026_calendar": true,
-    "already_raced_2026": false,
-    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. compounds: 2026 allocation C2/C3/C4 per F1.com (HARD C2; the T-010 note had the 2025 C1). Wear/stint figures are from Austin_2025 (HARD was C1 then), not refitted. base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (181 laps, race_simulator convention); pit stops n=20."
+    "already_raced_2026": true,
+    "notes": "compounds from 2026 allocation per F1.com (HARD C2). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (153 laps, race_simulator convention); pit stops n=30."
   },
   {
     "track_id": "mexico",
     "name": "Mexico City GP (Mexico)",
     "circuit": "Autodromo Hermanos Rodriguez",
     "total_laps": 71,
-    "pit_loss_s": 22.7,
-    "pit_loss_noise_std_s": 3.68,
-    "base_laptime_s": 79.84,
+    "pit_loss_s": 22.85,
+    "pit_loss_noise_std_s": 3.0,
+    "base_laptime_s": 78.08,
     "compounds": null,
     "max_stint_laps": {
-      "SOFT": 37,
-      "MEDIUM": 44,
+      "SOFT": 41,
+      "MEDIUM": 38,
       "HARD": 48
     },
     "typical_stint_laps": {
       "SOFT": 34,
-      "MEDIUM": 38,
+      "MEDIUM": 34,
       "HARD": null
     },
-    "source_season": 2025,
+    "source_season": 2026,
     "source_races": [
+      "Mexico_2026",
       "Mexico_2025"
     ],
     "on_2026_calendar": true,
-    "already_raced_2026": false,
-    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (174 laps, race_simulator convention); pit stops n=26."
+    "already_raced_2026": true,
+    "notes": "Mexico_2026: 4 SOFT stints ended at a red-flag stop; kept for max_stint_laps (lower bound), excluded from typical_stint_laps. Mexico_2026: 5 MEDIUM stints ended at a red-flag stop; kept for max_stint_laps (lower bound), excluded from typical_stint_laps. HARD stints not run in Mexico_2026; max_stint_laps filled from Mexico_2025. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (136 laps, race_simulator convention); pit stops n=22."
   },
   {
     "track_id": "brazil",
@@ -889,7 +570,7 @@
     "total_laps": 71,
     "pit_loss_s": 23.49,
     "pit_loss_noise_std_s": 3.35,
-    "base_laptime_s": 72.12,
+    "base_laptime_s": 72.08,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 35,
@@ -916,7 +597,7 @@
     "total_laps": 50,
     "pit_loss_s": 21.44,
     "pit_loss_noise_std_s": 3.69,
-    "base_laptime_s": 93.78,
+    "base_laptime_s": 93.8,
     "compounds": null,
     "max_stint_laps": {
       "MEDIUM": 27,
@@ -941,7 +622,7 @@
     "total_laps": 57,
     "pit_loss_s": 28.54,
     "pit_loss_noise_std_s": 3.84,
-    "base_laptime_s": 83.44,
+    "base_laptime_s": 83.42,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 25,
@@ -968,7 +649,7 @@
     "total_laps": 58,
     "pit_loss_s": 21.8,
     "pit_loss_noise_std_s": 1.65,
-    "base_laptime_s": 86.7,
+    "base_laptime_s": 86.74,
     "compounds": null,
     "max_stint_laps": {
       "SOFT": 8,

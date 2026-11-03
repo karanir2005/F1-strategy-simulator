@@ -276,6 +276,13 @@ DRY_COMPOUNDS = ("SOFT", "MEDIUM", "HARD")
 # 2026-10-25 UPDATE. Switched by the strategy-vs-actual evaluation (data/strategy_eval/).
 DEFAULT_OFFSET_MODE = "pace_ordered"
 
+# T-047: compound durability from real stint lengths (fit_stint_durability) is on by default. Evidence and the
+# regressions it costs are in team/handoffs/T-047.md; set to None to restore the lap-time-only wear slopes
+# (M = H = S, symmetric splits). Leave-one-race-out strategy eval, 34 dry races: compound-set agreement 7 -> 12,
+# pit-lap error vs top-10 median 4.0 -> 3.0 laps, start-compound agreement 14 -> 21; stop-count agreement 23 -> 22
+# (one 2025 race); scorecard MAE equal, ranking accuracy .669 -> .654 (inside the bootstrap CI).
+DEFAULT_DURABILITY = "stint_lengths"
+
 
 def era_of_year(year: int) -> str:
     return ERA_2026 if year >= 2026 else ERA_2025
@@ -960,6 +967,67 @@ def transfer_track_wear(model: dict, other: dict, track_id: str, lam: Optional[f
     return out, lam
 
 
+def fit_stint_durability(laps: pd.DataFrame, min_stint: int = 5) -> dict:
+    """
+    Relative compound durability from REAL stint lengths (T-047 / T-049), as {compound: L_c / L_HARD}.
+
+    Why: lap-time regression alone cannot separate MEDIUM from HARD wear (slopes tie at the constraint
+    boundary, and the slope moves ~1:1 with the assumed fuel slope, diag_t049.py), so the optimizer had no reason
+    to run a shorter MEDIUM and a longer HARD; only stint caps taken from team behaviour did that, and caps
+    cannot exist for a circuit nobody has raced. Teams' stint lengths are the other, independent measurement of
+    durability: with linear wear the cost-optimal stints satisfy a_M * n_M = a_H * n_H, so the ratio of chosen
+    stint lengths identifies the ratio of wear slopes.
+
+    Method: log(stint length) = race effect + compound effect (OLS, HARD = reference), over CLOSED stints only
+    (the last stint of a car is cut by the flag, not by the tyre), whose closing stop was under GREEN (a
+    stop within one lap of an SC/VSC/red lap says nothing about wear), >= min_stint laps, in races without a
+    red flag. The race effect removes track length / severity so compounds are compared within a race.
+    Returns {} when a compound has fewer than 10 stints (caller keeps the lap-time slopes).
+    Revealed-preference caveat: team stint lengths also reflect pit windows, sets in hand and SC timing; the
+    ratio is used as a RELATIVE scale only (build_tire_model keeps the lap-time-fitted overall level).
+    """
+    rows = []
+    for (race, drv), g in laps.sort_values("lap_number").groupby(["race_file", "driver"]):
+        if "has_red" in g.columns and g["has_red"].astype(bool).any():
+            continue
+        neut = set(g.loc[g["is_neutralised"].astype(bool), "lap_number"]) if "is_neutralised" in g.columns else set()
+        stints = [x for _, x in g.groupby("tyre_stint" if "tyre_stint" in g.columns else "stint_id", sort=True)]
+        for st in stints[:-1]:  # closed stints only
+            comp = st["compound"].dropna()
+            end = int(st["lap_number"].max())
+            if len(comp) and comp.iloc[0] in DRY_COMPOUNDS and len(st) >= min_stint and end not in neut and end + 1 not in neut:
+                rows.append((race, comp.iloc[0], np.log(len(st))))
+    if not rows:
+        return {}
+    d = pd.DataFrame(rows, columns=["race", "compound", "logn"])
+    if (d["compound"].value_counts().reindex(list(DRY_COMPOUNDS)).fillna(0) < 10).any():
+        return {}
+    X = pd.get_dummies(d["race"]).astype(float)
+    X["SOFT"] = (d["compound"] == "SOFT").astype(float)
+    X["MEDIUM"] = (d["compound"] == "MEDIUM").astype(float)
+    beta, *_ = np.linalg.lstsq(X.values, d["logn"].values, rcond=None)
+    b = dict(zip(X.columns, beta))
+    return {"HARD": 1.0, "MEDIUM": float(np.exp(b["MEDIUM"])), "SOFT": float(np.exp(b["SOFT"]))}
+
+
+def apply_durability(model: dict, ratios: dict, weights: dict) -> None:
+    """
+    Rescale the model's wear slopes so wear_c is proportional to 1 / L_c (L = ratios), keeping the
+    laps-weighted mean slope of the lap-time fit unchanged. `weights` = {compound: laps fitted}. In place.
+    """
+    comps = [c for c in DRY_COMPOUNDS if c in model and c in ratios]
+    if len(comps) < 3:
+        return
+    inv = {c: 1.0 / ratios[c] for c in comps}
+    w = {c: float(weights.get(c, 0.0)) for c in comps}
+    target = sum(w[c] * model[c]["age_coef"] for c in comps)
+    k = target / sum(w[c] * inv[c] for c in comps)
+    model["_wear_lap_time_fit"] = {c: model[c]["age_coef"] for c in comps}
+    for c in comps:
+        model[c] = dict(model[c], age_coef=float(k * inv[c]))
+    model["_durability_ratios"] = {c: float(ratios[c]) for c in comps}
+
+
 def build_tire_model(
     min_samples_per_age: int = 3,
     quadratic: bool = False,
@@ -971,6 +1039,7 @@ def build_tire_model(
     drop_red_flag_stints: bool = True,
     track_wear_tau: Optional[float] = TRACK_WEAR_TAU,
     offset_mode: str = DEFAULT_OFFSET_MODE,
+    durability: Optional[str] = DEFAULT_DURABILITY,
 ) -> dict:
     """
     Full pipeline: load -> era filter -> stints -> clean -> joint fit
@@ -999,6 +1068,10 @@ def build_tire_model(
         pace AND wear ordering constraints); "pace_ordered" = offsets are the FREE fit's, projected
         onto SOFT <= MEDIUM <= HARD(=0) only, then wear is refitted with those offsets held fixed
         under the wear ordering. See project_pace_ordering() for why.
+    durability (T-047, default DEFAULT_DURABILITY): None = wear slopes exactly as fitted from lap times; "stint_lengths" = rescale the
+        compound slopes so wear_c ~ 1 / (real stint length of c within a race), see fit_stint_durability
+        and apply_durability. Computed from the `laps` actually passed, so leave-one-race-out fits never
+        see the held-out race's stints.
     track_wear_tau: prior sd for the per-track wear fit (fit_track_wear) that
         fills model["_track_wear"]; None skips it. Linear-wear fits only.
         The returned model's own compound curves are always the GLOBAL ones;
@@ -1087,8 +1160,16 @@ def build_tire_model(
     model["_constrained"] = bool(constrain)
     model["_offset_mode"] = offset_mode
     model["_cliff_penalties"] = dict(COMPOUND_CLIFF_PENALTY_PLACEHOLDER)
+    if durability not in (None, "stint_lengths"):
+        raise ValueError(f"durability must be None or 'stint_lengths', got {durability!r}")
+    if durability == "stint_lengths":
+        ratios = fit_stint_durability(laps)
+        if ratios:
+            apply_durability(model, ratios, filtered["compound"].value_counts().to_dict())
     if track_wear_tau is not None and not quadratic and len(filtered):
-        model["_track_wear"] = fit_track_wear(filtered, final, tau=track_wear_tau)
+        # per-track slopes are ridged towards the GLOBAL slopes; with durability on, that prior is the rescaled one
+        final_for_tracks = dict(final, wear={c: (model[c]["age_coef"], 0.0) for c in DRY_COMPOUNDS if c in model}) if durability == "stint_lengths" else final
+        model["_track_wear"] = fit_track_wear(filtered, final_for_tracks, tau=track_wear_tau)
     model["_n_laps_fitted"] = int(len(filtered))
     model["_eras"] = sorted(set(lap_eras(filtered))) if len(filtered) else []
     return model

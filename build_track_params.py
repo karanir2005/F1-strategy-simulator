@@ -114,6 +114,8 @@ DRY = ("SOFT", "MEDIUM", "HARD")
 # (2025 Austin used C1/C3/C4, F1.com / Pirelli).
 COMPOUND_OVERRIDES = {
     "Austin_2025": ({"HARD": "C1", "MEDIUM": "C3", "SOFT": "C4"}, "T-010 research note (2025 allocation)"),
+    # T-047: the 2026 US GP allocation (F1.com preview); the rebuild used to fall through to the 2025 C1 hard.
+    "Austin_2026": ({"HARD": "C2", "MEDIUM": "C3", "SOFT": "C4"}, "2026 allocation per F1.com (HARD C2)"),
 }
 
 
@@ -151,7 +153,17 @@ def pit_durations(pits: pd.DataFrame) -> np.ndarray:
 
 
 def stint_lengths(laps: pd.DataFrame) -> dict:
-    """{compound: [stint laps]} split only at real in-lap -> out-lap tyre changes."""
+    """{compound: [stint laps]} split only at real in-lap -> out-lap tyre changes.
+
+    Old return shape (all stints, red-flag-ended ones included); see stint_lengths_flagged."""
+    return {c: [n for n, _ in v] for c, v in stint_lengths_flagged(laps).items()}
+
+
+def stint_lengths_flagged(laps: pd.DataFrame) -> dict:
+    """{compound: [(stint laps, ended_under_red)]}. A stint whose closing pit stop happened under a red flag
+    (T-047, Mexico_2026 lap 45) was cut short by the stoppage, not by tyre life: its length is a valid LOWER
+    bound (the tyre did last that long, so it counts for max_stint_laps) but would bias the p90 'typical' stint
+    low, so build_track_params leaves it out of typical_stint_laps."""
     out = {c: [] for c in DRY}
     for _, g in laps.sort_values(["driver", "lap_number"]).groupby("driver"):
         g = g.reset_index(drop=True)
@@ -169,7 +181,9 @@ def stint_lengths(laps: pd.DataFrame) -> dict:
         for _, s in g.groupby(sid):
             comp = s["compound"].mode()
             if len(comp) and comp.iloc[0] in DRY:
-                out[comp.iloc[0]].append(int(len(s)))
+                last = s.iloc[-1]
+                red_end = bool(last.get("pit_in_lap", 0) == 1 and (bool(last.get("pit_under_red", False)) or bool(last.get("has_red", False))))
+                out[comp.iloc[0]].append((int(len(s)), red_end))
     return out
 
 
@@ -293,13 +307,19 @@ def main():
             stint_src = [(2025, cands[2025])] if 2025 in cands else stint_src
             notes.append("max_stint_laps from Monaco_2025 (Monaco_2026 red-flag stints unreliable).")
         stints = {c: [] for c in DRY}
+        stints_typ = {c: [] for c in DRY}  # same, minus stints ended by a red-flag stop (censored, T-047)
         filled = []
         for i, (season, (k, l, p, inf, dn)) in enumerate(stint_src):
-            sl = stint_lengths(l)
+            sl = stint_lengths_flagged(l)
             for c in DRY:
-                got = [x for x in sl[c] if x >= 5]
+                got = [x for x, _ in sl[c] if x >= 5]
+                got_typ = [x for x, red in sl[c] if x >= 5 and not red]
                 if got and (i == 0 or not stints[c]):
                     stints[c] = got
+                    stints_typ[c] = got_typ
+                    if any(red for x, red in sl[c] if x >= 5):
+                        notes.append(f"{k}: {sum(1 for x, red in sl[c] if x >= 5 and red)} {c} stints ended at a red-flag stop; "
+                                     "kept for max_stint_laps (lower bound), excluded from typical_stint_laps.")
                     if i > 0:
                         filled.append(c)
                         sources.append(k) if k not in sources else None
@@ -310,7 +330,7 @@ def main():
         # robust cap: p90 of observed stint lengths (max is one outlier stint away from
         # unrealistic); null when fewer than 5 stints were observed for the compound
         typical_stint = {
-            c: (int(round(float(np.percentile(stints[c], 90)))) if len(stints[c]) >= 5 else None)
+            c: (int(round(float(np.percentile(stints_typ[c], 90)))) if len(stints_typ[c]) >= 5 else None)
             for c in DRY if stints[c]
         }
         missing = [c for c in DRY if c not in max_stint]

@@ -1,0 +1,114 @@
+{
+  "all": {
+    "n_races": 31,
+    "stops_match_modal": "26/31",
+    "stops_match_modal_green": "19/31",
+    "one_stop_always_baseline": "20/31",
+    "seq_match_modal": "16/31",
+    "set_match_modal": "16/31",
+    "start_match_modal": "20/31",
+    "mean_start_share_top10": 0.548,
+    "modal_in_opt_top3": "21/31",
+    "stops_match_winner": "23/31",
+    "median_winner_gap_s": 4.3,
+    "median_winner_rank": 1.0,
+    "winner_in_opt_top20": "25/31",
+    "median_pit_err_green_laps": 4.0,
+    "n_pit_err_green": 26,
+    "median_pit_err_laps": 3.9,
+    "mean_opt_stops": 1.29,
+    "mean_modal_stops": 1.39,
+    "soft_share_opt": 0.088,
+    "soft_share_actual": 0.146,
+    "med_share_opt": 0.315,
+    "med_share_actual": 0.397,
+    "hard_share_opt": 0.597,
+    "hard_share_actual": 0.457
+  },
+  "2025_regs": {
+    "n_races": 17,
+    "stops_match_modal": "13/17",
+    "stops_match_modal_green": "12/17",
+    "one_stop_always_baseline": "10/17",
+    "seq_match_modal": "7/17",
+    "set_match_modal": "7/17",
+    "start_match_modal": "10/17",
+    "mean_start_share_top10": 0.424,
+    "modal_in_opt_top3": "8/17",
+    "stops_match_winner": "13/17",
+    "median_winner_gap_s": 3.5,
+    "median_winner_rank": 1.0,
+    "winner_in_opt_top20": "13/17",
+    "median_pit_err_green_laps": 4.5,
+    "n_pit_err_green": 15,
+    "median_pit_err_laps": 4.5,
+    "mean_opt_stops": 1.35,
+    "mean_modal_stops": 1.47,
+    "soft_share_opt": 0.142,
+    "soft_share_actual": 0.132,
+    "med_share_opt": 0.266,
+    "med_share_actual": 0.437,
+    "hard_share_opt": 0.592,
+    "hard_share_actual": 0.431
+  },
+  "2026_regs": {
+    "n_races": 14,
+    "stops_match_modal": "13/14",
+    "stops_match_modal_green": "7/14",
+    "one_stop_always_baseline": "10/14",
+    "seq_match_modal": "9/14",
+    "set_match_modal": "9/14",
+    "start_match_modal": "10/14",
+    "mean_start_share_top10": 0.7,
+    "modal_in_opt_top3": "13/14",
+    "stops_match_winner": "10/14",
+    "median_winner_gap_s": 7.1,
+    "median_winner_rank": 1.5,
+    "winner_in_opt_top20": "12/14",
+    "median_pit_err_green_laps": 2.5,
+    "n_pit_err_green": 11,
+    "median_pit_err_laps": 1.5,
+    "mean_opt_stops": 1.21,
+    "mean_modal_stops": 1.29,
+    "soft_share_opt": 0.023,
+    "soft_share_actual": 0.164,
+    "med_share_opt": 0.374,
+    "med_share_actual": 0.348,
+    "hard_share_opt": 0.604,
+    "hard_share_actual": 0.488
+  },
+  "skipped": [
+    [
+      "Italy_2026",
+      "red flag (free tyre changes, stints not comparable)"
+    ],
+    [
+      "Mexico_2026",
+      "red flag (free tyre changes, stints not comparable)"
+    ],
+    [
+      "Monaco_2026",
+      "red flag (free tyre changes, stints not comparable)"
+    ],
+    [
+      "Netherlands_2026",
+      "red flag (free tyre changes, stints not comparable)"
+    ],
+    [
+      "Australia_2025",
+      "wet / missing laps (tire_model.EXCLUDED_2025_RACES)"
+    ],
+    [
+      "Belgium_2025",
+      "wet / missing laps (tire_model.EXCLUDED_2025_RACES)"
+    ],
+    [
+      "Britain_2025",
+      "wet / missing laps (tire_model.EXCLUDED_2025_RACES)"
+    ],
+    [
+      "Miami_2025",
+      "wet / missing laps (tire_model.EXCLUDED_2025_RACES)"
+    ]
+  ]
+}

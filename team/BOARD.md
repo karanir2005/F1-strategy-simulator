@@ -52,7 +52,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-043 | data-scientist | done | T-020 | Optimizer vs actual strategies, 34 dry races: offset_mode="pace_ordered" default (compound mix 0/14 -> 7/14, top-10 mode in top 3 8/14 -> 11/14); stop count unchanged; SC timing is the biggest gap. Note: build_track_params.py resets Austin compounds to C1 |
 | T-045 | data-scientist | done | T-044 | Predicted order = expected FIA points (0 inversions vs 7 by E[pos], better Spearman/MAE, podium 35/54); DNF model: stronger shrinkage + grid-slot factor (DNF LL better both seasons) |
 | T-046 | orchestrator | done | T-045 | R19 scored: winner 13/19, podium hits 36/57. Stickiness sweep (0-8) keeps gamma 4. Crash fix for an extra car in the DNF grid bins; T-012 tests no longer hardcode the next round |
-| T-047 | data-scientist | in progress | T-043, T-049 | Realistic optimizer: Austin/Mexico 2026 track params, stint caps, compound durability, wear fixes from the audit |
+| T-047 | data-scientist | done | T-043, T-049 | Realistic optimizer: Austin/Mexico 2026 track params, stint caps, compound durability, wear fixes from the audit | Shipped: stint-length durability, softer-first tie-break, 2026 Austin/Mexico params. Not fixed: stop count (always-1-stop level), SC timing, per-track wear severity |
 | T-048 | frontend-engineer | done | T-024 | /strategy: default next race, Compare this plan (T-033), near-ties, stint timeline, summary sentence, safety-car wording |
 | T-049 | researcher | done | T-043 | Tyre wear audit: linear equal-slope wear cannot decide stops or splits; caps supply the structure |
 

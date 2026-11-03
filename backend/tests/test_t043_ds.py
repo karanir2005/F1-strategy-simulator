@@ -23,7 +23,7 @@ def test_default_offset_mode_is_pace_ordered_and_keeps_wear_ordering():
 
 def test_joint_mode_still_reproduces_t020_fit():
     m = tm.build_tire_model(offset_mode="joint")
-    assert m["_compound_offsets"]["SOFT"] == pytest.approx(-0.123, abs=0.01)
+    assert m["_compound_offsets"]["SOFT"] == pytest.approx(-0.11, abs=0.02)  # T-047: -0.123 on 16 races, -0.109 with Austin+Mexico
     with pytest.raises(ValueError):
         tm.build_tire_model(offset_mode="nope")
 

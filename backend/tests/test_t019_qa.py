@@ -79,12 +79,13 @@ def test_determinism_real(tracks, tm):
 
 def test_closed_form_matches_simulate_race(tracks, tm):
     # n_sims=1 with zero noise would be ideal; instead check the deterministic total via simulate_race
+    # T-047: Austin caps now come from the 2026 race (M25 / S29 / H41), so the plan must fit inside them
     from app.core.optimizer import _Cost
 
     t = next(x for x in tracks if x["track_id"] == "austin")
     caps = {c: min(max(v, MIN_STINT_CAP), t["total_laps"]) for c, v in t["max_stint_laps"].items()}
     cost = _Cost(tm, list(caps), caps, t["total_laps"], t["base_laptime_s"], t["pit_loss_s"])
-    for comps, laps in [(("MEDIUM", "SOFT"), (28, 28)), (("HARD", "MEDIUM", "SOFT"), (10, 20, 26))]:
+    for comps, laps in [(("SOFT", "HARD"), (26, 30)), (("HARD", "MEDIUM", "SOFT"), (10, 20, 26))]:
         sim = simulate_race([Stint(c, n) for c, n in zip(comps, laps)], t["base_laptime_s"], tm, t["pit_loss_s"]).total_time
         assert cost.total(comps, laps) == pytest.approx(sim, abs=1e-6)
 

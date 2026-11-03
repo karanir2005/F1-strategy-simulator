@@ -75,5 +75,5 @@ def test_2025_fallbacks_flagged(tracks):
 
 def test_austin_matches_contract_example(tracks):
     a = next(t for t in tracks if t["track_id"] == "austin")
-    assert a["total_laps"] == 56 and a["source_season"] == 2025
+    assert a["total_laps"] == 56 and a["source_season"] == 2026 and a["already_raced_2026"]  # T-047: raced 2026-10-25
     assert a["compounds"] == {"HARD": "C2", "MEDIUM": "C3", "SOFT": "C4"}

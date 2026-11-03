@@ -102,14 +102,7 @@ def load_races() -> tuple:
         neut = laps.groupby("lap_number")["is_neutralised"].apply(lambda x: x.astype(bool).mean())
         races[key] = dict(era=era, laps=laps, strat=strat, order=res["driver"].tolist(), total_laps=total, sc_frac=sc,
                           race_file=str(p), neutral=set(int(l) for l in neut.index[neut > 0.5]))
-    # Austin R18 (OpenF1 stints, no laps CSV)
-    strat, order = austin26_strategies()
-    # no flag data for R18: neutralised lap = field-median lap >= 8% slower than the race median (lap 1 excluded)
-    ol = pd.DataFrame(json.loads((RAW / "laps_11396.json").read_text(encoding="utf-8")))
-    med = ol.groupby("lap_number")["lap_duration"].median()
-    neutral = set(int(l) for l in med.index[(med > 1.08 * med.median()) & (med.index > 1)])
-    races[AUSTIN26] = dict(era="2026_regs", laps=None, strat=strat, order=order, total_laps=56,
-                           sc_frac=len(neutral) / 56, race_file=None, neutral=neutral)
+    # T-047: Austin_2026 (OpenF1) now lives in data/processed like every other race; Mexico_2026 is skipped above (red flag).
     return races, skipped
 
 
@@ -199,6 +192,11 @@ def score_race(key, r, model, T, res, n_top=10) -> dict:
         gmed = np.median(np.array(gsame, dtype=float), axis=0)
         pit_err_green = float(np.mean(np.abs(np.array(p1["pit_laps"], dtype=float) - gmed)))
     pit_err_win = float(np.mean(np.abs(np.array(p1["pit_laps"]) - np.array(pit_laps(win))))) if len(win) - 1 == p1_stops else None
+    starts = Counter(L.get(s[0][0], "?") for s in strats.values())
+    wstart = L.get(win[0][0], "?")
+    modal_start = wstart if starts[wstart] == max(starts.values()) else starts.most_common(1)[0][0]
+    # pit-lap error vs the top-10 median of the SAME stop count as the optimizer (over all of the top 10, SC stops included)
+    pit_err_any = None if pit_err is None else round(pit_err, 1)
     act_laps = Counter()
     for s in strats.values():
         for c, n in s:
@@ -224,6 +222,10 @@ def score_race(key, r, model, T, res, n_top=10) -> dict:
         neutral_laps=len(r["neutral"]), seq_match_modal=int(p1_seq == modal),
         set_match_modal=int(tuple(sorted(p1_seq)) == tuple(sorted(modal))),
         modal_in_opt_top3=int(modal_key in top3),
+        # T-047: start compound. modal_start = most common first compound in the top 10 (ties: winner's).
+        modal_start=modal_start, opt_start=L[p1_plan[0][0]], start_match_modal=int(L[p1_plan[0][0]] == modal_start),
+        start_share_top10=round(sum(1 for s in strats.values() if L.get(s[0][0]) == L[p1_plan[0][0]]) / len(strats), 2),
+        pit_err_top10_median_any=pit_err_any,
         stops_match_winner=int(p1_stops == len(win) - 1), seq_match_winner=int(p1_seq == win_seq),
         winner_rank_in_opt=rank, winner_gap_s=round(gap, 1),
         pit_err_vs_top10_same_stops=None if pit_err is None else round(pit_err, 1),
@@ -241,11 +243,13 @@ def score_race(key, r, model, T, res, n_top=10) -> dict:
 # ---------------------------------------------------------------- variants ---
 # Phase-2 switches. Each variant is a dict of knobs read by run().
 VARIANTS = {
-    "baseline": {"model_kwargs": {"offset_mode": "joint"}},  # T-020 shipped tyre fit (before T-043)
+    "baseline": {"model_kwargs": {"offset_mode": "joint", "durability": None}},  # T-020 shipped tyre fit (before T-043)
     # Change A (T-043): pace offsets from the free fit projected onto the pace ordering only
-    "pace_ordered": {"model_kwargs": {"offset_mode": "pace_ordered"}},
+    "pace_ordered": {"model_kwargs": {"offset_mode": "pace_ordered", "durability": None}},
     # Change B candidate: + circuit wear borrowed from the other era (tire_model.transfer_track_wear)
     "pace_ordered_sc": {"model_kwargs": {"offset_mode": "pace_ordered"}, "sc_on": True},
+    # T-047: + compound durability from real green stint lengths of the OTHER races (tire_model.fit_stint_durability)
+    "durable": {"model_kwargs": {"offset_mode": "pace_ordered", "durability": "stint_lengths"}},
     "pace_ordered_xwear": {"model_kwargs": {"offset_mode": "pace_ordered"}, "transfer_wear": True},
 }
 
@@ -300,6 +304,12 @@ def run(variant: str, n_sims: int, caps_mode: str = "clean", only: list = None) 
             p90, mx = stint_caps(races, era, exclude=key, pct=cfg.get("cap_pct", 90), top10_only=cfg.get("cap_top10", False))
             maxc, typ = mx, p90
             model = apply_overrides(model, cfg, races, era, key)
+        elif caps_mode == "none":  # T-047/T-049: caps-free -- the wear curve alone must create stops and splits
+            maxc, typ = {c: r["total_laps"] for c in L}, None
+        elif caps_mode == "global":  # one pooled p90 for all compounds (no per-compound durability information)
+            allv = [n for k2, r2 in races.items() if k2 != key and r2["era"] == era for st in r2["strat"].values() for c, n in st if c in L and n >= 5]
+            g = int(np.percentile(allv, 90))
+            maxc, typ = {c: g for c in L}, None
         else:  # shipped track-specific caps (leak for tracks whose source race is the judged race)
             maxc, typ = T["max_stint_laps"], T.get("typical_stint_laps")
             if len(maxc) < 2:  # circuit absent from track_params.json (Bahrain/Imola/Saudi 2025): no shipped caps
@@ -336,6 +346,8 @@ def summarise(df: pd.DataFrame) -> dict:
             one_stop_always_baseline=f"{int((d.modal_stops == 1).sum())}/{len(d)}",
             seq_match_modal=f"{int(d.seq_match_modal.sum())}/{len(d)}",
             set_match_modal=f"{int(d.set_match_modal.sum())}/{len(d)}",
+            start_match_modal=f"{int(d.start_match_modal.sum())}/{len(d)}",
+            mean_start_share_top10=round(float(d.start_share_top10.mean()), 3),
             modal_in_opt_top3=f"{int(d.modal_in_opt_top3.sum())}/{len(d)}",
             stops_match_winner=f"{int(d.stops_match_winner.sum())}/{len(d)}",
             median_winner_gap_s=round(float(d.winner_gap_s.median()), 1),
@@ -359,11 +371,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", default="pace_ordered", choices=list(VARIANTS))
     ap.add_argument("--n-sims", type=int, default=300)
-    ap.add_argument("--caps", default="clean", choices=["clean", "shipped"])
+    ap.add_argument("--caps", default="clean", choices=["clean", "shipped", "none", "global"])
     ap.add_argument("--only", nargs="*")
     a = ap.parse_args()
     df = run(a.variant, a.n_sims, a.caps, a.only)
-    tag = a.variant + ("" if a.caps == "clean" else "_shippedcaps")
+    tag = a.variant + ("" if a.caps == "clean" else ("_shippedcaps" if a.caps == "shipped" else f"_caps{a.caps}"))
     name = "strategy_vs_actual.csv" if tag == "pace_ordered" else f"strategy_vs_actual_{tag}.csv"
     df.to_csv(OUT_DIR / name, index=False)
     summ = summarise(df)
