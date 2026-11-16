@@ -55,6 +55,9 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-047 | data-scientist | done | T-043, T-049 | Realistic optimizer: Austin/Mexico 2026 track params, stint caps, compound durability, wear fixes from the audit | Shipped: stint-length durability, softer-first tie-break, 2026 Austin/Mexico params. Not fixed: stop count (always-1-stop level), SC timing, per-track wear severity |
 | T-048 | frontend-engineer | done | T-024 | /strategy: default next race, Compare this plan (T-033), near-ties, stint timeline, summary sentence, safety-car wording |
 | T-049 | researcher | done | T-043 | Tyre wear audit: linear equal-slope wear cannot decide stops or splits; caps supply the structure |
+| T-050 | data-scientist | in progress | T-047 | Brazil R20 tyre data, 2026 Brazil params, one tyre-model polish, Las Vegas plans |
+| T-051 | researcher | done | - | AI/ML ideas (MCP, RAG, LLM previews, SC-reactive DP, calibration): recommends an MCP server first |
+| T-052 | orchestrator | done (not shipped) | T-046 | R20 scored (winner 14/20, podium 37/60). Pace x grid interaction for out-of-position fast cars: mixed on 2026 and 2025, left off (grid_pace_int=False) |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:

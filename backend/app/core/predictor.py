@@ -150,6 +150,11 @@ class PredictorConfig:
     seed: int = 0
     # practice long-run pace (OpenF1) as a 3rd level-2 feature
     use_fp: bool = False
+    # T-052: pace x grid interaction, (theta_race - field mean) * log(grid), as a
+    # further level-2 feature, so a fast car starting at the back loses less than
+    # -log(grid) alone says (2026: top-4-team cars from P8+ made the top 10 73%
+    # of the time vs 54% predicted).
+    grid_pace_int: bool = False
     # Final probabilities = (1 - w) * PL model + w * rank-frequency baseline
     # (grid-rank table in grid mode, championship-rank table pre-quali; see
     # RankBaseline). w picked on the 2025 walk-forward before looking at
@@ -562,6 +567,7 @@ class OutcomeModel:
     b_grid: float
     a_quali: float
     b_fp: float = 0.0
+    b_int: float = 0.0
 
 
 def _training_races(hist, season, rnd, cfg):
@@ -582,11 +588,14 @@ def fit_outcome_model(hist, season, rnd, cfg, stores: dict) -> OutcomeModel:
         f = stores[s].get(s, k)
         fin = f[f["classified"] == True].sort_values("position")  # noqa: E712
         if len(fin) >= 2:
-            X = np.c_[fin["theta_race"].to_numpy(),
-                      fin["stick"].to_numpy() * -np.log(fin["grid_eff"].to_numpy(dtype=float)),
-                      fin["fp_feat"].to_numpy()]
-            if not cfg.use_fp:
-                X = X[:, :2]
+            lg = np.log(fin["grid_eff"].to_numpy(dtype=float))
+            cols = [fin["theta_race"].to_numpy(), fin["stick"].to_numpy() * -lg]
+            if cfg.use_fp:
+                cols.append(fin["fp_feat"].to_numpy())
+            if cfg.grid_pace_int:
+                # centred on the whole field (finishers and non-finishers), as in simulate
+                cols.append((fin["theta_race"].to_numpy() - f["theta_race"].mean()) * lg)
+            X = np.column_stack(cols)
             designs.append(X)
             weights.append(w)
         if len(q):
@@ -595,10 +604,11 @@ def fit_outcome_model(hist, season, rnd, cfg, stores: dict) -> OutcomeModel:
             if len(qq) >= 2:
                 qdesigns.append(qq[["theta_quali"]].to_numpy())
                 qweights.append(w)
-    b = fit_pl(designs, weights, [cfg.lambda_beta] * (3 if cfg.use_fp else 2), topk=cfg.topk_level2)
+    b = fit_pl(designs, weights, [cfg.lambda_beta] * (2 + cfg.use_fp + cfg.grid_pace_int), topk=cfg.topk_level2)
     a = fit_pl(qdesigns, qweights, [cfg.lambda_beta], topk=cfg.topk_quali)
     return OutcomeModel(b_race=float(b[0]), b_grid=float(b[1]), a_quali=float(a[0]),
-                        b_fp=float(b[2]) if cfg.use_fp else 0.0)
+                        b_fp=float(b[2]) if cfg.use_fp else 0.0,
+                        b_int=float(b[-1]) if cfg.grid_pace_int else 0.0)
 
 
 def track_dnf_ratio(hist: dict, season: int, rnd: int, cfg: "PredictorConfig") -> float:
@@ -711,6 +721,9 @@ def simulate(
     u = model.b_race * np.asarray(theta_race) + model.b_grid * stick * (-np.log(g))
     if fp_feat is not None and model.b_fp:
         u = u + model.b_fp * np.asarray(fp_feat)
+    if model.b_int:
+        th = np.asarray(theta_race)
+        u = u + model.b_int * (th - th.mean()) * np.log(g)
     perf = u + rng.gumbel(size=(n_sims, n))
     dnf = rng.random((n_sims, n)) < np.asarray(p_dnf)
     perf = np.where(dnf, perf - 1e6, perf)  # DNFs rank behind every finisher

@@ -2255,3 +2255,25 @@ season,round,race_name,circuit_id,date,session,driver_id,code,team_id,team,posit
 2026,19,Mexico City Grand Prix,rodriguez,2026-11-01,race,bottas,BOT,cadillac,Cadillac F1 Team,20,R,False,21,Retired,0.0,42
 2026,19,Mexico City Grand Prix,rodriguez,2026-11-01,race,stroll,STR,aston_martin,Aston Martin,21,R,False,19,Retired,0.0,5
 2026,19,Mexico City Grand Prix,rodriguez,2026-11-01,race,alonso,ALO,aston_martin,Aston Martin,22,R,False,17,Retired,0.0,5
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,norris,NOR,mclaren,McLaren,1,1,True,1,Finished,25.0,71
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,max_verstappen,VER,red_bull,Red Bull,2,2,True,21,Finished,18.0,71
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,hadjar,HAD,red_bull,Red Bull,3,3,True,5,Finished,15.0,71
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,russell,RUS,mercedes,Mercedes,4,4,True,7,Finished,12.0,71
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,antonelli,ANT,mercedes,Mercedes,5,5,True,2,Finished,10.0,71
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,piastri,PIA,mclaren,McLaren,6,6,True,10,Finished,8.0,71
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,lawson,LAW,rb,RB F1 Team,7,7,True,3,Finished,6.0,71
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,leclerc,LEC,ferrari,Ferrari,8,8,True,14,Finished,4.0,71
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,hamilton,HAM,ferrari,Ferrari,9,9,True,20,Lapped,2.0,70
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,hulkenberg,HUL,audi,Audi,10,10,True,4,Lapped,1.0,70
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,arvid_lindblad,LIN,rb,RB F1 Team,11,11,True,18,Lapped,0.0,70
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,alonso,ALO,aston_martin,Aston Martin,12,12,True,8,Lapped,0.0,70
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,colapinto,COL,alpine,Alpine F1 Team,13,13,True,13,Lapped,0.0,70
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,gasly,GAS,alpine,Alpine F1 Team,14,14,True,15,Lapped,0.0,70
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,albon,ALB,williams,Williams,15,15,True,9,Lapped,0.0,70
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,bortoleto,BOR,audi,Audi,16,16,True,19,Lapped,0.0,70
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,bearman,BEA,haas,Haas F1 Team,17,17,True,6,Lapped,0.0,70
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,perez,PER,cadillac,Cadillac F1 Team,18,18,True,22,Lapped,0.0,69
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,sainz,SAI,williams,Williams,19,19,True,12,Lapped,0.0,69
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,rafael_camara,CAM,haas,Haas F1 Team,20,20,True,11,Lapped,0.0,69
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,stroll,STR,aston_martin,Aston Martin,21,R,False,16,Retired,0.0,30
+2026,20,Brazilian Grand Prix,interlagos,2026-11-08,race,bottas,BOT,cadillac,Cadillac F1 Team,22,W,False,17,Did not start,0.0,0

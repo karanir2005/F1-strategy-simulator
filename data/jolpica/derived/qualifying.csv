@@ -2250,3 +2250,25 @@ season,round,circuit_id,driver_id,code,team_id,team,quali_position,q1,q2,q3
 2026,19,rodriguez,stroll,STR,aston_martin,Aston Martin,20,1:19.072,,
 2026,19,rodriguez,perez,PER,cadillac,Cadillac F1 Team,21,1:19.105,,
 2026,19,rodriguez,bottas,BOT,cadillac,Cadillac F1 Team,22,1:19.852,,
+2026,20,interlagos,norris,NOR,mclaren,McLaren,1,1:30.939,1:29.207,1:27.470
+2026,20,interlagos,russell,RUS,mercedes,Mercedes,2,1:31.206,1:26.745,1:27.674
+2026,20,interlagos,antonelli,ANT,mercedes,Mercedes,3,1:32.229,1:29.302,1:28.095
+2026,20,interlagos,leclerc,LEC,ferrari,Ferrari,4,1:32.121,1:28.082,1:28.289
+2026,20,interlagos,lawson,LAW,rb,RB F1 Team,5,1:32.085,1:27.049,1:28.321
+2026,20,interlagos,hulkenberg,HUL,audi,Audi,6,1:31.693,1:28.361,1:28.668
+2026,20,interlagos,hadjar,HAD,red_bull,Red Bull,7,1:32.059,1:27.218,1:28.763
+2026,20,interlagos,bearman,BEA,haas,Haas F1 Team,8,1:33.030,1:29.130,1:29.831
+2026,20,interlagos,alonso,ALO,aston_martin,Aston Martin,9,1:32.092,1:29.072,1:30.311
+2026,20,interlagos,albon,ALB,williams,Williams,10,1:33.150,1:28.918,1:30.456
+2026,20,interlagos,hamilton,HAM,ferrari,Ferrari,11,1:31.666,1:30.001,
+2026,20,interlagos,piastri,PIA,mclaren,McLaren,12,1:32.251,1:30.369,
+2026,20,interlagos,rafael_camara,CAM,haas,Haas F1 Team,13,1:32.809,1:31.515,
+2026,20,interlagos,arvid_lindblad,LIN,rb,RB F1 Team,14,1:32.306,1:31.687,
+2026,20,interlagos,sainz,SAI,williams,Williams,15,1:32.959,1:31.785,
+2026,20,interlagos,max_verstappen,VER,red_bull,Red Bull,16,1:31.238,,
+2026,20,interlagos,colapinto,COL,alpine,Alpine F1 Team,17,1:33.327,,
+2026,20,interlagos,gasly,GAS,alpine,Alpine F1 Team,18,1:33.449,,
+2026,20,interlagos,stroll,STR,aston_martin,Aston Martin,19,1:33.653,,
+2026,20,interlagos,bottas,BOT,cadillac,Cadillac F1 Team,20,1:33.774,,
+2026,20,interlagos,perez,PER,cadillac,Cadillac F1 Team,21,1:34.509,,
+2026,20,interlagos,bortoleto,BOR,audi,Audi,22,1:41.564,,
