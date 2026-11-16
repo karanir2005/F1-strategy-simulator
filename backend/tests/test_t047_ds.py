@@ -39,3 +39,13 @@ def test_austin_and_mexico_are_2026_sourced():
     assert a["compounds"] == {"HARD": "C2", "MEDIUM": "C3", "SOFT": "C4"}
     assert a["max_stint_laps"]["HARD"] > 28  # the old 2025 cap that forced H28/M28
     assert "red-flag" in get_track("mexico")["notes"]
+
+
+def test_t050_wet_brazil_excluded_from_fit():
+    import pandas as pd
+    from app.core import tire_model as tm
+    laps = tm.load_all_laps()
+    assert laps["race_file"].str.contains("Brazil_2026").any()
+    kept = tm.drop_wet_races(laps)
+    assert not kept["race_file"].str.contains("Brazil_2026").any()
+    assert kept["race_file"].str.contains("Canada_2026").any()  # 1.2% rain-tyre laps stays

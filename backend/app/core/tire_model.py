@@ -272,6 +272,22 @@ COMPOUND_CLIFF_PENALTY_PLACEHOLDER = {"SOFT": 1.0, "MEDIUM": 0.5, "HARD": 0.2}
 
 DRY_COMPOUNDS = ("SOFT", "MEDIUM", "HARD")
 
+# T-050: a race run largely on INTERMEDIATE/WET is not a dry-pace source even for its slick stints. Brazil 2026 (R20)
+# started on inters (36% of laps), every car switched to SOFT at lap 15-18 on a drying track, and ran inters again at
+# the end; the OpenF1 rainfall flag stayed False, so clean_laps cannot see it. Slick laps there carry track-drying
+# pace gain (several seconds over a stint), which would be read as NEGATIVE tyre wear, and only SOFT was run. Races
+# above this share of rain-tyre laps are dropped from every fit (same rule/threshold as build_track_params.WET_EXCLUDE_FRAC;
+# Canada 2026 at 1.2% stays in).
+WET_RACE_EXCLUDE_FRAC = 0.10
+
+
+def drop_wet_races(laps: pd.DataFrame) -> pd.DataFrame:
+    """Drop whole races whose share of INTERMEDIATE/WET laps exceeds WET_RACE_EXCLUDE_FRAC."""
+    if laps.empty or "race_file" not in laps.columns:
+        return laps
+    wet = laps["compound"].isin(["INTERMEDIATE", "WET"]).groupby(laps["race_file"]).transform("mean")
+    return laps[(wet <= WET_RACE_EXCLUDE_FRAC).values]
+
 # T-043: how build_tire_model() obtains the pace offsets, see its docstring and the module docstring's
 # 2026-10-25 UPDATE. Switched by the strategy-vs-actual evaluation (data/strategy_eval/).
 DEFAULT_OFFSET_MODE = "pace_ordered"
@@ -1097,6 +1113,7 @@ def build_tire_model(
         laps = load_all_laps(eras=eras)
     else:
         laps = filter_eras(laps, eras)
+    laps = drop_wet_races(laps)
     laps = assign_stint_ids(laps)
     clean = clean_laps(laps, drop_red_flag_stints=drop_red_flag_stints)
     constrain = constrain and not quadratic

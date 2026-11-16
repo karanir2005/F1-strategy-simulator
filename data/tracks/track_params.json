@@ -588,7 +588,7 @@
     ],
     "on_2026_calendar": true,
     "already_raced_2026": false,
-    "notes": "Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (236 laps, race_simulator convention); pit stops n=33."
+    "notes": "Brazil_2026 excluded (wet/mixed: 36% of laps on rain tyres, drying-track slick laps are not a wear or pace source). The race WAS run in 2026, but its data cannot feed a dry plan, so source_season stays 2025 and already_raced_2026 stays false (T-050). Not raced (usable) in 2026: all data is from the 2025 race; base_laptime_s is 2025 pace (2025 cars) and may differ from 2026 pace. Pirelli C-numbers not in the data for this circuit (compounds=null). base_laptime_s = HARD, age-2, final-lap-fuel clean-air pace of the 5 fastest drivers (236 laps, race_simulator convention); pit stops n=33."
   },
   {
     "track_id": "las_vegas",

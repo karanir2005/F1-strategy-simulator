@@ -11,7 +11,7 @@ SIX = ("Barcelona", "Madrid", "Italy", "Azerbaijan", "Singapore", "Netherlands")
 
 def test_six_races_promoted_and_18_total():
     files = glob.glob("data/processed/*_2026_laps.csv")
-    assert len(files) == 18  # T-047: + Austin_2026, Mexico_2026
+    assert len(files) == 19  # T-047: + Austin_2026, Mexico_2026; T-050: + Brazil_2026 (wet, excluded from fits)
     for gp in SIX:
         assert any(f"{gp}_2026_laps" in f for f in files)
     assert not any("Malaysia" in f for f in files)

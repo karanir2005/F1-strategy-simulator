@@ -246,7 +246,11 @@ def main():
             if loaded is None:
                 continue
             if wet_fraction(loaded[0]) > WET_EXCLUDE_FRAC:
-                notes.append(f"{key} excluded (wet).")
+                notes.append(
+                    f"{key} excluded (wet/mixed: {wet_fraction(loaded[0]):.0%} of laps on rain tyres, drying-track slick "
+                    "laps are not a wear or pace source). The race WAS run in 2026, but its data cannot feed a dry plan, "
+                    "so source_season stays 2025 and already_raced_2026 stays false (T-050)."
+                )
                 continue
             cands[season] = (key, *loaded)
         if not cands:
