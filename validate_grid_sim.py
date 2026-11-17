@@ -49,10 +49,25 @@ def main():
     ap.add_argument("--rounds", default="2-20")
     ap.add_argument("--table", default=str(C.TABLE_PATH))
     ap.add_argument("--no-write", action="store_true")
+    ap.add_argument("--walk-forward", action="store_true",
+                    help="strict walk-forward (T-062): everything for round R from rounds < R only; rounds 5-19; "
+                         "scores the shipped sim and the theta_grid pace variant; writes data/scorecard/grid_sim_walkforward.json")
     ap.add_argument("--skip-2025", action="store_true", help="skip the 2025 out-of-sample season")
     a = ap.parse_args()
     lo, hi = (int(x) for x in a.rounds.split("-"))
     t0 = time.time()
+    if a.walk_forward:
+        import grid_sim_walkforward as W
+
+        res = W.run_walk_forward(a.n_sims)
+        summ = W.summarise_walk_forward(res["rows"])
+        print(json.dumps(summ, indent=1, default=float))
+        if not a.no_write:
+            slim = [{k: v for k, v in r.items() if not hasattr(v, "__len__") or isinstance(v, str)} for r in res["rows"]]
+            (ROOT / "data" / "scorecard" / "grid_sim_walkforward.json").write_text(
+                json.dumps({"n_sims": a.n_sims, "rounds": res["rounds"], "summary": summ, "per_race": slim}, indent=1, default=float))
+        print(f"{time.time() - t0:.0f}s")
+        return
     real = C.Real()
     st = C.Study(real, range(lo, hi + 1), verbose=False)
     tp = Path(a.table)
