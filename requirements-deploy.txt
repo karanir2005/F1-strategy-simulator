@@ -1,0 +1,11 @@
+# Runtime-only pins for the deployed API (Render). Same versions as requirements.txt.
+# Left out on purpose: fastf1 (only data_loader.py imports it, no API route does; it also drags in
+# matplotlib etc. and would cost memory and build time on the 512 MB free tier) and mcp (local tooling).
+# Keep in step with requirements.txt when you bump a pin.
+fastapi==0.135.2
+uvicorn==0.42.0
+pydantic==2.12.5
+numpy==2.4.3
+pandas==2.3.3
+scipy==1.17.1
+requests==2.33.0

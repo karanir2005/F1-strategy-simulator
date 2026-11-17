@@ -1,0 +1,18 @@
+# Render Blueprint for the API (free tier). The frontend deploys separately on Vercel (see README, "Deploying").
+# Native Python service rather than Docker: the repo root is the build context because the API reads ../data/,
+# the image would need the same files either way, and Render's native builder needs no extra file to maintain.
+services:
+  - type: web
+    name: f1-strategy-api
+    runtime: python
+    plan: free
+    region: oregon            # pick the region nearest you; free services can't be moved later
+    buildCommand: pip install -r requirements-deploy.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true          # redeploys on every push to the connected branch
+    envVars:
+      - key: PYTHON_VERSION   # pinned: numpy 2.4 / scipy 1.17 need >= 3.11, wheels checked for 3.12 on Linux
+        value: 3.12.8
+      - key: ALLOWED_ORIGINS  # set in the dashboard to the Vercel URL, e.g. https://f1-strategy.vercel.app
+        sync: false
