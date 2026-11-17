@@ -30,6 +30,7 @@ import { CompareResults } from "@/components/strategy/compare-results";
 import { ManualCompare } from "@/components/strategy/manual-compare";
 import { OptimizerResults } from "@/components/strategy/optimizer-results";
 import { RaceSettings } from "@/components/strategy/race-settings";
+import { StrategyChat } from "@/components/strategy/strategy-chat";
 import { ErrorBlock, Sk } from "@/components/viz/states";
 
 function ResultsSkeleton({ label }: { label: string }) {
@@ -390,6 +391,8 @@ export default function StrategyPage() {
         />
       )}
       {results && <CompareResults results={results} context={resultsCtx} />}
+
+      <StrategyChat trackId={trackId} />
     </div>
   );
 }

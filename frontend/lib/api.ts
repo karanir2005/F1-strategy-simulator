@@ -186,18 +186,18 @@ async function failure(response: Response, what: string): Promise<Error> {
 }
 
 /** fetch() rejects with a bare TypeError when the server is unreachable; give that a useful message. */
-async function call(path: string, what: string, init?: RequestInit): Promise<Response> {
+async function call(path: string, what: string, init?: RequestInit, timeoutMs = FETCH_TIMEOUT_MS): Promise<Response> {
   let response: Response;
   const ctl = new AbortController();
   let timedOut = false;
   const timer = setTimeout(() => {
     timedOut = true;
     ctl.abort();
-  }, FETCH_TIMEOUT_MS);
+  }, timeoutMs);
   try {
     response = await fetch(`${API_URL}${path}`, { ...init, signal: ctl.signal });
   } catch {
-    if (timedOut) throw new Error(`${what} failed: the backend did not respond within ${FETCH_TIMEOUT_MS / 1000} s.`);
+    if (timedOut) throw new Error(`${what} failed: the backend did not respond within ${timeoutMs / 1000} s.`);
     throw new Error(`${what} failed: cannot reach the backend at ${API_URL}.`);
   } finally {
     clearTimeout(timer);
@@ -219,6 +219,56 @@ export async function runSimulation(
 
 export async function fetchTracks(): Promise<TrackOut[]> {
   const response = await call("/tracks", "Loading tracks");
+  return response.json();
+}
+
+// ---------------------------------------------------------------------------
+// Local strategy chat (backend/app/api/routes/chat.py, T-058). Needs Ollama on the backend host; 503 if it is down.
+// ---------------------------------------------------------------------------
+
+export interface ChatStatus {
+  available: boolean;
+  ollama_reachable: boolean;
+  model: string;
+  model_pulled: boolean;
+  url: string;
+  message: string;
+}
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface ChatToolCall {
+  name: string;
+  args: Record<string, unknown>;
+  result_summary: string;
+}
+
+export interface ChatResponse {
+  reply: string;
+  tool_calls: ChatToolCall[];
+  caveats: string[];
+}
+
+const CHAT_TIMEOUT_MS = 200_000; // a 7B model on CPU can take minutes; the backend caps each Ollama call at 180 s
+
+export async function fetchChatStatus(): Promise<ChatStatus> {
+  const response = await call("/chat/status", "Chat status");
+  return response.json();
+}
+
+export async function sendChat(
+  messages: ChatMessage[],
+  context?: { track_id?: string; race?: string },
+): Promise<ChatResponse> {
+  const response = await call(
+    "/chat",
+    "Chat",
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages, context }) },
+    CHAT_TIMEOUT_MS,
+  );
   return response.json();
 }
 
