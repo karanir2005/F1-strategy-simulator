@@ -80,6 +80,28 @@ python predict_race.py --evaluate   # walk-forward 2026 vs baselines
 | `GET` | `/predict/history` | Season-to-date prediction accuracy |
 | `GET` | `/predict/races`, `/predict/race/{round}` | Past races: prediction vs actual |
 
+## MCP server (chat with the model in Claude)
+
+`backend/app/mcp_server.py` is a stdio MCP server that exposes the simulator to Claude Desktop or Claude Code using your Claude subscription (no API key, no uvicorn needed). Tools: `list_tracks`, `predict_race`, `get_race_results`, `optimize_strategy`, `simulate_strategy`, `query_laps`, and `search_project_notes` (BM25 retrieval over `team/` notes and README; Claude writes the answer from the retrieved chunks). Every result includes a `caveats` list.
+
+**Claude Code:** the project-scope `.mcp.json` at the repo root is picked up automatically (approve it on first use).
+
+**Claude Desktop:** add this to `%APPDATA%\Claude\claude_desktop_config.json` and restart Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "f1-strategy-simulator": {
+      "command": "C:\\Users\\rushi\\Desktop\\Folders\\Code\\F1-strategy-simulator\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "app.mcp_server"],
+      "cwd": "C:\\Users\\rushi\\Desktop\\Folders\\Code\\F1-strategy-simulator\\backend"
+    }
+  }
+}
+```
+
+Spot-check questions with expected tools and facts: `team/research/T-054-mcp-eval.md`.
+
 ## Validation
 
 - **Replays:** `validate_replay.py` re-simulates real drivers' strategies. Error is 0.13–1.10% of total race time, excluding SC/VSC/red-flag laps.
