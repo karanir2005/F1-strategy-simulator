@@ -68,7 +68,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-061 | backend-engineer | done (pole-car gains roughly halved, e.g. Austin +0.22 pts; real-SC agreement 70.6% vs never-box 70.9%; card says so) | T-055, T-060 | Re-run T-055 policy gains on calibrated sim; update stale placeholder strings (grid_sim.py, mcp_server.py) |
 | T-062 | data-scientist | done (negative result; strict walk-forward added, sim ~= PL on Spearman, worse P(win); grid-slot variant opt-in only) | T-060 | Grid sim: strict walk-forward validation; try PL strengths as pace, likelihood-fitted noise, 2025 track overtake prior, grid-slot term |
 | T-063 | data-scientist | done (negative result, no default changed) | T-057 | Predictor calibration: walk-forward refit of in-model blend/temperature, pooled shrunk recalibration, favourite Platt; ship only if held-out improves |
-| T-059 | qa-engineer | done (pass with notes; F3 fixed, F1/F2/F5/F9 queued after T-062) | all above | Milestone QA: pytest, lint/tsc, browser pass of /predict + /strategy (incl. T-025 scope), grid-sim and calibration claims checked |
+| T-059 | qa-engineer | done (pass with notes; F1/F2/F3/F5 fixed, F9 open: brazil if_field_follows gain > solo gain, needs a sanity check) | all above | Milestone QA: pytest, lint/tsc, browser pass of /predict + /strategy (incl. T-025 scope), grid-sim and calibration claims checked |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:

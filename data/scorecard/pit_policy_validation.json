@@ -1,4 +1,5 @@
 {
+ "scope": "in-sample: tyre model and track entry are fitted on all races incl. the one checked; policy never sees its pit/SC rows (T-059 F2)",
  "summary": {
   "n_pairs": 330,
   "n_races_with_events": 18,

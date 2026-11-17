@@ -13,6 +13,10 @@ where both boxed. A real decision depends on the planned stop lap, which the dat
 who was due to stop that lap anyway counts as "boxed" (a known bias toward disagreement on policy-silent
 cases).
 
+Not held out (T-059 F2): the tyre model and track entry the policy search uses are fitted on all pulled races,
+including the one being checked. The policy never sees that race's pit or SC rows, but this is an in-sample check,
+not leave-one-race-out.
+
 Run:  .venv\\Scripts\\python.exe validate_pit_policy.py [--n-screen 400] [--n-eval 1000] [--races Austin,Japan]
 Output: data/scorecard/pit_policy_validation.json
 """
@@ -149,7 +153,7 @@ def main():
     summ = summarise(recs)
     print(json.dumps(summ, indent=1))
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({"summary": summ, "races": recs}, indent=1, default=float), encoding="utf-8")
+    OUT.write_text(json.dumps({"scope": "in-sample: tyre model and track entry are fitted on all races incl. the one checked; policy never sees its pit/SC rows (T-059 F2)", "summary": summ, "races": recs}, indent=1, default=float), encoding="utf-8")
 
 
 if __name__ == "__main__":

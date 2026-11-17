@@ -28,7 +28,6 @@ def field(d=6, laps=20, p_dnf=0.0):
 
 # ---------------------------------------------------------------- calibration loader robustness (BUG)
 
-@pytest.mark.xfail(strict=True, reason="T-059 Q1: load_grid_calibration docstring says it never raises, but a non-numeric value raises ValueError")
 def test_calibration_non_numeric_value_does_not_raise(tmp_path):
     p = tmp_path / "c.json"
     p.write_text(json.dumps({"version": 1, "sc": {"gap_s": "abc"}}))
@@ -36,7 +35,6 @@ def test_calibration_non_numeric_value_does_not_raise(tmp_path):
     assert cal.sc_gap_s == 0.9
 
 
-@pytest.mark.xfail(strict=True, reason="T-059 Q1: valid JSON that is not an object (a list) raises AttributeError")
 def test_calibration_json_list_does_not_raise(tmp_path):
     p = tmp_path / "c.json"
     p.write_text("[]")
@@ -44,7 +42,6 @@ def test_calibration_json_list_does_not_raise(tmp_path):
     assert cal.source.startswith("placeholder")
 
 
-@pytest.mark.xfail(strict=True, reason="T-059 Q1: same for load_interaction_params with a null section")
 def test_interaction_null_section_does_not_raise(tmp_path):
     p = tmp_path / "i.json"
     p.write_text(json.dumps({"version": 1, "overtake": None}))

@@ -17,8 +17,8 @@ are not coded anywhere, they fall out of the arithmetic.
      + fuel effect + Gaussian lap noise (calibrated level). Pit loss lands on the out-lap, the same
      convention as race_simulator.simulate_race.
   3. Dirty air: gap_ahead < window  ->  + time_loss and + extra_deg_frac x the tyre delta.
-  4. Overtakes, resolved from the front of the order backwards: a car whose free lap would put it
-     whose gap to the car in front at the start of the lap is within overtake.window_s attempts a pass
+  4. Overtakes, resolved from the front of the order backwards: a car whose free lap is faster than the car
+     in front and whose gap to it at the start of the lap is within overtake.window_s attempts a pass
      with the fitted logistic probability of pace delta, tyre-age delta and gap (T-053 definitions).
      Success: attacker pays pass_time_cost.attacker, the defender pays pass_time_cost.defender and ends
      the lap behind. Failure: attacker is held at min_follow_gap. One attempt per car per lap.
@@ -181,6 +181,8 @@ def load_grid_calibration(path: Optional[Path] = None) -> GridCalibration:
     if path.exists():
         try:
             d = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(d, dict):
+                raise ValueError("not a JSON object")
             cal.source = f"{path.name} v{d.get('version')}"
         except (OSError, ValueError):
             d, cal.source = {}, "placeholder (unreadable file)"
@@ -191,10 +193,12 @@ def load_grid_calibration(path: Optional[Path] = None) -> GridCalibration:
     def get(section, key, attr, cast=float):
         sec = d.get(section) if section else d
         v = sec.get(key) if isinstance(sec, dict) else None
-        if v is None or (isinstance(v, float) and v != v):
+        try:
+            if v is None or (isinstance(v, float) and v != v):
+                raise ValueError
+            setattr(cal, attr, cast(v))
+        except (TypeError, ValueError):
             missing.append(f"{section}.{key}" if section else key)
-            return
-        setattr(cal, attr, cast(v))
 
     get("pace", "race_pace_scale", "race_pace_scale")
     get("pace", "driver_shrink", "driver_shrink")
@@ -255,6 +259,8 @@ def load_interaction_params(path: Optional[Path] = None) -> InteractionParams:
     if path.exists():
         try:
             d = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(d, dict):
+                raise ValueError("not a JSON object")
             source = f"{path.name} v{d.get('version')}"
         except (OSError, ValueError):
             d, source = {}, "placeholder (unreadable file)"
@@ -271,16 +277,33 @@ def load_interaction_params(path: Optional[Path] = None) -> InteractionParams:
             else:
                 missing.append(".".join(keys))
                 return fall
-        return cur
+        try:
+            return float(cur)
+        except (TypeError, ValueError):
+            missing.append(".".join(keys))
+            return fall
 
-    ov_model = d.get("overtake", {}).get("model", "logistic")
+    def section(*keys) -> dict:
+        cur = d
+        for k in keys:
+            cur = cur.get(k) if isinstance(cur, dict) else None
+        return cur if isinstance(cur, dict) else {}
+
+    def as_float(v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
+    ov_model = section("overtake").get("model", "logistic")
     if ov_model != "logistic":
         raise ValueError(f"unsupported overtake model {ov_model!r} in {path}")
     bins = {}
     for name, _, _ in LAP1_BINS:
-        b = d.get("lap1", {}).get("by_grid_bin", {}).get(name)
-        if b and b.get("mean") is not None and b.get("sd") is not None:
-            bins[name] = {"mean": float(b["mean"]), "sd": float(b["sd"])}
+        b = section("lap1", "by_grid_bin", name)
+        mean, sd = as_float(b.get("mean")), as_float(b.get("sd"))
+        if mean is not None and sd is not None:
+            bins[name] = {"mean": mean, "sd": sd}
         else:
             missing.append(f"lap1.by_grid_bin.{name}")
             bins[name] = dict(ph["lap1"]["by_grid_bin"][name])
@@ -292,7 +315,7 @@ def load_interaction_params(path: Optional[Path] = None) -> InteractionParams:
         ov_pace_coef=float(get("overtake", "pace_delta_coef")),
         ov_tyre_age_coef=float(get("overtake", "tyre_age_delta_coef")),
         ov_gap_coef=float(get("overtake", "gap_coef")),
-        ov_track_offset={k: float(v) for k, v in (d.get("overtake", {}).get("track_offset") or {}).items()},
+        ov_track_offset={k: f for k, v in section("overtake", "track_offset").items() if (f := as_float(v)) is not None},
         pass_cost_attacker_s=float(get("pass_time_cost_s", "attacker")),
         pass_cost_defender_s=float(get("pass_time_cost_s", "defender")),
         lap1_bins=bins,
