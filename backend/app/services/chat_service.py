@@ -154,6 +154,10 @@ def _ollama_chat(messages: list[dict], tools: list[dict] | None) -> dict:
         body["tools"] = tools
     try:
         r = requests.post(f"{OLLAMA_URL}/api/chat", json=body, timeout=CHAT_TIMEOUT_S)
+    except requests.Timeout as exc:
+        raise OllamaUnavailable(
+            f"Ollama is running but did not answer within {CHAT_TIMEOUT_S:.0f}s (model '{OLLAMA_MODEL}' is "
+            f"likely running on CPU). Try again, or set OLLAMA_MODEL to a smaller model.") from exc
     except requests.RequestException as exc:
         raise OllamaUnavailable(
             f"Cannot reach Ollama at {OLLAMA_URL} ({type(exc).__name__}). Install Ollama and run "
