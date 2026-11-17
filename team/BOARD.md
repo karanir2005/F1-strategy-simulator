@@ -62,7 +62,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-054 | backend-engineer | done (simulate_grid tool pending T-034) | T-051 | MCP server (stdio): predict/strategy/results/laps tools + BM25 search over team notes (RAG without an API key) |
 | T-055 | backend-engineer | blocked (after T-034) | T-034 | Safety-car-reactive pit policy (DP), evaluated on the grid sim |
 | T-056 | backend-engineer | in progress | T-031 | Deploy prep (revives T-032): Render backend + Vercel frontend configs, env/CORS, README steps; user does logins + final deploy |
-| T-057 | data-scientist | in progress | T-052 | Probability calibration check of p_win/p_podium (reliability, Brier, walk-forward temperature fix, off by default) |
+| T-057 | data-scientist | done (roughly calibrated; walk-forward recalibration hurt held-out, not shipped) | T-052 | Probability calibration check of p_win/p_podium (reliability, Brier, walk-forward temperature fix, off by default) |
 | T-058 | backend-engineer | in progress | T-054 | In-app strategy chat on /strategy via local Ollama model + same tools as MCP (no API key; local only, disabled when Ollama absent) |
 | T-059 | qa-engineer | queued (after T-034, T-055, T-056, T-058) | all above | Milestone QA: pytest, lint/tsc, browser pass of /predict + /strategy (incl. T-025 scope), grid-sim and calibration claims checked |
 
