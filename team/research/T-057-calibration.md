@@ -72,3 +72,38 @@ Correction tried: logit temperature `p' = sigmoid(logit(p)/T)` (T<1 sharpens, T>
 ## Reproduce
 
 `.venv\Scripts\python data\predict_eval\calibration_check.py` (about 25 s, offline, cached Jolpica data). Writes only to `data/predict_eval/out/`. Default artifacts under `data/jolpica/` were checksummed before and after and are unchanged.
+
+## T-063 (2026-11-17): can calibration be improved under strict walk-forward? No. Nothing clears the bar; defaults unchanged.
+
+Script: `data/predict_eval/t063_experiments.py` (modes `A`, `Arecompute`, `B`, `D`; in memory, never `--by-race`). Outputs `data/predict_eval/out/t063_A.csv`, `t063_B.csv`. All numbers are held-out walk-forward over R1-end (2026: 20 races, 2025: 24), per-driver Brier / log loss, paired race bootstrap of (variant - default). Hit rates: winner = argmax p_win, podium = top 3 by p_podium. Default: winners 14/20 and 15/24, podium hits 36/60 and 57/72 by this definition.
+
+### (a) In-model knobs (refit-free sweeps, one factor at a time)
+New inert hook `PredictorConfig.utility_scale` (default 1.0): multiplies the fitted level-2 coefficients (Plackett-Luce inverse temperature) after the fit.
+
+| variant | 2026 win LL diff [95%] | 2025 win LL diff [95%] | note |
+|---|---|---|---|
+| scale 1.15 | -0.0024 [-0.0054,+0.0008] | -0.0003 [-0.0037,+0.0032] | podium/top10 ~0 both seasons |
+| scale 1.3 | -0.0036 [-0.0095,+0.0026] | +0.0003 [-0.0062,+0.0069] | 2025 top10 +0.0046 |
+| scale 1.5 | -0.0040 [-0.0133,+0.0058] | +0.0019 | 2025 top10 +0.0080 |
+| scale 0.85 | +0.0045 (worse, CI excludes 0) | +0.0016 | |
+| blend_baseline 0 / 0.1 / 0.4 | win unchanged (win blend is already 0 in grid mode) | same | podium/top10 move with opposite signs per season (2025 prefers 0.4, 2026 prefers 0-0.1) |
+| blend_win_grid 0.1 / 0.25 | +0.0007 / +0.0019 | -0.0011 / -0.0017 | opposite signs, all CIs span 0 |
+| stick_gamma 0 / 2 / 6 | +0.003 / +0.0005 / +0.0012 | +0.003 / +0.0006 / +0.0009 | flat |
+| topk_level2 5 / 10 | +0.0019 / +0.0106 (worse) | +0.0023 / +0.0080 | |
+| w2025_level2 0 | +0.0188 (worse) | n/a | prior still matters |
+
+The suspected cause (0.25 blend flattening the favourite) is wrong for p_win: in grid mode p_win has no baseline blend (T-040, `blend_win_grid=0`). The blend only touches podium/top10, where the two seasons disagree about the best weight. Sharpening the PL (scale ~1.15-1.5) helps 2026 win log loss by 0.002-0.004 (ECE 0.019 -> 0.007-0.011, winner NLL 1.031 -> 0.97-1.00) but no interval excludes zero, and 2025 is neutral for win and slightly worse for top-10. Hit rates unchanged for every scale.
+
+### (b)/(c) Walk-forward recalibration (p_win only, renormalised to sum 1)
+Platt `sigmoid(a*logit p + b)` (slope only, or slope+intercept), fitted on prior rounds with a ridge prior toward identity (lam 5/30/150), own-season versus pooled with the earlier season (2025 predictions for the 2026 target, honest 2024 predictions with w2025_level2=0 for the 2025 target). Also a utility_scale chosen walk-forward from {0.85..1.5} by earlier-round win log loss.
+
+- 2026 win LL diff: -0.0017 to -0.0019 (lam 5), -0.0010 to -0.0013 (lam 30), -0.0003 to -0.0005 (lam 150); every interval spans 0 (best pooled lam 5: [-0.0047,+0.0011]).
+- 2025 win LL diff: +0.0001 to +0.0043 (own-season +0.0001..+0.0011, pooled worse: +0.0008..+0.0043). Pooling the previous season hurts 2025: the calibration of a season does not transfer (era/dominance shifts).
+- Walk-forward-chosen scale: lam 0 chose 1.5 almost every round in 2026 and bounced 0.85-1.5 in 2025 (2025 win LL +0.0031); lam 20 settled at 1.15 in 2026 (-0.0015 [-0.0044,+0.0015]) and 1.0 in 2025 (+0.0006).
+- The intercept adds nothing over the slope. Podium and top-10 were not recalibrated (T-057 already showed worse).
+
+### (d) The 21 outsider cases (p_win 0.10-0.20, 1 win)
+19 of 21 started P1-P3 and all were the model's 2nd-4th favourite (13 rank-2, 6 rank-3, 2 rank-4): the second Mercedes / Ferrari / Red Bull on the front rows, mean grid 2.4, none from P8+, so this is not the T-052 pace x grid issue. Among all rank>=2 drivers, P2-P3 starters were predicted 4.9 wins and got 4; P4-P6 predicted 2.2, got 1; the rest ~1.3 vs 1. So the excess mass is "front-row non-favourite", i.e. the same thing as the favourite underconfidence: in a Mercedes-dominated season the favourite converts more often than a car-pace + grid model says. In 2025 the same bin goes the other way (0.153 predicted, 0.333 observed, 6 wins in 18, again 16/18 from P2-P3), so the sign flips between seasons. That is a season-level dispersion regime (how dominant the best car is), not a fixed bias, and it is the reason both a season-only and a pooled correction fail out of sample. Reported, not corrected.
+
+### Verdict and bar
+Bar: improve held-out log loss in both seasons, or clearly in 2026 and neutral in 2025, without hurting hit rates. Best candidates (utility_scale 1.15; Platt lam 30 pooled) improve 2026 win LL by 0.001-0.002 with intervals spanning 0 and are neutral-to-worse in 2025. Not shipped. `utility_scale` stays at 1.0 as an off-by-default hook. No artifact regeneration was needed, since defaults are unchanged. Revisit with 2027 races: the 2026 evidence (sharpen ~1.15) is consistent in sign across ways of fitting it but only 20 winners.

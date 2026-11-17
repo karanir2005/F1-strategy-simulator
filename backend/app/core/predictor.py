@@ -190,6 +190,10 @@ class PredictorConfig:
     stick_top: int = 8
     # races of seasons < 2022 (pre ground-effect) get stick_w_old * this factor
     stick_w_pre2022: float = 1.0
+    # T-063 (2026-11-16): multiplier on the level-2 race utility (b_race, b_grid, b_fp, b_int) AFTER the fit,
+    # i.e. the Plackett-Luce inverse temperature. 1.0 = as fitted (off). >1 sharpens the order distribution.
+    # Experiment hook; see team/research/T-057-calibration.md (T-063 section) for the result.
+    utility_scale: float = 1.0
 
 
 # ----------------------------------------------------------- data shaping
@@ -828,6 +832,9 @@ def predict_race(
     if mode == "grid" and f["grid_eff"].isna().any():
         raise ValueError("grid mode needs a grid for every entrant")
     model = fit_outcome_model(hist, season, rnd, cfg, stores)
+    if cfg.utility_scale != 1.0:
+        model = replace(model, b_race=model.b_race * cfg.utility_scale, b_grid=model.b_grid * cfg.utility_scale,
+                        b_fp=model.b_fp * cfg.utility_scale, b_int=model.b_int * cfg.utility_scale)
     p_dnf = dnf_probabilities(hist, season, rnd, f, cfg, use_grid=(mode == "grid"))
     sim = simulate(
         f["theta_race"].to_numpy(),
