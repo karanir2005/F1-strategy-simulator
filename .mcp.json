@@ -3,7 +3,7 @@
     "f1-strategy-simulator": {
       "command": ".venv/Scripts/python.exe",
       "args": ["-m", "app.mcp_server"],
-      "cwd": "backend"
+      "env": { "PYTHONPATH": "backend" }
     }
   }
 }
