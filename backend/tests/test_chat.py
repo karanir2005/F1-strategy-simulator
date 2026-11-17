@@ -77,6 +77,14 @@ def test_tool_calling_round_trip(monkeypatch):
     assert sent[1]["messages"][-1]["role"] == "tool"
 
 
+def test_simulate_grid_schema_and_call():
+    schema = {t["function"]["name"]: t["function"]["parameters"] for t in cs.TOOL_SCHEMAS}
+    props = schema["simulate_grid"]["properties"]
+    assert "forced_sc_lap" in props and schema["simulate_grid"]["required"] == ["track_id"]
+    r = cs.run_tool("simulate_grid", {"track_id": "austin", "n_sims": 30, "forced_sc_lap": 15, "top_n": 3, "bogus": 1})
+    assert "error" not in r and len(r["drivers"]) == 3 and r["forced_sc_lap"] == 15
+
+
 def test_unknown_tool_is_reported_not_crashed(monkeypatch):
     replies = iter([_tool_msg("nope", {}), _text_msg("ok")])
     monkeypatch.setattr(cs.requests, "post", lambda *a, **k: FakeResp(next(replies)))

@@ -55,6 +55,18 @@ def test_simulate_deterministic_given_seed():
     assert a["results"] == b["results"]
 
 
+def test_simulate_grid_tool():
+    r = m.simulate_grid("austin", n_sims=40, top_n=5, forced_sc_lap=20)
+    _has_caveats(r)
+    assert r["forced_sc_lap"] == 20 and len(r["drivers"]) == 5
+    assert any("forced from lap 20" in c for c in r["caveats"])
+    assert r["drivers"][0]["exp_points"] >= r["drivers"][-1]["exp_points"]
+    assert m.simulate_grid("austin", n_sims=40, seed=2) == m.simulate_grid("austin", n_sims=40, seed=2)
+    bad = m.simulate_grid("austin", n_sims=40, strategies={"NOR": [{"compound": "HARD", "laps": 3}]})
+    assert "error" in bad and bad["caveats"]
+    assert "error" in m.simulate_grid("nowhere")
+
+
 def test_get_race_results():
     r = m.get_race_results(20)
     _has_caveats(r)
@@ -119,7 +131,7 @@ def test_mcp_round_trip_in_memory():
         async with Client(m.build_server()) as client:
             tools = {t.name for t in (await client.list_tools()).tools}
             assert {"list_tracks", "predict_race", "get_race_results", "optimize_strategy", "simulate_strategy",
-                    "query_laps", "search_project_notes"} <= tools
+                    "simulate_grid", "query_laps", "search_project_notes"} <= tools
             res = await client.call_tool("search_project_notes", {"query": "pit loss calibration", "k": 2})
             assert not res.is_error
             payload = res.structured_content or json.loads(res.content[0].text)

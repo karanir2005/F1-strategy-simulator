@@ -54,7 +54,14 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from app.core.race_simulator import DEFAULT_PIT_LOSS_SECONDS, Stint, simulate_race
-from app.core.safety_cars import SafetyCarParams, draw_timelines, strategy_extra
+from app.core.safety_cars import (
+    SafetyCarParams,
+    apply_forced_sc,
+    default_sc_length,
+    draw_timelines,
+    load_params as load_safety_car_params,
+    strategy_extra,
+)
 
 DEFAULT_N_SIMULATIONS = 10_000
 
@@ -122,6 +129,8 @@ def simulate_totals(
     pit_loss_seconds: float = DEFAULT_PIT_LOSS_SECONDS,
     seed: Optional[int] = None,
     safety_cars: Optional[SafetyCarParams] = None,
+    forced_sc_lap: Optional[int] = None,
+    forced_sc_laps: Optional[int] = None,
 ) -> Dict[str, np.ndarray]:
     """
     Vectorized Monte Carlo core: returns {name: array of n_simulations
@@ -163,6 +172,12 @@ def simulate_totals(
     strategies. The effect is still additive per iteration, so the vectorised
     decomposition holds: each strategy's extra seconds come from
     safety_cars.strategy_extra. See that module for what is and isn't modelled.
+
+    FORCED SC (what-if, off by default): forced_sc_lap = N puts an SC on 1-indexed laps N ..
+    N + forced_sc_laps - 1 in every iteration (length defaults to the median fitted SC length). If
+    `safety_cars` is also given the forced SC is added to the random timeline (the random draws are
+    unchanged); if not, the forced SC is the ONLY neutralisation, using the fitted slowdown and
+    pit-loss ratios. With forced_sc_lap=None nothing changes bit-for-bit.
     """
     rng = np.random.default_rng(seed)
 
@@ -190,9 +205,17 @@ def simulate_totals(
         + pit_cum[:, len(result.pit_laps)]
         for name, result in deterministic.items()
     }
-    if safety_cars is not None:
-        sc_rng = np.random.default_rng(rng.integers(2**63))
-        sc, vsc = draw_timelines(sc_rng, n_simulations, max_laps, safety_cars)
+    if safety_cars is not None or forced_sc_lap is not None:
+        if safety_cars is not None:
+            sc_rng = np.random.default_rng(rng.integers(2**63))
+            sc, vsc = draw_timelines(sc_rng, n_simulations, max_laps, safety_cars)
+        else:
+            safety_cars = load_safety_car_params()
+            sc = np.zeros((n_simulations, max_laps), dtype=bool)
+            vsc = np.zeros((n_simulations, max_laps), dtype=bool)
+        if forced_sc_lap is not None:
+            n_sc = forced_sc_laps if forced_sc_laps is not None else default_sc_length(safety_cars)
+            sc, vsc = apply_forced_sc(sc, vsc, forced_sc_lap, n_sc)
         for name, result in deterministic.items():
             totals[name] = totals[name] + strategy_extra(
                 sc, vsc, result.lap_times, result.pit_laps, pit_loss_seconds, safety_cars
@@ -235,6 +258,8 @@ def compare_strategies(
     pit_loss_seconds: float = DEFAULT_PIT_LOSS_SECONDS,
     seed: Optional[int] = None,
     safety_cars: Optional[SafetyCarParams] = None,
+    forced_sc_lap: Optional[int] = None,
+    forced_sc_laps: Optional[int] = None,
 ) -> Dict[str, dict]:
     """
     Run several candidate strategies through Monte Carlo, and on each
@@ -287,6 +312,8 @@ def compare_strategies(
         pit_loss_seconds=pit_loss_seconds,
         seed=seed,
         safety_cars=safety_cars,
+        forced_sc_lap=forced_sc_lap,
+        forced_sc_laps=forced_sc_laps,
     )
     names = list(strategies.keys())
     stacked = np.vstack([times[name] for name in names])  # (n_strategies, n_sims)

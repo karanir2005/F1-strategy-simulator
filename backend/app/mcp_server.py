@@ -419,13 +419,65 @@ def search_project_notes(query: str, k: int = 5) -> dict:
     )
 
 
-# TODO(T-034): simulate_grid tool. Added below only if app.core.race_grid_sim imports cleanly.
+CAVEATS_GRID = [
+    "Full-grid simulation: pace comes from qualifying and earlier-race ratings with judgement-placeholder scaling; "
+    "it is validated only as a finishing-order ranker (see team/handoffs/T-034-backend-engineer.md), not for exact gaps.",
+    "Strategies are fixed in advance per car (default: optimizer top plans with per-car variation); no reactive stops, "
+    "no lapping/blue flags, red flags, weather or penalties.",
+    "Overtake, dirty-air and lap-1 parameters are 2026 fits (T-053); the finishing-position distribution is a model "
+    "output, not a forecast guarantee.",
+]
+
+
+def simulate_grid(
+    track_id: str,
+    round: int | None = None,
+    n_sims: int = 1000,
+    seed: int = 0,
+    safety_cars: bool = True,
+    forced_sc_lap: int | None = None,
+    forced_sc_laps: int | None = None,
+    strategies: dict | None = None,
+    top_n: int = 22,
+) -> dict:
+    """Simulate the whole grid together (same inputs as POST /simulate/grid): per-driver P(win), P(podium),
+    expected points, mean finishing position. forced_sc_lap = N forces a safety car starting on lap N (what-if).
+    strategies = {"NOR": [{"compound": "MEDIUM", "laps": 25}, {"compound": "HARD", "laps": 31}]} overrides
+    those drivers' plans (other cars keep the default). Defaults to the race's real grid / latest qualifying."""
+    from fastapi import HTTPException
+    from pydantic import ValidationError
+
+    from app.api.routes.grid_sim import GridSimRequest, simulate_grid_route
+
+    try:
+        req = GridSimRequest(track_id=track_id, round=round, n_sims=n_sims, seed=seed, safety_cars=safety_cars,
+                             forced_sc_lap=forced_sc_lap, forced_sc_laps=forced_sc_laps, strategies=strategies)
+        with _quiet():
+            resp = simulate_grid_route(req)
+    except ValidationError as exc:
+        e = exc.errors()[0]
+        return _err(f"invalid input: {'.'.join(map(str, e['loc']))}: {e['msg']}", CAVEATS_GRID)
+    except HTTPException as exc:
+        return _err(_http_detail(exc), CAVEATS_GRID)
+    d = resp.model_dump()
+    keep = ("code", "team", "grid", "p_win", "p_podium", "p_dnf", "exp_points", "mean_position", "p50_time_s", "strategy")
+    rows = []
+    for r in d["drivers"][: max(1, int(top_n))]:
+        row = {k: r[k] for k in keep}
+        row["strategy"] = [f"{x['compound'][0]}{x['laps']}" for x in row["strategy"]]
+        rows.append({k: _round(v, 3) for k, v in row.items()})
+    out = {k: d[k] for k in ("track_id", "round", "total_laps", "n_sims", "grid_source", "forced_sc_lap",
+                             "mean_overtakes_per_race", "mean_sc_laps_per_race")}
+    out["mean_overtakes_per_race"] = _round(out["mean_overtakes_per_race"], 1)
+    out["mean_sc_laps_per_race"] = _round(out["mean_sc_laps_per_race"], 1)
+    out["drivers"] = rows
+    return _with_caveats(out, CAVEATS_GRID + ([f"A safety car is forced from lap {forced_sc_lap}."] if forced_sc_lap else []))
 
 
 # ------------------------------------------------------------------ server
 
-TOOLS = [list_tracks, predict_race, get_race_results, optimize_strategy, simulate_strategy, query_laps,
-         search_project_notes]
+TOOLS = [list_tracks, predict_race, get_race_results, optimize_strategy, simulate_strategy, simulate_grid,
+         query_laps, search_project_notes]
 
 INSTRUCTIONS = (
     "Tools over the user's own F1 strategy simulator and race predictor (2026 season). Always read the `caveats` "

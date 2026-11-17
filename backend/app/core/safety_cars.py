@@ -97,3 +97,25 @@ def strategy_extra(sc, vsc, lap_times, pit_laps, pit_loss, params: SafetyCarPara
         extra -= (1 - params.sc_pit_loss_ratio) * pit_loss * sc[:, p]
         extra -= (1 - params.vsc_pit_loss_ratio) * pit_loss * vsc[:, p]
     return extra
+
+
+def default_sc_length(params: SafetyCarParams) -> int:
+    """Median observed SC length in laps, used when a caller forces an SC without giving a length."""
+    return int(np.median(np.asarray(params.sc_lengths)))
+
+
+def apply_forced_sc(sc, vsc, start_lap: int, n_laps_sc: int):
+    """
+    "What if an SC comes on lap N": returns (sc, vsc) with an SC forced on the 1-indexed laps
+    start_lap .. start_lap + n_laps_sc - 1 (clipped to the race), in every simulation. The forced SC is
+    OR-ed into whatever random timeline is passed in (pass all-False masks for "only this SC"), and
+    wins over a VSC on the same lap, matching draw_timelines' precedence.
+    """
+    n_laps = sc.shape[1]
+    if start_lap < 1:
+        raise ValueError(f"forced SC lap must be >= 1, got {start_lap}")
+    if n_laps_sc < 1:
+        raise ValueError(f"forced SC length must be >= 1 lap, got {n_laps_sc}")
+    sc = sc.copy()
+    sc[:, min(start_lap - 1, n_laps) : min(start_lap - 1 + n_laps_sc, n_laps)] = True
+    return sc, vsc & ~sc

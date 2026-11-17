@@ -63,6 +63,13 @@ TOOL_SCHEMAS = [
           {"strategies": {"type": "array", "description": "list of {name, stints:[{compound, laps}]}",
                           "items": {"type": "object"}},
            "track_id": _S, "n_simulations": _I, "safety_cars": _B}, ["strategies"]),
+    _tool("simulate_grid",
+          "Simulate the WHOLE grid together (traffic, overtakes, safety cars): per-driver win/podium/points. "
+          "forced_sc_lap=N forces a safety car from lap N ('what if SC on lap 30'). strategies overrides "
+          "{driver code: [{compound, laps}]}.",
+          {"track_id": _S, "round": _I, "n_sims": _I, "forced_sc_lap": _I, "forced_sc_laps": _I,
+           "safety_cars": _B, "strategies": {"type": "object", "description": "{CODE: [{compound, laps}]}"},
+           "top_n": _I}, ["track_id"]),
     _tool("query_laps", "Filtered per-lap data for one 2026 race (name fragment, e.g. 'Austin'). Max 200 rows.",
           {"race": _S, "driver": _S, "lap_from": _I, "lap_to": _I, "compound": _S, "green_only": _B,
            "max_rows": _I}, ["race"]),

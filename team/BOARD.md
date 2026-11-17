@@ -39,7 +39,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-031 | frontend-engineer | done (no QA; 'what changed' strip needs backend p_win_prequali, folded into T-029) | T-027 | Race-week behaviour on /predict (countdown, grid-set state, what changed since pre-quali, driver detail); phone-width browser check |
 | T-032 | backend-engineer | superseded by T-056 (user asked to deploy, 2026-11-16) | T-031 | Deploy: Vercel frontend + Railway/Render backend, env/CORS config |
 | T-033 | frontend-engineer | done (T-048) | T-024 | Copy an optimizer plan into the manual comparison with one click |
-| T-034 | backend-engineer | in progress (user, 2026-11-16) | T-030 | Phase 1 full-grid multi-car race simulation: the 'final polishing' step that would let the winner prediction beat grid order |
+| T-034 | backend-engineer | done (Spearman 0.700 vs grid 0.657, PL 0.702; not wired into /predict; over-passes ~60/race vs ~13) | T-030 | Phase 1 full-grid multi-car race simulation: the 'final polishing' step that would let the winner prediction beat grid order |
 | T-035 | backend-engineer | done (no QA) | T-027 | Qualifying prediction (pole/front row/Q3/Q1 exit/exp grid) in API, walk-forward validated vs baselines |
 | T-036 | orchestrator | done | T-035 | Qualifying columns in the /predict driver table; predicted vs actual grid after quali |
 | T-037 | backend-engineer | done | T-029 | Per-circuit grid stickiness from pole-to-win rate (2018-2026, shrunk, no leakage); default stick_mode=pole, gamma 4. 2026 grid win LL 0.0794->0.0762, podium 0.2083->0.1990; still picks pole every race |
@@ -60,10 +60,11 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-052 | orchestrator | done (not shipped) | T-046 | R20 scored (winner 14/20, podium 37/60). Pace x grid interaction for out-of-position fast cars: mixed on 2026 and 2025, left off (grid_pace_int=False) |
 | T-053 | data-scientist | done (19 dry 2026 races; overtake LORO log-loss 0.240 vs 0.338 const) | - | Fit race-interaction params (dirty air, overtake logistic, pass cost, lap-1 shuffle) into data/sim_params/race_interaction.json for T-034 |
 | T-054 | backend-engineer | done (simulate_grid tool pending T-034) | T-051 | MCP server (stdio): predict/strategy/results/laps tools + BM25 search over team notes (RAG without an API key) |
-| T-055 | backend-engineer | blocked (after T-034) | T-034 | Safety-car-reactive pit policy (DP), evaluated on the grid sim |
+| T-055 | backend-engineer | in progress | T-034 | Safety-car-reactive pit policy (DP), evaluated on the grid sim |
 | T-056 | backend-engineer | repo side done; waiting on user Render+Vercel login | T-031 | Deploy prep (revives T-032): Render backend + Vercel frontend configs, env/CORS, README steps; user does logins + final deploy |
 | T-057 | data-scientist | done (roughly calibrated; walk-forward recalibration hurt held-out, not shipped) | T-052 | Probability calibration check of p_win/p_podium (reliability, Brier, walk-forward temperature fix, off by default) |
 | T-058 | backend-engineer | done (mocked tests; not yet tried with a real Ollama model) | T-054 | In-app strategy chat on /strategy via local Ollama model + same tools as MCP (no API key; local only, disabled when Ollama absent) |
+| T-060 | data-scientist | in progress | T-034 | Fit grid-sim placeholders (pace scale, shrinkage, pace noise, SC bunching, lap-1 spacing, plan mix) and calibrate pass count to real |
 | T-059 | qa-engineer | queued (after T-034, T-055, T-056, T-058) | all above | Milestone QA: pytest, lint/tsc, browser pass of /predict + /strategy (incl. T-025 scope), grid-sim and calibration claims checked |
 
 ### T-001: FastF1 schema + 2026 rules brief
