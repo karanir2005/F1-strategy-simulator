@@ -58,7 +58,7 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-050 | data-scientist | done | T-047 | Brazil R20 pulled; wet race (36% laps on inters) so excluded from tyre fit via drop_wet_races; temp covariate and physics fuel tried, not shipped; Las Vegas top plan M23/H27 |
 | T-051 | researcher | done | - | AI/ML ideas (MCP, RAG, LLM previews, SC-reactive DP, calibration): recommends an MCP server first |
 | T-052 | orchestrator | done (not shipped) | T-046 | R20 scored (winner 14/20, podium 37/60). Pace x grid interaction for out-of-position fast cars: mixed on 2026 and 2025, left off (grid_pace_int=False) |
-| T-053 | data-scientist | in progress | - | Fit race-interaction params (dirty air, overtake logistic, pass cost, lap-1 shuffle) into data/sim_params/race_interaction.json for T-034 |
+| T-053 | data-scientist | done (19 dry 2026 races; overtake LORO log-loss 0.240 vs 0.338 const) | - | Fit race-interaction params (dirty air, overtake logistic, pass cost, lap-1 shuffle) into data/sim_params/race_interaction.json for T-034 |
 | T-054 | backend-engineer | done (simulate_grid tool pending T-034) | T-051 | MCP server (stdio): predict/strategy/results/laps tools + BM25 search over team notes (RAG without an API key) |
 | T-055 | backend-engineer | blocked (after T-034) | T-034 | Safety-car-reactive pit policy (DP), evaluated on the grid sim |
 | T-056 | backend-engineer | in progress | T-031 | Deploy prep (revives T-032): Render backend + Vercel frontend configs, env/CORS, README steps; user does logins + final deploy |

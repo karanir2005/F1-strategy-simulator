@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "fitted_on": [
+    "Austin_2026",
+    "Australia_2026",
+    "Austria_2026",
+    "Azerbaijan_2026",
+    "Barcelona_2026",
+    "Belgium_2026",
+    "Britain_2026",
+    "Canada_2026",
+    "China_2026",
+    "Hungary_2026",
+    "Italy_2026",
+    "Japan_2026",
+    "Madrid_2026",
+    "Malaysia_2026",
+    "Mexico_2026",
+    "Miami_2026",
+    "Monaco_2026",
+    "Netherlands_2026",
+    "Singapore_2026"
+  ],
+  "dirty_air": {
+    "window_s": 1.0,
+    "time_loss_s": 0.308,
+    "extra_deg_frac": 0.0,
+    "time_loss_se_s": 0.049,
+    "extra_deg_frac_raw": -0.305,
+    "extra_deg_frac_ci95": [
+      -0.795,
+      0.012
+    ],
+    "extra_deg_detectable": false,
+    "loss_by_gap_bin_s": {
+      "bin_0.0_0.5": 0.398,
+      "bin_0.5_1.0": 0.188,
+      "bin_1.0_1.5": 0.037,
+      "bin_1.5_2.0": -0.008,
+      "bin_2.0_3.0": -0.029
+    }
+  },
+  "overtake": {
+    "model": "logistic",
+    "window_s": 1.5,
+    "intercept": -0.0437,
+    "pace_delta_coef": 1.3128,
+    "tyre_age_delta_coef": 0.0791,
+    "gap_coef": -4.3454,
+    "track_offset": {
+      "austin": 1.0294,
+      "australia": -0.1356,
+      "austria": 0.2183,
+      "azerbaijan": -0.1527,
+      "barcelona": 0.7448,
+      "belgium": 0.8525,
+      "britain": 0.564,
+      "canada": 0.0185,
+      "china": 0.3612,
+      "hungary": -0.249,
+      "italy": 0.7913,
+      "japan": -0.1125,
+      "madrid": -1.7074,
+      "malaysia": 0.0915,
+      "mexico": -0.362,
+      "miami": 0.6942,
+      "monaco": -1.1967,
+      "netherlands": -0.9356,
+      "singapore": -0.514
+    },
+    "coef_ci95": {
+      "intercept": [
+        -0.856,
+        0.4681
+      ],
+      "pace_delta": [
+        0.9628,
+        1.957
+      ],
+      "tyre_age_delta": [
+        0.0363,
+        0.1225
+      ],
+      "gap": [
+        -5.1867,
+        -3.6817
+      ]
+    },
+    "base_rate_per_lap": 0.1088,
+    "used_2025_prior": false
+  },
+  "pass_time_cost_s": {
+    "attacker": 0.12,
+    "defender": 1.047,
+    "attacker_se": 0.067,
+    "defender_se": 0.086
+  },
+  "lap1": {
+    "by_grid_bin": {
+      "1-3": {
+        "mean": 0.473,
+        "sd": 1.773
+      },
+      "4-6": {
+        "mean": 0.37,
+        "sd": 3.4
+      },
+      "7-10": {
+        "mean": 0.635,
+        "sd": 3.431
+      },
+      "11-15": {
+        "mean": -0.819,
+        "sd": 2.631
+      },
+      "16-22": {
+        "mean": -1.092,
+        "sd": 2.546
+      }
+    },
+    "n_by_grid_bin": {
+      "1-3": 55,
+      "4-6": 54,
+      "7-10": 74,
+      "11-15": 94,
+      "16-22": 131
+    }
+  },
+  "min_follow_gap_s": 0.306,
+  "n_obs": {
+    "dirty_air_laps": 14891,
+    "dirty_air_laps_in_window": 3222,
+    "overtake_obs": 2335,
+    "overtake_passes": 254,
+    "lap1_drivers": 408,
+    "follow_gap_laps": 5388,
+    "races": 19
+  },
+  "validation": {
+    "loro_logloss_model": 0.2395,
+    "loro_logloss_const": 0.3378,
+    "loro_logloss_model_no_offsets": 0.2385,
+    "loro_logloss_with_2025_prior": 0.2384,
+    "loro_model_minus_const": "-0.0983 +/- 0.0175 (n=19 races)"
+  },
+  "notes": "Fitted 2026-11-16 by fit_race_interaction.py from end-of-lap on-road gaps (one sample per lap). dirty_air.time_loss_s is seconds per lap for a car whose gap to the car ahead at the end of lap is below window_s, vs clean air, from two-way fixed effects (stint, race-lap). overtake probability is per lap for a car directly behind within overtake.window_s: p = sigmoid(intercept + pace_delta_coef*pace_delta + tyre_age_delta_coef*tyre_age_delta + gap_coef*gap + track_offset[track]); pace_delta = defender pace - attacker pace in s/lap (positive = attacker faster, tyre/fuel-normalised car pace), tyre_age_delta = defender age - attacker age (positive = attacker fresher). Use track_offset = 0 for tracks not listed. pass_time_cost_s is the extra lap time on the lap the pass is recorded, beyond the dirty-air term, relative to clean air (may be negative). lap1 mean/sd are (end-of-lap-1 position - grid position); positive = lost places. min_follow_gap_s is the 5th percentile of sustained-follower gaps at timing-line resolution."
+}
