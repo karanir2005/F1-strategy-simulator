@@ -2,21 +2,21 @@
  "summary": {
   "n_pairs": 330,
   "n_races_with_events": 18,
-  "agreement": 0.7121212121212122,
+  "agreement": 0.706060606060606,
   "agreement_never_box_baseline": 0.7090909090909091,
   "base_rate_boxed": 0.2909090909090909,
-  "policy_fire_rate": 0.2515151515151515,
-  "precision_P_boxed_given_fires": 0.5060240963855421,
-  "recall_P_fires_given_boxed": 0.4375,
-  "n_fires": 83,
+  "policy_fire_rate": 0.27575757575757576,
+  "precision_P_boxed_given_fires": 0.4945054945054945,
+  "recall_P_fires_given_boxed": 0.46875,
+  "n_fires": 91,
   "n_boxed": 96,
-  "n_both": 42,
-  "compound_match_when_both": 0.21428571428571427,
-  "n_compound_pairs": 42,
-  "agreement_sc_events": 0.4777777777777778,
+  "n_both": 45,
+  "compound_match_when_both": 0.35555555555555557,
+  "n_compound_pairs": 45,
+  "agreement_sc_events": 0.5888888888888889,
   "n_pairs_sc": 90,
   "base_rate_boxed_sc": 0.5555555555555556,
-  "agreement_vsc_events": 0.8,
+  "agreement_vsc_events": 0.75,
   "n_pairs_vsc": 240,
   "base_rate_boxed_vsc": 0.19166666666666668
  },
@@ -30,18 +30,18 @@
     "vsc@50"
    ],
    "policy": {
-    "window_lo": 22,
+    "window_lo": 2,
     "window_hi": 55,
-    "min_age": 4,
+    "min_age": 8,
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 0.832,
-   "gain_pts_ci": 0.16811651508475972,
+   "gain_pts": 0.223,
+   "gain_pts_ci": 0.09162777702816499,
    "significant": true,
    "pairs": [
     {
-     "driver": "HAD",
+     "driver": "PIA",
      "lap": 2,
      "kind": "vsc",
      "age": 2.0,
@@ -51,7 +51,27 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "PIA",
+     "driver": "ANT",
+     "lap": 2,
+     "kind": "vsc",
+     "age": 2.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 2,
+     "kind": "vsc",
+     "age": 2.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "RUS",
      "lap": 2,
      "kind": "vsc",
      "age": 2.0,
@@ -71,7 +91,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "GAS",
+     "driver": "NOR",
      "lap": 2,
      "kind": "vsc",
      "age": 2.0,
@@ -91,60 +111,30 @@
      "policy_compound": "HARD"
     },
     {
+     "driver": "HAD",
+     "lap": 2,
+     "kind": "vsc",
+     "age": 2.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "GAS",
+     "lap": 2,
+     "kind": "vsc",
+     "age": 2.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
      "driver": "LAW",
      "lap": 2,
      "kind": "vsc",
      "age": 2.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 2,
-     "kind": "vsc",
-     "age": 2.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 2,
-     "kind": "vsc",
-     "age": 2.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "NOR",
-     "lap": 2,
-     "kind": "vsc",
-     "age": 2.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "RUS",
-     "lap": 2,
-     "kind": "vsc",
-     "age": 2.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAD",
-     "lap": 50,
-     "kind": "vsc",
-     "age": 25.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -161,40 +151,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
-     "lap": 50,
-     "kind": "vsc",
-     "age": 12.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "GAS",
+     "driver": "ANT",
      "lap": 50,
      "kind": "vsc",
      "age": 26.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 50,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 50,
-     "kind": "vsc",
-     "age": 25.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -211,10 +171,20 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
+     "driver": "RUS",
      "lap": 50,
      "kind": "vsc",
-     "age": 26.0,
+     "age": 28.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 50,
+     "kind": "vsc",
+     "age": 12.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -231,10 +201,40 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "LEC",
      "lap": 50,
      "kind": "vsc",
-     "age": 28.0,
+     "age": 11.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAD",
+     "lap": 50,
+     "kind": "vsc",
+     "age": 25.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "GAS",
+     "lap": 50,
+     "kind": "vsc",
+     "age": 26.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 50,
+     "kind": "vsc",
+     "age": 25.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -252,36 +252,16 @@
     "vsc@33"
    ],
    "policy": {
-    "window_lo": 26,
+    "window_lo": 20,
     "window_hi": 57,
     "min_age": 4,
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 0.547,
-   "gain_pts_ci": 0.1293027188372259,
+   "gain_pts": 0.189,
+   "gain_pts_ci": 0.07683639526967698,
    "significant": true,
    "pairs": [
-    {
-     "driver": "LIN",
-     "lap": 11,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "BEA",
-     "lap": 11,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
     {
      "driver": "BOR",
      "lap": 11,
@@ -290,66 +270,6 @@
      "fires": false,
      "boxed": false,
      "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAM",
-     "lap": 11,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "GAS",
-     "lap": 11,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 11,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 11,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 11,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "NOR",
-     "lap": 11,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
      "policy_compound": "HARD"
     },
     {
@@ -363,20 +283,80 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "LIN",
-     "lap": 18,
+     "driver": "ANT",
+     "lap": 11,
      "kind": "vsc",
-     "age": 18.0,
+     "age": 11.0,
      "fires": false,
      "boxed": true,
      "new_compound": "HARD",
      "policy_compound": "HARD"
     },
     {
-     "driver": "BEA",
-     "lap": 18,
+     "driver": "VER",
+     "lap": 11,
      "kind": "vsc",
-     "age": 18.0,
+     "age": 11.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 11,
+     "kind": "vsc",
+     "age": 11.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "BEA",
+     "lap": 11,
+     "kind": "vsc",
+     "age": 11.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
+     "lap": 11,
+     "kind": "vsc",
+     "age": 11.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LEC",
+     "lap": 11,
+     "kind": "vsc",
+     "age": 11.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LIN",
+     "lap": 11,
+     "kind": "vsc",
+     "age": 11.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "GAS",
+     "lap": 11,
+     "kind": "vsc",
+     "age": 11.0,
      "fires": false,
      "boxed": true,
      "new_compound": "HARD",
@@ -393,30 +373,20 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
+     "driver": "RUS",
      "lap": 18,
      "kind": "vsc",
-     "age": 18.0,
+     "age": 6.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
     },
     {
-     "driver": "GAS",
+     "driver": "ANT",
      "lap": 18,
      "kind": "vsc",
-     "age": 7.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 18,
-     "kind": "vsc",
-     "age": 18.0,
+     "age": 6.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -433,13 +403,23 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
+     "driver": "HAM",
      "lap": 18,
      "kind": "vsc",
-     "age": 6.0,
+     "age": 18.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "BEA",
+     "lap": 18,
+     "kind": "vsc",
+     "age": 18.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
      "policy_compound": "HARD"
     },
     {
@@ -453,10 +433,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "LEC",
      "lap": 18,
      "kind": "vsc",
-     "age": 6.0,
+     "age": 18.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -464,19 +444,19 @@
     },
     {
      "driver": "LIN",
-     "lap": 33,
+     "lap": 18,
      "kind": "vsc",
-     "age": 15.0,
+     "age": 18.0,
      "fires": false,
-     "boxed": false,
-     "new_compound": null,
+     "boxed": true,
+     "new_compound": "HARD",
      "policy_compound": "HARD"
     },
     {
-     "driver": "BEA",
-     "lap": 33,
+     "driver": "GAS",
+     "lap": 18,
      "kind": "vsc",
-     "age": 15.0,
+     "age": 7.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -490,6 +470,36 @@
      "fires": false,
      "boxed": true,
      "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "RUS",
+     "lap": 33,
+     "kind": "vsc",
+     "age": 21.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 33,
+     "kind": "vsc",
+     "age": 21.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 33,
+     "kind": "vsc",
+     "age": 15.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
      "policy_compound": "HARD"
     },
     {
@@ -503,40 +513,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "GAS",
-     "lap": 33,
-     "kind": "vsc",
-     "age": 22.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 33,
-     "kind": "vsc",
-     "age": 8.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
+     "driver": "BEA",
      "lap": 33,
      "kind": "vsc",
      "age": 15.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 33,
-     "kind": "vsc",
-     "age": 21.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -553,10 +533,30 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "LEC",
      "lap": 33,
      "kind": "vsc",
-     "age": 21.0,
+     "age": 8.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LIN",
+     "lap": 33,
+     "kind": "vsc",
+     "age": 15.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "GAS",
+     "lap": 33,
+     "kind": "vsc",
+     "age": 22.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -573,82 +573,32 @@
     "vsc@51"
    ],
    "policy": {
-    "window_lo": 2,
-    "window_hi": 70,
+    "window_lo": 18,
+    "window_hi": 50,
     "min_age": 4,
     "compound": "HARD",
-    "trigger": "sc"
+    "trigger": "sc_or_vsc"
    },
-   "gain_pts": 0.337,
-   "gain_pts_ci": 0.12534074370144624,
+   "gain_pts": 0.143,
+   "gain_pts_ci": 0.09462724680258557,
    "significant": true,
    "pairs": [
-    {
-     "driver": "HAD",
-     "lap": 24,
-     "kind": "vsc",
-     "age": 6.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LIN",
-     "lap": 24,
-     "kind": "vsc",
-     "age": 6.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
     {
      "driver": "PIA",
      "lap": 24,
      "kind": "vsc",
      "age": 5.0,
-     "fires": false,
+     "fires": true,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
-     "lap": 24,
-     "kind": "vsc",
-     "age": 12.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "SOFT",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 24,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
+     "driver": "RUS",
      "lap": 24,
      "kind": "vsc",
      "age": 5.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 24,
-     "kind": "vsc",
-     "age": 6.0,
-     "fires": false,
+     "fires": true,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
@@ -658,9 +608,39 @@
      "lap": 24,
      "kind": "vsc",
      "age": 24.0,
-     "fires": false,
+     "fires": true,
      "boxed": true,
      "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 24,
+     "kind": "vsc",
+     "age": 6.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 24,
+     "kind": "vsc",
+     "age": 12.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAD",
+     "lap": 24,
+     "kind": "vsc",
+     "age": 6.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
      "policy_compound": "HARD"
     },
     {
@@ -674,31 +654,31 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "LEC",
      "lap": 24,
      "kind": "vsc",
-     "age": 5.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAD",
-     "lap": 51,
-     "kind": "vsc",
      "age": 11.0,
-     "fires": false,
+     "fires": true,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
     },
     {
      "driver": "LIN",
-     "lap": 51,
+     "lap": 24,
+     "kind": "vsc",
+     "age": 6.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 24,
      "kind": "vsc",
      "age": 5.0,
-     "fires": false,
+     "fires": true,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
@@ -714,40 +694,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
+     "driver": "RUS",
      "lap": 51,
      "kind": "vsc",
-     "age": 9.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 51,
-     "kind": "vsc",
-     "age": 14.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 51,
-     "kind": "vsc",
-     "age": 6.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 51,
-     "kind": "vsc",
-     "age": 2.0,
+     "age": 8.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -764,6 +714,36 @@
      "policy_compound": "HARD"
     },
     {
+     "driver": "VER",
+     "lap": 51,
+     "kind": "vsc",
+     "age": 2.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 51,
+     "kind": "vsc",
+     "age": 9.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAD",
+     "lap": 51,
+     "kind": "vsc",
+     "age": 11.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
      "driver": "NOR",
      "lap": 51,
      "kind": "vsc",
@@ -774,10 +754,30 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "LEC",
      "lap": 51,
      "kind": "vsc",
-     "age": 8.0,
+     "age": 14.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LIN",
+     "lap": 51,
+     "kind": "vsc",
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 51,
+     "kind": "vsc",
+     "age": 6.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -795,52 +795,52 @@
    "policy": {
     "window_lo": 2,
     "window_hi": 50,
-    "min_age": 4,
+    "min_age": 12,
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 0.735,
-   "gain_pts_ci": 0.17210636548669847,
+   "gain_pts": 0.349,
+   "gain_pts_ci": 0.12301460511448009,
    "significant": true,
    "pairs": [
     {
-     "driver": "SAI",
+     "driver": "RUS",
      "lap": 30,
      "kind": "sc",
-     "age": 14.0,
+     "age": 32.0,
      "fires": true,
      "boxed": true,
      "new_compound": "SOFT",
      "policy_compound": "HARD"
     },
     {
-     "driver": "OCO",
+     "driver": "ANT",
      "lap": 30,
      "kind": "sc",
-     "age": 30.0,
+     "age": 32.0,
      "fires": true,
      "boxed": true,
-     "new_compound": "MEDIUM",
+     "new_compound": "SOFT",
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAD",
-     "lap": 30,
-     "kind": "sc",
-     "age": 30.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "MEDIUM",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LIN",
+     "driver": "VER",
      "lap": 30,
      "kind": "sc",
      "age": 30.0,
      "fires": true,
      "boxed": true,
      "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 30,
+     "kind": "sc",
+     "age": 30.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "MEDIUM",
      "policy_compound": "HARD"
     },
     {
@@ -854,7 +854,17 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
+     "driver": "SAI",
+     "lap": 30,
+     "kind": "sc",
+     "age": 14.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAD",
      "lap": 30,
      "kind": "sc",
      "age": 30.0,
@@ -874,7 +884,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "VER",
+     "driver": "LIN",
      "lap": 30,
      "kind": "sc",
      "age": 30.0,
@@ -884,23 +894,13 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
+     "driver": "OCO",
      "lap": 30,
      "kind": "sc",
-     "age": 32.0,
+     "age": 30.0,
      "fires": true,
      "boxed": true,
-     "new_compound": "SOFT",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "RUS",
-     "lap": 30,
-     "kind": "sc",
-     "age": 32.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "SOFT",
+     "new_compound": "MEDIUM",
      "policy_compound": "HARD"
     }
    ]
@@ -915,40 +915,20 @@
    ],
    "policy": {
     "window_lo": 2,
-    "window_hi": 65,
-    "min_age": 4,
+    "window_hi": 56,
+    "min_age": 12,
     "compound": "HARD",
-    "trigger": "sc"
+    "trigger": "sc_or_vsc"
    },
-   "gain_pts": 0.577,
-   "gain_pts_ci": 0.14991016046222416,
+   "gain_pts": 0.365,
+   "gain_pts_ci": 0.1317185811669129,
    "significant": true,
    "pairs": [
     {
-     "driver": "COL",
+     "driver": "RUS",
      "lap": 39,
      "kind": "vsc",
-     "age": 5.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAD",
-     "lap": 39,
-     "kind": "vsc",
-     "age": 7.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LIN",
-     "lap": 39,
-     "kind": "vsc",
-     "age": 2.0,
+     "age": 3.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -959,36 +939,6 @@
      "lap": 39,
      "kind": "vsc",
      "age": 3.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAM",
-     "lap": 39,
-     "kind": "vsc",
-     "age": 12.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "GAS",
-     "lap": 39,
-     "kind": "vsc",
-     "age": 25.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 39,
-     "kind": "vsc",
-     "age": 4.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1005,6 +955,26 @@
      "policy_compound": "HARD"
     },
     {
+     "driver": "COL",
+     "lap": 39,
+     "kind": "vsc",
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 39,
+     "kind": "vsc",
+     "age": 12.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
      "driver": "NOR",
      "lap": 39,
      "kind": "vsc",
@@ -1015,40 +985,50 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "HAD",
      "lap": 39,
      "kind": "vsc",
-     "age": 3.0,
+     "age": 7.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
     },
     {
-     "driver": "COL",
-     "lap": 60,
+     "driver": "GAS",
+     "lap": 39,
      "kind": "vsc",
-     "age": 26.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAD",
-     "lap": 60,
-     "kind": "vsc",
-     "age": 5.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
+     "age": 25.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
      "policy_compound": "HARD"
     },
     {
      "driver": "LIN",
+     "lap": 39,
+     "kind": "vsc",
+     "age": 2.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 39,
+     "kind": "vsc",
+     "age": 4.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "RUS",
      "lap": 60,
      "kind": "vsc",
-     "age": 23.0,
+     "age": 24.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1065,40 +1045,30 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
-     "lap": 60,
-     "kind": "vsc",
-     "age": 19.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "GAS",
-     "lap": 60,
-     "kind": "vsc",
-     "age": 20.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 60,
-     "kind": "vsc",
-     "age": 25.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "VER",
      "lap": 60,
      "kind": "vsc",
      "age": 20.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "COL",
+     "lap": 60,
+     "kind": "vsc",
+     "age": 26.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 60,
+     "kind": "vsc",
+     "age": 19.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1115,10 +1085,40 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "HAD",
      "lap": 60,
      "kind": "vsc",
-     "age": 24.0,
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "GAS",
+     "lap": 60,
+     "kind": "vsc",
+     "age": 20.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LIN",
+     "lap": 60,
+     "kind": "vsc",
+     "age": 23.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 60,
+     "kind": "vsc",
+     "age": 25.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1137,15 +1137,55 @@
    ],
    "policy": {
     "window_lo": 2,
-    "window_hi": 43,
+    "window_hi": 18,
     "min_age": 4,
     "compound": "HARD",
-    "trigger": "sc"
+    "trigger": "sc_or_vsc"
    },
-   "gain_pts": 0.374,
-   "gain_pts_ci": 0.12702742193843153,
+   "gain_pts": 0.198,
+   "gain_pts_ci": 0.09475405344492785,
    "significant": true,
    "pairs": [
+    {
+     "driver": "BOR",
+     "lap": 18,
+     "kind": "vsc",
+     "age": 18.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "PIA",
+     "lap": 18,
+     "kind": "vsc",
+     "age": 18.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 18,
+     "kind": "vsc",
+     "age": 18.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 18,
+     "kind": "vsc",
+     "age": 1.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
     {
      "driver": "COL",
      "lap": 18,
@@ -1157,11 +1197,41 @@
      "policy_compound": "HARD"
     },
     {
+     "driver": "HAM",
+     "lap": 18,
+     "kind": "vsc",
+     "age": 18.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
      "driver": "HAD",
      "lap": 18,
      "kind": "vsc",
      "age": 16.0,
-     "fires": false,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LEC",
+     "lap": 18,
+     "kind": "vsc",
+     "age": 18.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
+     "lap": 18,
+     "kind": "vsc",
+     "age": 18.0,
+     "fires": true,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
@@ -1177,40 +1247,30 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "PIA",
-     "lap": 18,
-     "kind": "vsc",
-     "age": 18.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "BOR",
-     "lap": 18,
+     "lap": 20,
      "kind": "vsc",
-     "age": 18.0,
+     "age": 20.0,
      "fires": false,
-     "boxed": false,
-     "new_compound": null,
+     "boxed": true,
+     "new_compound": "HARD",
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
-     "lap": 18,
+     "driver": "PIA",
+     "lap": 20,
      "kind": "vsc",
-     "age": 18.0,
+     "age": 20.0,
      "fires": false,
-     "boxed": false,
-     "new_compound": null,
+     "boxed": true,
+     "new_compound": "HARD",
      "policy_compound": "HARD"
     },
     {
-     "driver": "LEC",
-     "lap": 18,
+     "driver": "ANT",
+     "lap": 20,
      "kind": "vsc",
-     "age": 18.0,
+     "age": 5.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1218,29 +1278,9 @@
     },
     {
      "driver": "VER",
-     "lap": 18,
+     "lap": 20,
      "kind": "vsc",
-     "age": 1.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 18,
-     "kind": "vsc",
-     "age": 18.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "SOFT",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "NOR",
-     "lap": 18,
-     "kind": "vsc",
-     "age": 18.0,
+     "age": 3.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1257,50 +1297,20 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAD",
-     "lap": 20,
-     "kind": "vsc",
-     "age": 18.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LIN",
-     "lap": 20,
-     "kind": "vsc",
-     "age": 4.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "PIA",
-     "lap": 20,
-     "kind": "vsc",
-     "age": 20.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "BOR",
-     "lap": 20,
-     "kind": "vsc",
-     "age": 20.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "HAM",
      "lap": 20,
      "kind": "vsc",
      "age": 20.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAD",
+     "lap": 20,
+     "kind": "vsc",
+     "age": 18.0,
      "fires": false,
      "boxed": true,
      "new_compound": "HARD",
@@ -1317,30 +1327,20 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "VER",
-     "lap": 20,
-     "kind": "vsc",
-     "age": 3.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 20,
-     "kind": "vsc",
-     "age": 5.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "NOR",
      "lap": 20,
      "kind": "vsc",
      "age": 20.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LIN",
+     "lap": 20,
+     "kind": "vsc",
+     "age": 4.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1356,12 +1356,12 @@
    "policy": {
     "window_lo": 2,
     "window_hi": 70,
-    "min_age": 4,
+    "min_age": 8,
     "compound": "MEDIUM",
     "trigger": "sc"
    },
-   "gain_pts": 0.705,
-   "gain_pts_ci": 0.18227603384019667,
+   "gain_pts": 0.525,
+   "gain_pts_ci": 0.15181303170873245,
    "significant": true,
    "pairs": []
   },
@@ -1375,36 +1375,16 @@
     "sc@46"
    ],
    "policy": {
-    "window_lo": 29,
+    "window_lo": 2,
     "window_hi": 51,
-    "min_age": 4,
+    "min_age": 8,
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 0.361,
-   "gain_pts_ci": 0.12035181180607546,
+   "gain_pts": 0.186,
+   "gain_pts_ci": 0.06886935308389498,
    "significant": true,
    "pairs": [
-    {
-     "driver": "COL",
-     "lap": 21,
-     "kind": "vsc",
-     "age": 21.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAD",
-     "lap": 21,
-     "kind": "vsc",
-     "age": 2.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
     {
      "driver": "BOR",
      "lap": 21,
@@ -1413,6 +1393,26 @@
      "fires": false,
      "boxed": false,
      "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "RUS",
+     "lap": 21,
+     "kind": "vsc",
+     "age": 21.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "COL",
+     "lap": 21,
+     "kind": "vsc",
+     "age": 21.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
      "policy_compound": "HARD"
     },
     {
@@ -1426,7 +1426,17 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "GAS",
+     "driver": "HAD",
+     "lap": 21,
+     "kind": "vsc",
+     "age": 2.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
      "lap": 21,
      "kind": "vsc",
      "age": 21.0,
@@ -1437,6 +1447,16 @@
     },
     {
      "driver": "LEC",
+     "lap": 21,
+     "kind": "vsc",
+     "age": 21.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LIN",
      "lap": 21,
      "kind": "vsc",
      "age": 21.0,
@@ -1456,7 +1476,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "LIN",
+     "driver": "GAS",
      "lap": 21,
      "kind": "vsc",
      "age": 21.0,
@@ -1466,10 +1486,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "NOR",
-     "lap": 21,
+     "driver": "BOR",
+     "lap": 37,
      "kind": "vsc",
-     "age": 21.0,
+     "age": 11.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1477,9 +1497,9 @@
     },
     {
      "driver": "RUS",
-     "lap": 21,
+     "lap": 37,
      "kind": "vsc",
-     "age": 21.0,
+     "age": 9.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1496,26 +1516,6 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAD",
-     "lap": 37,
-     "kind": "vsc",
-     "age": 18.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "MEDIUM",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "BOR",
-     "lap": 37,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "HAM",
      "lap": 37,
      "kind": "vsc",
@@ -1526,13 +1526,23 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "GAS",
+     "driver": "HAD",
      "lap": 37,
      "kind": "vsc",
-     "age": 14.0,
+     "age": 18.0,
      "fires": false,
-     "boxed": false,
-     "new_compound": null,
+     "boxed": true,
+     "new_compound": "MEDIUM",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
+     "lap": 37,
+     "kind": "vsc",
+     "age": 9.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "MEDIUM",
      "policy_compound": "HARD"
     },
     {
@@ -1540,16 +1550,6 @@
      "lap": 37,
      "kind": "vsc",
      "age": 12.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 37,
-     "kind": "vsc",
-     "age": 9.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1566,17 +1566,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "NOR",
-     "lap": 37,
-     "kind": "vsc",
-     "age": 9.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "MEDIUM",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "RUS",
+     "driver": "LAW",
      "lap": 37,
      "kind": "vsc",
      "age": 9.0,
@@ -1586,23 +1576,13 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "COL",
-     "lap": 46,
-     "kind": "sc",
-     "age": 24.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "SOFT",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAD",
-     "lap": 46,
-     "kind": "sc",
-     "age": 8.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "SOFT",
+     "driver": "GAS",
+     "lap": 37,
+     "kind": "vsc",
+     "age": 14.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
      "policy_compound": "HARD"
     },
     {
@@ -1610,6 +1590,26 @@
      "lap": 46,
      "kind": "sc",
      "age": 20.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "RUS",
+     "lap": 46,
+     "kind": "sc",
+     "age": 18.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "COL",
+     "lap": 46,
+     "kind": "sc",
+     "age": 24.0,
      "fires": true,
      "boxed": true,
      "new_compound": "SOFT",
@@ -1626,40 +1626,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "GAS",
+     "driver": "HAD",
      "lap": 46,
      "kind": "sc",
-     "age": 23.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 46,
-     "kind": "sc",
-     "age": 21.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 46,
-     "kind": "sc",
-     "age": 18.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "SOFT",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LIN",
-     "lap": 46,
-     "kind": "sc",
-     "age": 19.0,
+     "age": 8.0,
      "fires": true,
      "boxed": true,
      "new_compound": "SOFT",
@@ -1676,10 +1646,40 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "LEC",
+     "lap": 46,
+     "kind": "sc",
+     "age": 21.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LIN",
+     "lap": 46,
+     "kind": "sc",
+     "age": 19.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
      "lap": 46,
      "kind": "sc",
      "age": 18.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "GAS",
+     "lap": 46,
+     "kind": "sc",
+     "age": 23.0,
      "fires": true,
      "boxed": false,
      "new_compound": null,
@@ -1698,15 +1698,35 @@
    ],
    "policy": {
     "window_lo": 2,
-    "window_hi": 67,
-    "min_age": 8,
+    "window_hi": 61,
+    "min_age": 4,
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 0.747,
-   "gain_pts_ci": 0.1537712893716998,
+   "gain_pts": 0.279,
+   "gain_pts_ci": 0.10492912720563408,
    "significant": true,
    "pairs": [
+    {
+     "driver": "ANT",
+     "lap": 29,
+     "kind": "vsc",
+     "age": 33.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 29,
+     "kind": "vsc",
+     "age": 34.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
     {
      "driver": "COL",
      "lap": 29,
@@ -1715,6 +1735,26 @@
      "fires": false,
      "boxed": true,
      "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 29,
+     "kind": "vsc",
+     "age": 32.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "BEA",
+     "lap": 29,
+     "kind": "vsc",
+     "age": 34.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "MEDIUM",
      "policy_compound": "HARD"
     },
     {
@@ -1738,20 +1778,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "BEA",
+     "driver": "LEC",
      "lap": 29,
      "kind": "vsc",
-     "age": 34.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "MEDIUM",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAM",
-     "lap": 29,
-     "kind": "vsc",
-     "age": 32.0,
+     "age": 33.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1768,16 +1798,6 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "LEC",
-     "lap": 29,
-     "kind": "vsc",
-     "age": 33.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "LAW",
      "lap": 29,
      "kind": "vsc",
@@ -1788,20 +1808,20 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "VER",
-     "lap": 29,
+     "driver": "ANT",
+     "lap": 44,
      "kind": "vsc",
-     "age": 34.0,
+     "age": 13.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
-     "lap": 29,
+     "driver": "VER",
+     "lap": 44,
      "kind": "vsc",
-     "age": 33.0,
+     "age": 13.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1809,6 +1829,26 @@
     },
     {
      "driver": "COL",
+     "lap": 44,
+     "kind": "vsc",
+     "age": 14.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 44,
+     "kind": "vsc",
+     "age": 13.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "BEA",
      "lap": 44,
      "kind": "vsc",
      "age": 14.0,
@@ -1838,17 +1878,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "BEA",
-     "lap": 44,
-     "kind": "vsc",
-     "age": 14.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAM",
+     "driver": "LEC",
      "lap": 44,
      "kind": "vsc",
      "age": 13.0,
@@ -1868,16 +1898,6 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "LEC",
-     "lap": 44,
-     "kind": "vsc",
-     "age": 13.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "LAW",
      "lap": 44,
      "kind": "vsc",
@@ -1888,20 +1908,20 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "VER",
-     "lap": 44,
+     "driver": "ANT",
+     "lap": 51,
      "kind": "vsc",
-     "age": 13.0,
+     "age": 20.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
-     "lap": 44,
+     "driver": "VER",
+     "lap": 51,
      "kind": "vsc",
-     "age": 13.0,
+     "age": 20.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -1909,6 +1929,26 @@
     },
     {
      "driver": "COL",
+     "lap": 51,
+     "kind": "vsc",
+     "age": 21.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 51,
+     "kind": "vsc",
+     "age": 20.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "BEA",
      "lap": 51,
      "kind": "vsc",
      "age": 21.0,
@@ -1938,17 +1978,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "BEA",
-     "lap": 51,
-     "kind": "vsc",
-     "age": 21.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAM",
+     "driver": "LEC",
      "lap": 51,
      "kind": "vsc",
      "age": 20.0,
@@ -1968,40 +1998,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "LEC",
-     "lap": 51,
-     "kind": "vsc",
-     "age": 20.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "LAW",
      "lap": 51,
      "kind": "vsc",
      "age": 21.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 51,
-     "kind": "vsc",
-     "age": 20.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 51,
-     "kind": "vsc",
-     "age": 20.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -2019,14 +2019,34 @@
    "policy": {
     "window_lo": 2,
     "window_hi": 55,
-    "min_age": 4,
+    "min_age": 8,
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 0.728,
-   "gain_pts_ci": 0.15814815428674567,
+   "gain_pts": 0.419,
+   "gain_pts_ci": 0.12592243534065772,
    "significant": true,
    "pairs": [
+    {
+     "driver": "RUS",
+     "lap": 10,
+     "kind": "sc",
+     "age": 10.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 10,
+     "kind": "sc",
+     "age": 10.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
     {
      "driver": "COL",
      "lap": 10,
@@ -2035,6 +2055,26 @@
      "fires": true,
      "boxed": false,
      "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 10,
+     "kind": "sc",
+     "age": 10.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "BEA",
+     "lap": 10,
+     "kind": "sc",
+     "age": 10.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
      "policy_compound": "HARD"
     },
     {
@@ -2058,17 +2098,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "BEA",
-     "lap": 10,
-     "kind": "sc",
-     "age": 10.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAM",
+     "driver": "LEC",
      "lap": 10,
      "kind": "sc",
      "age": 10.0,
@@ -2088,16 +2118,6 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "LEC",
-     "lap": 10,
-     "kind": "sc",
-     "age": 10.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "LAW",
      "lap": 10,
      "kind": "sc",
@@ -2105,26 +2125,6 @@
      "fires": false,
      "boxed": false,
      "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 10,
-     "kind": "sc",
-     "age": 10.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "RUS",
-     "lap": 10,
-     "kind": "sc",
-     "age": 10.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
      "policy_compound": "HARD"
     }
    ]
@@ -2138,15 +2138,75 @@
    ],
    "policy": {
     "window_lo": 2,
-    "window_hi": 60,
+    "window_hi": 63,
     "min_age": 12,
     "compound": "HARD",
     "trigger": "sc_or_vsc"
    },
-   "gain_pts": 0.381,
-   "gain_pts_ci": 0.1635020416386903,
+   "gain_pts": 0.229,
+   "gain_pts_ci": 0.12964083538993648,
    "significant": true,
    "pairs": [
+    {
+     "driver": "RUS",
+     "lap": 55,
+     "kind": "vsc",
+     "age": 1.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 55,
+     "kind": "vsc",
+     "age": 2.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 55,
+     "kind": "vsc",
+     "age": 17.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 55,
+     "kind": "vsc",
+     "age": 25.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
+     "lap": 55,
+     "kind": "vsc",
+     "age": 16.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LEC",
+     "lap": 55,
+     "kind": "vsc",
+     "age": 19.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
     {
      "driver": "HAD",
      "lap": 55,
@@ -2168,36 +2228,6 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
-     "lap": 55,
-     "kind": "vsc",
-     "age": 25.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "SOFT",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HUL",
-     "lap": 55,
-     "kind": "vsc",
-     "age": 19.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 55,
-     "kind": "vsc",
-     "age": 19.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "SOFT",
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "LAW",
      "lap": 55,
      "kind": "vsc",
@@ -2208,41 +2238,11 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "VER",
+     "driver": "HUL",
      "lap": 55,
      "kind": "vsc",
-     "age": 17.0,
+     "age": 19.0,
      "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 55,
-     "kind": "vsc",
-     "age": 2.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "NOR",
-     "lap": 55,
-     "kind": "vsc",
-     "age": 16.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "SOFT",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "RUS",
-     "lap": 55,
-     "kind": "vsc",
-     "age": 1.0,
-     "fires": false,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
@@ -2264,11 +2264,51 @@
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 1.035,
-   "gain_pts_ci": 0.2424312747212351,
+   "gain_pts": 0.713,
+   "gain_pts_ci": 0.18130993945105087,
    "significant": true,
    "pairs": [
     {
+     "driver": "RUS",
+     "lap": 3,
+     "kind": "sc",
+     "age": 3.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 3,
+     "kind": "sc",
+     "age": 3.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "MEDIUM",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 3,
+     "kind": "sc",
+     "age": 3.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "MEDIUM",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "PIA",
+     "lap": 3,
+     "kind": "sc",
+     "age": 3.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
      "driver": "COL",
      "lap": 3,
      "kind": "sc",
@@ -2289,57 +2329,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "LIN",
-     "lap": 3,
-     "kind": "sc",
-     "age": 3.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "PIA",
-     "lap": 3,
-     "kind": "sc",
-     "age": 3.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "HAM",
-     "lap": 3,
-     "kind": "sc",
-     "age": 3.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "MEDIUM",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "GAS",
-     "lap": 3,
-     "kind": "sc",
-     "age": 3.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 3,
-     "kind": "sc",
-     "age": 3.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "MEDIUM",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
      "lap": 3,
      "kind": "sc",
      "age": 3.0,
@@ -2359,13 +2349,63 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "GAS",
      "lap": 3,
      "kind": "sc",
      "age": 3.0,
      "fires": false,
      "boxed": true,
      "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LIN",
+     "lap": 3,
+     "kind": "sc",
+     "age": 3.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "RUS",
+     "lap": 27,
+     "kind": "vsc",
+     "age": 24.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 27,
+     "kind": "vsc",
+     "age": 24.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "MEDIUM",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 27,
+     "kind": "vsc",
+     "age": 24.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "PIA",
+     "lap": 27,
+     "kind": "vsc",
+     "age": 24.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
      "policy_compound": "HARD"
     },
     {
@@ -2389,27 +2429,17 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "LIN",
-     "lap": 27,
-     "kind": "vsc",
-     "age": 24.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "PIA",
-     "lap": 27,
-     "kind": "vsc",
-     "age": 24.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "HAM",
+     "lap": 27,
+     "kind": "vsc",
+     "age": 24.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
      "lap": 27,
      "kind": "vsc",
      "age": 24.0,
@@ -2429,37 +2459,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "VER",
-     "lap": 27,
-     "kind": "vsc",
-     "age": 24.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 27,
-     "kind": "vsc",
-     "age": 24.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "MEDIUM",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "NOR",
-     "lap": 27,
-     "kind": "vsc",
-     "age": 24.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "RUS",
+     "driver": "LIN",
      "lap": 27,
      "kind": "vsc",
      "age": 24.0,
@@ -2479,25 +2479,15 @@
    ],
    "policy": {
     "window_lo": 2,
-    "window_hi": 52,
-    "min_age": 4,
-    "compound": "MEDIUM",
-    "trigger": "sc"
+    "window_hi": 37,
+    "min_age": 16,
+    "compound": "HARD",
+    "trigger": "sc_or_vsc"
    },
-   "gain_pts": 0.341,
-   "gain_pts_ci": 0.10307223290292879,
+   "gain_pts": 0.187,
+   "gain_pts_ci": 0.11016508083160757,
    "significant": true,
    "pairs": [
-    {
-     "driver": "OCO",
-     "lap": 21,
-     "kind": "sc",
-     "age": 2.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "MEDIUM"
-    },
     {
      "driver": "PIA",
      "lap": 21,
@@ -2506,57 +2496,7 @@
      "fires": false,
      "boxed": false,
      "new_compound": null,
-     "policy_compound": "MEDIUM"
-    },
-    {
-     "driver": "HAM",
-     "lap": 21,
-     "kind": "sc",
-     "age": 21.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "MEDIUM"
-    },
-    {
-     "driver": "GAS",
-     "lap": 21,
-     "kind": "sc",
-     "age": 21.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "MEDIUM"
-    },
-    {
-     "driver": "LEC",
-     "lap": 21,
-     "kind": "sc",
-     "age": 4.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "MEDIUM"
-    },
-    {
-     "driver": "LAW",
-     "lap": 21,
-     "kind": "sc",
-     "age": 21.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "MEDIUM"
-    },
-    {
-     "driver": "VER",
-     "lap": 21,
-     "kind": "sc",
-     "age": 21.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "MEDIUM"
+     "policy_compound": "HARD"
     },
     {
      "driver": "ANT",
@@ -2566,17 +2506,7 @@
      "fires": true,
      "boxed": true,
      "new_compound": "HARD",
-     "policy_compound": "MEDIUM"
-    },
-    {
-     "driver": "NOR",
-     "lap": 21,
-     "kind": "sc",
-     "age": 5.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "MEDIUM"
+     "policy_compound": "HARD"
     },
     {
      "driver": "RUS",
@@ -2586,7 +2516,77 @@
      "fires": true,
      "boxed": true,
      "new_compound": "HARD",
-     "policy_compound": "MEDIUM"
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 21,
+     "kind": "sc",
+     "age": 21.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 21,
+     "kind": "sc",
+     "age": 21.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
+     "lap": 21,
+     "kind": "sc",
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LEC",
+     "lap": 21,
+     "kind": "sc",
+     "age": 4.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "GAS",
+     "lap": 21,
+     "kind": "sc",
+     "age": 21.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "OCO",
+     "lap": 21,
+     "kind": "sc",
+     "age": 2.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 21,
+     "kind": "sc",
+     "age": 21.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
     }
    ]
   },
@@ -2600,14 +2600,44 @@
    "policy": {
     "window_lo": 2,
     "window_hi": 56,
-    "min_age": 4,
+    "min_age": 12,
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 0.658,
-   "gain_pts_ci": 0.1612188084616736,
+   "gain_pts": 0.374,
+   "gain_pts_ci": 0.12268475988772487,
    "significant": true,
    "pairs": [
+    {
+     "driver": "RUS",
+     "lap": 14,
+     "kind": "vsc",
+     "age": 14.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "MEDIUM",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 14,
+     "kind": "vsc",
+     "age": 14.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 14,
+     "kind": "vsc",
+     "age": 17.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
     {
      "driver": "COL",
      "lap": 14,
@@ -2616,6 +2646,36 @@
      "fires": false,
      "boxed": true,
      "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "PIA",
+     "lap": 14,
+     "kind": "vsc",
+     "age": 14.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
+     "lap": 14,
+     "kind": "vsc",
+     "age": 14.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LEC",
+     "lap": 14,
+     "kind": "vsc",
+     "age": 14.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
      "policy_compound": "HARD"
     },
     {
@@ -2629,7 +2689,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "PIA",
+     "driver": "LAW",
      "lap": 14,
      "kind": "vsc",
      "age": 14.0,
@@ -2646,66 +2706,6 @@
      "fires": false,
      "boxed": true,
      "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 14,
-     "kind": "vsc",
-     "age": 14.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 14,
-     "kind": "vsc",
-     "age": 14.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 14,
-     "kind": "vsc",
-     "age": 17.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 14,
-     "kind": "vsc",
-     "age": 14.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "NOR",
-     "lap": 14,
-     "kind": "vsc",
-     "age": 14.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "RUS",
-     "lap": 14,
-     "kind": "vsc",
-     "age": 14.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "MEDIUM",
      "policy_compound": "HARD"
     }
    ]
@@ -2726,92 +2726,12 @@
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 0.949,
-   "gain_pts_ci": 0.1926397749201376,
+   "gain_pts": 0.341,
+   "gain_pts_ci": 0.12114860583223852,
    "significant": true,
    "pairs": [
     {
-     "driver": "HIR",
-     "lap": 7,
-     "kind": "vsc",
-     "age": 6.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAD",
-     "lap": 7,
-     "kind": "vsc",
-     "age": 9.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "MEDIUM",
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "BOR",
-     "lap": 7,
-     "kind": "vsc",
-     "age": 7.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAM",
-     "lap": 7,
-     "kind": "vsc",
-     "age": 10.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 7,
-     "kind": "vsc",
-     "age": 7.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 7,
-     "kind": "vsc",
-     "age": 9.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 7,
-     "kind": "vsc",
-     "age": 7.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ANT",
-     "lap": 7,
-     "kind": "vsc",
-     "age": 7.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "NOR",
      "lap": 7,
      "kind": "vsc",
      "age": 7.0,
@@ -2831,21 +2751,81 @@
      "policy_compound": "HARD"
     },
     {
+     "driver": "ANT",
+     "lap": 7,
+     "kind": "vsc",
+     "age": 7.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "VER",
+     "lap": 7,
+     "kind": "vsc",
+     "age": 7.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
      "driver": "HIR",
-     "lap": 43,
-     "kind": "sc",
-     "age": 42.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "SOFT",
+     "lap": 7,
+     "kind": "vsc",
+     "age": 6.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 7,
+     "kind": "vsc",
+     "age": 10.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
+     "lap": 7,
+     "kind": "vsc",
+     "age": 7.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LEC",
+     "lap": 7,
+     "kind": "vsc",
+     "age": 7.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
      "policy_compound": "HARD"
     },
     {
      "driver": "HAD",
-     "lap": 43,
-     "kind": "sc",
-     "age": 5.0,
-     "fires": true,
+     "lap": 7,
+     "kind": "vsc",
+     "age": 9.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "MEDIUM",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 7,
+     "kind": "vsc",
+     "age": 9.0,
+     "fires": false,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
@@ -2861,33 +2841,23 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
+     "driver": "RUS",
      "lap": 43,
      "kind": "sc",
-     "age": 15.0,
+     "age": 10.0,
      "fires": true,
      "boxed": true,
      "new_compound": "MEDIUM",
      "policy_compound": "HARD"
     },
     {
-     "driver": "LEC",
+     "driver": "ANT",
      "lap": 43,
      "kind": "sc",
-     "age": 16.0,
+     "age": 43.0,
      "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 43,
-     "kind": "sc",
-     "age": 1.0,
-     "fires": false,
      "boxed": true,
-     "new_compound": "SOFT",
+     "new_compound": "MEDIUM",
      "policy_compound": "HARD"
     },
     {
@@ -2901,10 +2871,20 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
+     "driver": "HIR",
      "lap": 43,
      "kind": "sc",
-     "age": 43.0,
+     "age": 42.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 43,
+     "kind": "sc",
+     "age": 15.0,
      "fires": true,
      "boxed": true,
      "new_compound": "MEDIUM",
@@ -2921,33 +2901,33 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "LEC",
      "lap": 43,
      "kind": "sc",
-     "age": 10.0,
+     "age": 16.0,
      "fires": true,
-     "boxed": true,
-     "new_compound": "MEDIUM",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HIR",
-     "lap": 59,
-     "kind": "sc",
-     "age": 18.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "SOFT",
+     "boxed": false,
+     "new_compound": null,
      "policy_compound": "HARD"
     },
     {
      "driver": "HAD",
-     "lap": 59,
+     "lap": 43,
      "kind": "sc",
-     "age": 17.0,
+     "age": 5.0,
      "fires": true,
      "boxed": false,
      "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 43,
+     "kind": "sc",
+     "age": 1.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "SOFT",
      "policy_compound": "HARD"
     },
     {
@@ -2961,27 +2941,17 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
+     "driver": "RUS",
      "lap": 59,
      "kind": "sc",
-     "age": 17.0,
+     "age": 18.0,
      "fires": true,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
     },
     {
-     "driver": "LEC",
-     "lap": 59,
-     "kind": "sc",
-     "age": 17.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
+     "driver": "ANT",
      "lap": 59,
      "kind": "sc",
      "age": 18.0,
@@ -3001,10 +2971,20 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
+     "driver": "HIR",
      "lap": 59,
      "kind": "sc",
      "age": 18.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 59,
+     "kind": "sc",
+     "age": 17.0,
      "fires": true,
      "boxed": false,
      "new_compound": null,
@@ -3021,7 +3001,27 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "RUS",
+     "driver": "LEC",
+     "lap": 59,
+     "kind": "sc",
+     "age": 17.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAD",
+     "lap": 59,
+     "kind": "sc",
+     "age": 17.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
      "lap": 59,
      "kind": "sc",
      "age": 18.0,
@@ -3040,115 +3040,115 @@
     "sc@5"
    ],
    "policy": {
-    "window_lo": 2,
+    "window_lo": 40,
     "window_hi": 56,
     "min_age": 4,
-    "compound": "HARD",
+    "compound": "SOFT",
     "trigger": "sc"
    },
-   "gain_pts": 0.408,
-   "gain_pts_ci": 0.12382993236592577,
-   "significant": true,
+   "gain_pts": 0.016,
+   "gain_pts_ci": 0.0386140958562906,
+   "significant": false,
    "pairs": [
-    {
-     "driver": "COL",
-     "lap": 5,
-     "kind": "sc",
-     "age": 5.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "ALB",
-     "lap": 5,
-     "kind": "sc",
-     "age": 5.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "SAI",
-     "lap": 5,
-     "kind": "sc",
-     "age": 5.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
     {
      "driver": "PIA",
      "lap": 5,
      "kind": "sc",
      "age": 5.0,
-     "fires": true,
+     "fires": false,
      "boxed": false,
      "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAM",
-     "lap": 5,
-     "kind": "sc",
-     "age": 5.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 5,
-     "kind": "sc",
-     "age": 5.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 5,
-     "kind": "sc",
-     "age": 5.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
+     "policy_compound": "SOFT"
     },
     {
      "driver": "ANT",
      "lap": 5,
      "kind": "sc",
      "age": 5.0,
-     "fires": true,
+     "fires": false,
      "boxed": false,
      "new_compound": null,
-     "policy_compound": "HARD"
+     "policy_compound": "SOFT"
     },
     {
-     "driver": "NOR",
+     "driver": "VER",
      "lap": 5,
      "kind": "sc",
      "age": 5.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
+     "fires": false,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "SOFT"
     },
     {
      "driver": "RUS",
      "lap": 5,
      "kind": "sc",
      "age": 5.0,
-     "fires": true,
+     "fires": false,
      "boxed": false,
      "new_compound": null,
-     "policy_compound": "HARD"
+     "policy_compound": "SOFT"
+    },
+    {
+     "driver": "COL",
+     "lap": 5,
+     "kind": "sc",
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "SOFT"
+    },
+    {
+     "driver": "HAM",
+     "lap": 5,
+     "kind": "sc",
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "SOFT"
+    },
+    {
+     "driver": "SAI",
+     "lap": 5,
+     "kind": "sc",
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "SOFT"
+    },
+    {
+     "driver": "NOR",
+     "lap": 5,
+     "kind": "sc",
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "SOFT"
+    },
+    {
+     "driver": "LEC",
+     "lap": 5,
+     "kind": "sc",
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "SOFT"
+    },
+    {
+     "driver": "ALB",
+     "lap": 5,
+     "kind": "sc",
+     "age": 5.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "SOFT"
     }
    ]
   },
@@ -3166,30 +3166,10 @@
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 0.893,
-   "gain_pts_ci": 0.19538642679924664,
+   "gain_pts": 0.472,
+   "gain_pts_ci": 0.1374536434209355,
    "significant": true,
    "pairs": [
-    {
-     "driver": "OCO",
-     "lap": 58,
-     "kind": "sc",
-     "age": 49.0,
-     "fires": true,
-     "boxed": true,
-     "new_compound": "HARD",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAD",
-     "lap": 58,
-     "kind": "sc",
-     "age": 26.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
     {
      "driver": "PIA",
      "lap": 58,
@@ -3198,6 +3178,16 @@
      "fires": true,
      "boxed": true,
      "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 58,
+     "kind": "sc",
+     "age": 21.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
      "policy_compound": "HARD"
     },
     {
@@ -3221,20 +3211,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "GAS",
+     "driver": "HAD",
      "lap": 58,
      "kind": "sc",
-     "age": 13.0,
-     "fires": true,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 58,
-     "kind": "sc",
-     "age": 18.0,
+     "age": 26.0,
      "fires": true,
      "boxed": false,
      "new_compound": null,
@@ -3251,10 +3231,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
+     "driver": "GAS",
      "lap": 58,
      "kind": "sc",
-     "age": 21.0,
+     "age": 13.0,
      "fires": true,
      "boxed": false,
      "new_compound": null,
@@ -3269,6 +3249,26 @@
      "boxed": true,
      "new_compound": "SOFT",
      "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 58,
+     "kind": "sc",
+     "age": 18.0,
+     "fires": true,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "OCO",
+     "lap": 58,
+     "kind": "sc",
+     "age": 49.0,
+     "fires": true,
+     "boxed": true,
+     "new_compound": "HARD",
+     "policy_compound": "HARD"
     }
    ]
   },
@@ -3282,15 +3282,35 @@
    ],
    "policy": {
     "window_lo": 2,
-    "window_hi": 71,
-    "min_age": 4,
+    "window_hi": 65,
+    "min_age": 16,
     "compound": "HARD",
-    "trigger": "sc"
+    "trigger": "sc_or_vsc"
    },
-   "gain_pts": 0.567,
-   "gain_pts_ci": 0.15051738817074173,
+   "gain_pts": 0.434,
+   "gain_pts_ci": 0.142027595305378,
    "significant": true,
    "pairs": [
+    {
+     "driver": "RUS",
+     "lap": 53,
+     "kind": "vsc",
+     "age": 13.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 53,
+     "kind": "vsc",
+     "age": 13.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
     {
      "driver": "PIA",
      "lap": 53,
@@ -3306,7 +3326,7 @@
      "lap": 53,
      "kind": "vsc",
      "age": 19.0,
-     "fires": false,
+     "fires": true,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
@@ -3316,26 +3336,16 @@
      "lap": 53,
      "kind": "vsc",
      "age": 28.0,
-     "fires": false,
+     "fires": true,
      "boxed": false,
      "new_compound": null,
      "policy_compound": "HARD"
     },
     {
-     "driver": "HUL",
+     "driver": "NOR",
      "lap": 53,
      "kind": "vsc",
-     "age": 5.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "GAS",
-     "lap": 53,
-     "kind": "vsc",
-     "age": 9.0,
+     "age": 6.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -3352,6 +3362,16 @@
      "policy_compound": "HARD"
     },
     {
+     "driver": "GAS",
+     "lap": 53,
+     "kind": "vsc",
+     "age": 9.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
      "driver": "LAW",
      "lap": 53,
      "kind": "vsc",
@@ -3362,20 +3382,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
+     "driver": "HUL",
      "lap": 53,
      "kind": "vsc",
-     "age": 13.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "NOR",
-     "lap": 53,
-     "kind": "vsc",
-     "age": 6.0,
+     "age": 5.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -3383,9 +3393,19 @@
     },
     {
      "driver": "RUS",
-     "lap": 53,
+     "lap": 68,
      "kind": "vsc",
-     "age": 13.0,
+     "age": 28.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "ANT",
+     "lap": 68,
+     "kind": "vsc",
+     "age": 15.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -3422,20 +3442,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HUL",
+     "driver": "NOR",
      "lap": 68,
      "kind": "vsc",
-     "age": 20.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "GAS",
-     "lap": 68,
-     "kind": "vsc",
-     "age": 24.0,
+     "age": 21.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -3452,6 +3462,16 @@
      "policy_compound": "HARD"
     },
     {
+     "driver": "GAS",
+     "lap": 68,
+     "kind": "vsc",
+     "age": 24.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
      "driver": "LAW",
      "lap": 68,
      "kind": "vsc",
@@ -3462,30 +3482,10 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "ANT",
+     "driver": "HUL",
      "lap": 68,
      "kind": "vsc",
-     "age": 15.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "NOR",
-     "lap": 68,
-     "kind": "vsc",
-     "age": 21.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "RUS",
-     "lap": 68,
-     "kind": "vsc",
-     "age": 28.0,
+     "age": 20.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -3508,72 +3508,12 @@
     "compound": "HARD",
     "trigger": "sc"
    },
-   "gain_pts": 1.099,
-   "gain_pts_ci": 0.21192386038622696,
+   "gain_pts": 0.499,
+   "gain_pts_ci": 0.12491922899286634,
    "significant": true,
    "pairs": [
     {
-     "driver": "HAD",
-     "lap": 8,
-     "kind": "vsc",
-     "age": 7.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "PIA",
-     "lap": 8,
-     "kind": "vsc",
-     "age": 8.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HAM",
-     "lap": 8,
-     "kind": "vsc",
-     "age": 8.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HUL",
-     "lap": 8,
-     "kind": "vsc",
-     "age": 8.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 8,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 8,
-     "kind": "vsc",
-     "age": 11.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
      "lap": 8,
      "kind": "vsc",
      "age": 8.0,
@@ -3593,7 +3533,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "NOR",
+     "driver": "VER",
      "lap": 8,
      "kind": "vsc",
      "age": 8.0,
@@ -3613,10 +3553,60 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAD",
-     "lap": 38,
+     "driver": "HAM",
+     "lap": 8,
      "kind": "vsc",
-     "age": 37.0,
+     "age": 8.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
+     "lap": 8,
+     "kind": "vsc",
+     "age": 8.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LEC",
+     "lap": 8,
+     "kind": "vsc",
+     "age": 11.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAD",
+     "lap": 8,
+     "kind": "vsc",
+     "age": 7.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 8,
+     "kind": "vsc",
+     "age": 11.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HUL",
+     "lap": 8,
+     "kind": "vsc",
+     "age": 8.0,
      "fires": false,
      "boxed": false,
      "new_compound": null,
@@ -3633,56 +3623,6 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "HAM",
-     "lap": 38,
-     "kind": "vsc",
-     "age": 23.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "HUL",
-     "lap": 38,
-     "kind": "vsc",
-     "age": 8.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LEC",
-     "lap": 38,
-     "kind": "vsc",
-     "age": 14.0,
-     "fires": false,
-     "boxed": true,
-     "new_compound": "SOFT",
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "LAW",
-     "lap": 38,
-     "kind": "vsc",
-     "age": 7.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
-     "driver": "VER",
-     "lap": 38,
-     "kind": "vsc",
-     "age": 6.0,
-     "fires": false,
-     "boxed": false,
-     "new_compound": null,
-     "policy_compound": "HARD"
-    },
-    {
      "driver": "ANT",
      "lap": 38,
      "kind": "vsc",
@@ -3693,7 +3633,7 @@
      "policy_compound": "HARD"
     },
     {
-     "driver": "NOR",
+     "driver": "VER",
      "lap": 38,
      "kind": "vsc",
      "age": 6.0,
@@ -3710,6 +3650,66 @@
      "fires": false,
      "boxed": true,
      "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAM",
+     "lap": 38,
+     "kind": "vsc",
+     "age": 23.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "NOR",
+     "lap": 38,
+     "kind": "vsc",
+     "age": 6.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LEC",
+     "lap": 38,
+     "kind": "vsc",
+     "age": 14.0,
+     "fires": false,
+     "boxed": true,
+     "new_compound": "SOFT",
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HAD",
+     "lap": 38,
+     "kind": "vsc",
+     "age": 37.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "LAW",
+     "lap": 38,
+     "kind": "vsc",
+     "age": 7.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
+     "policy_compound": "HARD"
+    },
+    {
+     "driver": "HUL",
+     "lap": 38,
+     "kind": "vsc",
+     "age": 8.0,
+     "fires": false,
+     "boxed": false,
+     "new_compound": null,
      "policy_compound": "HARD"
     }
    ]

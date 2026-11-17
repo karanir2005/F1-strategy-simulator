@@ -420,8 +420,10 @@ def search_project_notes(query: str, k: int = 5) -> dict:
 
 
 CAVEATS_GRID = [
-    "Full-grid simulation: pace comes from qualifying and earlier-race ratings with judgement-placeholder scaling; "
-    "it is validated only as a finishing-order ranker (see team/handoffs/T-034-backend-engineer.md), not for exact gaps.",
+    "Full-grid simulation: pace comes from qualifying and earlier-race ratings; its scaling, noise, pass rate and SC "
+    "bunching are fitted on 19 dry 2026 races (T-060; SC bunching and the strategy mix on thin evidence). It ranks "
+    "finishers about as well as the grid order / Plackett-Luce predictor, no better (see team/handoffs/T-060-data-scientist.md), "
+    "and its win probabilities are more diffuse; not for exact gaps.",
     "Strategies are fixed in advance per car (default: optimizer top plans with per-car variation); no reactive stops, "
     "no lapping/blue flags, red flags, weather or penalties.",
     "Overtake, dirty-air and lap-1 parameters are 2026 fits (T-053); the finishing-position distribution is a model "
@@ -481,6 +483,8 @@ CAVEATS_POLICY = [
     "where all cars follow the rule). Safety-car timing is the fitted model (26 SC, 30 VSC events), not a forecast.",
     "Tyre wear and fuel are not reduced under SC/VSC and the tyre-cliff penalties are placeholders, so the value of a "
     "fresh set late in a stint is model-dependent.",
+    "Against real 2026 SC/VSC laps the rule agrees with top-10 drivers' actual stops 71% of the time, no better than a "
+    "never-box policy (71%), and matches the compound in about a third of cases: a model finding, not what teams do.",
 ]
 
 

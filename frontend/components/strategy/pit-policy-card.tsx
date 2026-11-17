@@ -128,7 +128,9 @@ export function PitPolicyCard({
             </Badge>
             <span>
               {res.n_sims.toLocaleString("en-US")} runs, interval is 95%, rule chosen on a different random draw. The tyre
-              cliff values are still rough, so a late fresh set may be over-valued.
+              cliff values are still rough, so a late fresh set may be over-valued. Checked against real 2026 safety-car laps, the
+              rule agrees with what top-10 drivers did about as often as a rule that never boxes (71% each), so read it as a
+              model finding, not as what teams do.
             </span>
           </p>
         </div>

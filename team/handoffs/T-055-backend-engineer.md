@@ -62,3 +62,24 @@ One hero car with one rule, others fixed (plus the all-follow check); new tyre g
 - Is "box under every full SC after lap ~20" what teams do? The data say about 56% of top-10 cars box under a full SC (90 pairs), so the rule is directionally plausible but the compound it recommends is not.
 - The search is on one hero; gain varies a lot by car (ALB ~0). The route does not average over the field.
 - The card runs on demand because a request takes 10-20 s; a cached/precomputed per-track table would be needed to show it automatically.
+
+## T-061 re-run (on the T-060 calibrated grid sim; the numbers above are the pre-calibration ones)
+Same code and settings (600 screen sims, 3,000 fresh-seed runs, 1,500 for the field check). New defaults: pass rate 22/race instead of 60, pace spread about 2x wider, looser SC bunching, pit-stop jitter 12 laps.
+
+| Track, hero (grid) | Best rule found | Gain pts | Gain places | Fires | Gain when fired | If field follows |
+|---|---|---|---|---|---|---|
+| Austin, ANT (P1) | SC laps 2-50, age >= 4, Hards | +0.22 (±0.05) | +0.08 (±0.02) | 23% | +1.0 | +0.24 (±0.08) |
+| Austin, ALB (P17) | SC/VSC laps 2-55, age >= 4, Hards | -0.00 (±0.01), NOT significant | -0.04 (±0.02) | 48% | 0.0 | -0.02 |
+| Monaco, ANT | SC laps 27-77, age >= 8, Hards | +0.46 (±0.08) | +0.14 (±0.03) | 33% | +1.4 | +0.59 (±0.13) |
+| Japan, ANT | SC laps 2-45, age >= 8, Hards | +0.17 (±0.05) | +0.05 (±0.02) | 17% | +1.0 | +0.14 (±0.08) |
+| Belgium, ANT | SC/VSC laps 2-31, age >= 12, Hards | +0.26 (±0.07) | +0.09 (±0.02) | 12% | +2.2 | +0.26 (±0.09) |
+
+Reading: every gain for the pole car is roughly halved or more (Austin 0.74 -> 0.22, Japan 0.46 -> 0.17, Monaco 0.87 -> 0.46), the back-marker gain is now zero (the search's rule is not significant, so the API returns the "no reliable rule" wording). The shape is unchanged (late-ish SC, fresh Hards) but the thresholds moved (age 8 or 12 more often) and Belgium's best window is now early. With wider pace spread the car has fewer position fights to win with a fresh set, and more random pit diversity in the field means fewer cars are left to be passed. Still model-dependent on the placeholder tyre cliff.
+
+Validation vs real 2026 SC/VSC laps (`validate_pit_policy.py`, same 330 pairs, 18 races; `data/scorecard/pit_policy_validation.json` overwritten):
+- Agreement 70.6% vs 70.9% for never-box (was 71.2% vs 70.9%): still equal to the silent baseline, within noise. Fires 27.6% of pairs (91), boxed 29.1% (96), both 45. Precision 49.5%, recall 46.9%.
+- Full SC (90 pairs): agreement 58.9% (was 47.8%) vs 55.6% always-box/base rate; VSC (240): 75.0% vs 80.8% never-box (the policy now sometimes fires on VSC).
+- Compound match when both boxed: 35.6% of 45 (was 21%), still low: the sim recommends Hards, teams mostly did not.
+Conclusion unchanged: the rule is a model finding about the engine's tyre values, with no demonstrated agreement with real team behaviour beyond the never-box rate. The pit-policy card, API `assumptions` and the MCP caveats now say this explicitly.
+
+T-061 text changes: `grid_sim.py` ASSUMPTIONS and `mcp_server.CAVEATS_GRID` no longer say "judgement placeholders" (they cite the T-060 fits, the thin-evidence constants and the finishing-order result); I did not add `calibration_source` to the `/simulate/grid` response (contract unchanged).

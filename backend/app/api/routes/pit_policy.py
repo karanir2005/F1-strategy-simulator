@@ -97,6 +97,9 @@ ASSUMPTIONS = [
     "is on its last stint, where it is an extra stop. New stints longer than the compound's observed cap are not allowed.",
     "Tyre wear and fuel burn are not reduced under SC/VSC, the new tyre goes on at the start of the SC lap, and the tyre "
     "cliff penalties are placeholders: how much a fresh set is worth late in a stint rests on those.",
+    "Real-world check (2026, 330 top-10 driver x SC/VSC events): the rule agrees with what drivers actually did 71% of the "
+    "time, the same as a policy that never boxes (71%); it agrees on compound in only about a third of matching stops. "
+    "Treat it as a model finding, not as what teams do (validate_pit_policy.py, T-061).",
     "Rule chosen on one random seed and scored on a different one (the interval does not include the search's selection).",
 ]
 

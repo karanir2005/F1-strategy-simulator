@@ -97,8 +97,13 @@ class GridSimResponse(BaseModel):
 
 ASSUMPTIONS = [
     "Pace comes from qualifying (Q1 gaps, shrunk to the team mean) blended with earlier-race ratings; the scale "
-    "from quali gap to race pace and the shrinkage weights are judgement placeholders, not fitted.",
-    "Strategies are fixed in advance per car (default: optimizer top plans with +-2 lap jitter); no reactive stops.",
+    "from quali gap to race pace, the shrinkage and blend weights, the pace noise, SC bunching, pass rate and strategy "
+    "mix are fitted on 19 dry 2026 races (T-060, data/sim_params/grid_sim_calibration.json; SC bunching and the "
+    "strategy mix rest on thin evidence). The pace spread is a 2026 fact and did not carry over to 2025.",
+    "Strategies are fixed in advance per car (default: optimizer top plans with per-car stop jitter); no reactive stops "
+    "here (see POST /strategy/policy for the safety-car rule).",
+    "Finishing-order skill is about that of the grid order and the Plackett-Luce predictor (T-060); the sim's win "
+    "probabilities are more diffuse than the predictor's. Use it for strategy what-ifs, not as a winner forecast.",
     "No lapping/blue flags, red flags, weather, pit-lane queues, penalties or DNF-triggered safety cars.",
     "Dirty air, overtake probability, pass costs and the lap-1 shuffle are the T-053 fits (2026, 19 races).",
     "Validation vs the grid order and the Plackett-Luce predictor: see team/handoffs/T-034-backend-engineer.md.",

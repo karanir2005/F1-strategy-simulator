@@ -65,8 +65,8 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-057 | data-scientist | done (roughly calibrated; walk-forward recalibration hurt held-out, not shipped) | T-052 | Probability calibration check of p_win/p_podium (reliability, Brier, walk-forward temperature fix, off by default) |
 | T-058 | backend-engineer | done (verified live with qwen2.5:7b: Las Vegas M23/H27 via optimize_strategy, ~110 s on CPU) | T-054 | In-app strategy chat on /strategy via local Ollama model + same tools as MCP (no API key; local only, disabled when Ollama absent) |
 | T-060 | data-scientist | done (passes 22.0 vs 23.2 real; Spearman 0.707 vs PL 0.702, within noise; keep as what-if engine, not /predict) | T-034 | Fit grid-sim placeholders (pace scale, shrinkage, pace noise, SC bunching, lap-1 spacing, plan mix) and calibrate pass count to real |
-| T-061 | backend-engineer | in progress | T-055, T-060 | Re-run T-055 policy gains on calibrated sim; update stale placeholder strings (grid_sim.py, mcp_server.py) |
-| T-059 | qa-engineer | queued (after T-034, T-055, T-056, T-058) | all above | Milestone QA: pytest, lint/tsc, browser pass of /predict + /strategy (incl. T-025 scope), grid-sim and calibration claims checked |
+| T-061 | backend-engineer | done (pole-car gains roughly halved, e.g. Austin +0.22 pts; real-SC agreement 70.6% vs never-box 70.9%; card says so) | T-055, T-060 | Re-run T-055 policy gains on calibrated sim; update stale placeholder strings (grid_sim.py, mcp_server.py) |
+| T-059 | qa-engineer | in progress | all above | Milestone QA: pytest, lint/tsc, browser pass of /predict + /strategy (incl. T-025 scope), grid-sim and calibration claims checked |
 
 ### T-001: FastF1 schema + 2026 rules brief
 Confirm against the local `cache/` / a real 2026 session, not just the docs:
