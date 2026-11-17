@@ -61,9 +61,9 @@ Owned by the orchestrator. Agents read this file and do not edit it. Status: `to
 | T-053 | data-scientist | done (19 dry 2026 races; overtake LORO log-loss 0.240 vs 0.338 const) | - | Fit race-interaction params (dirty air, overtake logistic, pass cost, lap-1 shuffle) into data/sim_params/race_interaction.json for T-034 |
 | T-054 | backend-engineer | done (simulate_grid tool pending T-034) | T-051 | MCP server (stdio): predict/strategy/results/laps tools + BM25 search over team notes (RAG without an API key) |
 | T-055 | backend-engineer | in progress | T-034 | Safety-car-reactive pit policy (DP), evaluated on the grid sim |
-| T-056 | backend-engineer | repo side done; waiting on user Render+Vercel login | T-031 | Deploy prep (revives T-032): Render backend + Vercel frontend configs, env/CORS, README steps; user does logins + final deploy |
+| T-056 | backend-engineer | repo side done + verified on clean Python 3.12 tree (boots, ~200 MB peak on 10k grid sim); waiting on user Render+Vercel login | T-031 | Deploy prep (revives T-032): Render backend + Vercel frontend configs, env/CORS, README steps; user does logins + final deploy |
 | T-057 | data-scientist | done (roughly calibrated; walk-forward recalibration hurt held-out, not shipped) | T-052 | Probability calibration check of p_win/p_podium (reliability, Brier, walk-forward temperature fix, off by default) |
-| T-058 | backend-engineer | done (mocked tests; not yet tried with a real Ollama model) | T-054 | In-app strategy chat on /strategy via local Ollama model + same tools as MCP (no API key; local only, disabled when Ollama absent) |
+| T-058 | backend-engineer | done (verified live with qwen2.5:7b: Las Vegas M23/H27 via optimize_strategy, ~110 s on CPU) | T-054 | In-app strategy chat on /strategy via local Ollama model + same tools as MCP (no API key; local only, disabled when Ollama absent) |
 | T-060 | data-scientist | in progress | T-034 | Fit grid-sim placeholders (pace scale, shrinkage, pace noise, SC bunching, lap-1 spacing, plan mix) and calibrate pass count to real |
 | T-059 | qa-engineer | queued (after T-034, T-055, T-056, T-058) | all above | Milestone QA: pytest, lint/tsc, browser pass of /predict + /strategy (incl. T-025 scope), grid-sim and calibration claims checked |
 
