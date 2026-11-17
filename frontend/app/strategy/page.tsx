@@ -29,6 +29,7 @@ import {
 import { CompareResults } from "@/components/strategy/compare-results";
 import { ManualCompare } from "@/components/strategy/manual-compare";
 import { OptimizerResults } from "@/components/strategy/optimizer-results";
+import { PitPolicyCard } from "@/components/strategy/pit-policy-card";
 import { RaceSettings } from "@/components/strategy/race-settings";
 import { StrategyChat } from "@/components/strategy/strategy-chat";
 import { ErrorBlock, Sk } from "@/components/viz/states";
@@ -357,6 +358,15 @@ export default function StrategyPage() {
           onCompare={copyPlan}
           compareFull={strategies.length >= MAX_STRATEGIES}
           contrast={optRuns[`${optKey}|${!optResult.params_used.safety_cars}`] ?? null}
+        />
+      )}
+
+      {optResult && optResult.strategies[0] && (
+        <PitPolicyCard
+          key={`${optKey}|${optResult.strategies[0].stints.map((s) => `${s.compound}${s.laps}`).join("")}`}
+          trackId={optResult.track.track_id}
+          plan={optResult.strategies[0].stints.map((s) => ({ compound: s.compound as Compound, laps: s.laps }))}
+          totalLaps={optResult.params_used.total_laps}
         />
       )}
 

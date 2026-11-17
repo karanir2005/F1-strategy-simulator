@@ -72,6 +72,7 @@ from app.core.safety_cars import (
 from app.core.tire_model import compound_pace_offset, fuel_effect, predict_delta
 
 INTERACTION_PARAMS_PATH = Path(__file__).resolve().parents[3] / "data" / "sim_params" / "race_interaction.json"
+CALIBRATION_PATH = Path(__file__).resolve().parents[3] / "data" / "sim_params" / "grid_sim_calibration.json"
 
 # FIA race points P1..P10 (same table as predictor.FIA_POINTS; duplicated so this module does not import
 # scipy/pandas through the predictor).
@@ -118,13 +119,99 @@ PLACEHOLDER_INTERACTION = {
     "min_follow_gap_s": 0.6,
 }
 
-# PLACEHOLDERS for things not in the T-053 schema (need a fit; see handoff):
-SC_GAP_S = 0.9  # PLACEHOLDER: spacing between cars once bunched behind the SC
-SC_GAP_CLOSURE = 0.5  # PLACEHOLDER: share of the extra gap removed per SC lap
-LAP1_SPACING_S = 0.7  # PLACEHOLDER: spacing between consecutive cars at the end of lap 1
-# PLACEHOLDER race-day pace uncertainty on top of the quali-based pace estimate (team-wide + driver-only), s/lap
+# FALLBACK values for things not in the T-053 schema (the T-034 PLACEHOLDERs). T-060 fits them from real data into
+# data/sim_params/grid_sim_calibration.json (calibrate_grid_sim.py); load_grid_calibration() returns the fitted value and
+# falls back to these per key (GridCalibration.placeholder_keys lists which). Same fallback pattern as the interaction file.
+SC_GAP_S = 0.9  # PLACEHOLDER fallback: spacing between cars once bunched behind the SC
+SC_GAP_CLOSURE = 0.5  # PLACEHOLDER fallback: share of the extra gap removed per SC lap
+LAP1_SPACING_S = 0.7  # PLACEHOLDER fallback: spacing between consecutive cars at the end of lap 1
+# PLACEHOLDER fallback race-day pace uncertainty on top of the quali-based pace estimate (team-wide + driver-only), s/lap
 TEAM_PACE_SD_S = 0.20
 DRIVER_PACE_SD_S = 0.15
+# T-060 overtake calibration, identity = the T-053 logistic as fitted (pace delta scale 1, no intercept shift)
+OV_PACE_SCALE = 1.0
+OV_INTERCEPT_SHIFT = 0.0
+# Fallbacks for grid_inputs' pace / strategy-mix constants (see grid_inputs.py for what they mean)
+RACE_PACE_SCALE = 0.6
+DRIVER_SHRINK = 0.5
+QUALI_WEIGHT = 0.5
+PLAN_WEIGHTS = (0.6, 0.25, 0.15)
+PIT_JITTER_LAPS = 2
+
+
+@dataclass
+class GridCalibration:
+    """Calibration constants of the full-grid sim (T-060). Defaults = the T-034 placeholders."""
+
+    team_pace_sd_s: float = TEAM_PACE_SD_S
+    driver_pace_sd_s: float = DRIVER_PACE_SD_S
+    sc_gap_s: float = SC_GAP_S
+    sc_gap_closure: float = SC_GAP_CLOSURE
+    lap1_spacing_s: float = LAP1_SPACING_S
+    ov_pace_scale: float = OV_PACE_SCALE  # multiplies the pace delta inside the overtake logit
+    ov_intercept_shift: float = OV_INTERCEPT_SHIFT  # added to the overtake intercept
+    # Gap a car is held at behind the car in front after a FAILED pass attempt (s). None = interaction.min_follow_gap_s,
+    # the T-034 behaviour. T-060: min_follow_gap_s is the 5th percentile of follower gaps (0.31 s) but a car that
+    # failed to pass sits at a median 0.87 s (sd 0.53) the next lap, so holding it at 0.31 s kept trains inside the
+    # attempt window and over-passed; the fitted value is the real median. A single value reset the gap every lap and
+    # stopped a clearly faster car closing in, so the held gap is drawn: lognormal(median held_gap_s, sigma
+    # held_gap_sigma), from the unused part of the pass-attempt uniform (no extra random numbers, CRN shapes unchanged).
+    held_gap_s: Optional[float] = None
+    held_gap_sigma: float = 0.0
+    race_pace_scale: float = RACE_PACE_SCALE  # grid_inputs
+    driver_shrink: float = DRIVER_SHRINK
+    quali_weight: float = QUALI_WEIGHT
+    plan_weights: tuple = PLAN_WEIGHTS
+    pit_jitter_laps: int = PIT_JITTER_LAPS
+    source: str = "placeholder"
+    placeholder_keys: List[str] = field(default_factory=list)
+
+
+def load_grid_calibration(path: Optional[Path] = None) -> GridCalibration:
+    """
+    Fitted calibration (data/sim_params/grid_sim_calibration.json) with a per-key fallback to the module constants
+    above. Never raises for a missing or malformed file: it falls back entirely and says so in `source`.
+    JSON layout: {"version", "pace": {race_pace_scale, driver_shrink, quali_weight, team_pace_sd_s, driver_pace_sd_s},
+    "sc": {gap_s, closure}, "lap1_spacing_s", "strategy_mix": {plan_weights, pit_jitter_laps},
+    "overtake_calibration": {pace_delta_scale, intercept_shift}}.
+    """
+    path = Path(path) if path is not None else CALIBRATION_PATH
+    cal = GridCalibration()
+    d: dict = {}
+    if path.exists():
+        try:
+            d = json.loads(path.read_text(encoding="utf-8"))
+            cal.source = f"{path.name} v{d.get('version')}"
+        except (OSError, ValueError):
+            d, cal.source = {}, "placeholder (unreadable file)"
+    else:
+        cal.source = "placeholder (no file)"
+    missing: List[str] = []
+
+    def get(section, key, attr, cast=float):
+        sec = d.get(section) if section else d
+        v = sec.get(key) if isinstance(sec, dict) else None
+        if v is None or (isinstance(v, float) and v != v):
+            missing.append(f"{section}.{key}" if section else key)
+            return
+        setattr(cal, attr, cast(v))
+
+    get("pace", "race_pace_scale", "race_pace_scale")
+    get("pace", "driver_shrink", "driver_shrink")
+    get("pace", "quali_weight", "quali_weight")
+    get("pace", "team_pace_sd_s", "team_pace_sd_s")
+    get("pace", "driver_pace_sd_s", "driver_pace_sd_s")
+    get("sc", "gap_s", "sc_gap_s")
+    get("sc", "closure", "sc_gap_closure")
+    get(None, "lap1_spacing_s", "lap1_spacing_s")
+    get("strategy_mix", "plan_weights", "plan_weights", lambda v: tuple(float(x) for x in v))
+    get("strategy_mix", "pit_jitter_laps", "pit_jitter_laps", int)
+    get("overtake_calibration", "pace_delta_scale", "ov_pace_scale")
+    get("overtake_calibration", "intercept_shift", "ov_intercept_shift")
+    get("overtake_calibration", "held_gap_s", "held_gap_s")
+    get("overtake_calibration", "held_gap_sigma", "held_gap_sigma")
+    cal.placeholder_keys = sorted(set(missing)) if d else ["all"]
+    return cal
 
 
 @dataclass
@@ -329,6 +416,8 @@ def simulate_grid(
     pace_noise: bool = True,
     dnfs: bool = True,
     interactions: bool = True,
+    plan_hook=None,
+    calibration: Optional[GridCalibration] = None,
 ) -> GridSimResult:
     """
     Simulate the whole grid n_sims times. See the module docstring for the model.
@@ -341,8 +430,15 @@ def simulate_grid(
         of any random ones; without `safety_cars` the forced SC is the only one.
     interactions=False turns off dirty air, overtakes and the lap-1 shuffle (cars then simply run their
         own clock; used by tests and as a no-interaction reference).
+    plan_hook (T-055, optional): callable(sc, vsc, (tyre, age, pit)) -> {car index: (tyre, age, pit)} with
+        per-run (N, L) tables for those cars, called once after the SC/VSC timeline is drawn. It lets a
+        reactive pit policy (pit_policy.py) change a car's stops per run depending on the timeline; cars not
+        in the returned dict keep their fixed plan. None = fixed plans, bit-identical to before.
+    calibration (T-060): pace noise, SC bunching, lap-1 spacing and the overtake pace-scale / intercept-shift;
+        default load_grid_calibration() = data/sim_params/grid_sim_calibration.json with placeholder fallbacks.
     """
     ip = interaction if interaction is not None else load_interaction_params()
+    cal = calibration if calibration is not None else load_grid_calibration()
     n, d, nl = int(n_sims), len(cars), int(total_laps)
     if d < 2:
         raise ValueError("need at least 2 cars")
@@ -370,7 +466,7 @@ def simulate_grid(
 
     pace_run = np.broadcast_to(pace, (n, d)).copy()
     if pace_noise:
-        pace_run += TEAM_PACE_SD_S * z_team[:, team_idx] + DRIVER_PACE_SD_S * z_drv
+        pace_run += cal.team_pace_sd_s * z_team[:, team_idx] + cal.driver_pace_sd_s * z_drv
 
     p_dnf = np.array([c.p_dnf for c in cars])
     if dnfs:
@@ -396,6 +492,8 @@ def simulate_grid(
 
         sc_params = load_params()  # only its multiples/ratios are used, and only if sc/vsc masks are non-empty
 
+    overrides = plan_hook(sc, vsc, (tyre, age, pit)) if plan_hook is not None else {}
+
     # ---- lap 1: grid order perturbed by the fitted position change
     mean1, sd1 = ip.lap1_mean_sd(grid)
     if interactions:
@@ -407,10 +505,13 @@ def simulate_grid(
         rank1 = np.broadcast_to(np.argsort(np.argsort(grid)), (n, d))
     lap1_base = base_laptime_s + tyre[:, 0] + fuel[0]  # (D,)
     t_lead = float(lap1_base.min())
-    T = t_lead + rank1 * LAP1_SPACING_S
+    T = t_lead + rank1 * cal.lap1_spacing_s
     T = T + np.where(dnf_lap <= 0, DNF_BIG_S, 0.0)
 
     mf = ip.min_follow_gap_s
+    held_gap = cal.held_gap_s if cal.held_gap_s is not None else mf
+    held_gap_sigma = cal.held_gap_sigma if cal.held_gap_s is not None else 0.0
+    from scipy.special import ndtri as _ndtri  # inverse normal cdf, only needed for the held-gap draw
     window = ip.dirty_window_s
     offset = ip.ov_track_offset.get(track_id, 0.0) if track_id else 0.0
     n_pass = np.zeros(n, dtype=np.int32)
@@ -433,9 +534,17 @@ def simulate_grid(
         def g(a):  # car-order (N, D) -> position order
             return np.take_along_axis(a, order, axis=1)
 
-        tyre_l = tyre[:, lap][order]  # (N, D)
-        age_l = age[:, lap][order]
-        pit_l = pit[:, lap][order]
+        if overrides:  # reactive cars: per-run tables for this lap (T-055)
+            tyre_c = np.broadcast_to(tyre[:, lap], (n, d)).copy()
+            age_c = np.broadcast_to(age[:, lap], (n, d)).copy()
+            pit_c = np.broadcast_to(pit[:, lap], (n, d)).copy()
+            for j, (ty_j, ag_j, pi_j) in overrides.items():
+                tyre_c[:, j], age_c[:, j], pit_c[:, j] = ty_j[:, lap], ag_j[:, lap], pi_j[:, lap]
+            tyre_l, age_l, pit_l = g(tyre_c), g(age_c), g(pit_c)
+        else:
+            tyre_l = tyre[:, lap][order]  # (N, D)
+            age_l = age[:, lap][order]
+            pit_l = pit[:, lap][order]
         pace_s = g(pace_run)
         dead_s = g(dead)
         noise_s = g(noise)
@@ -482,15 +591,22 @@ def simulate_grid(
                     adelta = age_l[cidx, t_c] - age_l[cidx, p]
                     gp = np.minimum(Ts[cidx, p] - Ts[cidx, t_c], 30.0)  # start-of-lap gap to the car in front (the line's tail)
                     logit = (
-                        ip.ov_intercept + ip.ov_pace_coef * pdelta + ip.ov_tyre_age_coef * adelta
-                        + ip.ov_gap_coef * gp + offset
+                        ip.ov_intercept + cal.ov_intercept_shift + ip.ov_pace_coef * cal.ov_pace_scale * pdelta
+                        + ip.ov_tyre_age_coef * adelta + ip.ov_gap_coef * gp + offset
                     )
                     win = uov_s[cidx, p] < _sigmoid(logit)
                     m1c, m2c = m1[cidx], m2[cidx]
                     # success: attacker ends the lap ahead of the defender (never slower than its own free lap
                     # allows, never through the car before the defender); failure: held at min_follow_gap
                     r_succ = np.maximum(np.minimum(fe[cidx] + ip.pass_cost_attacker_s, m1c - 0.5 * mf), m2c + mf)
-                    r_fail = np.maximum(fe[cidx], m1c + mf)
+                    if held_gap_sigma > 0.0:
+                        # given a failed attempt (u >= p), (u - p) / (1 - p) is U(0, 1): the quantile of the held-gap law
+                        pc = _sigmoid(logit)
+                        u_f = np.clip((uov_s[cidx, p] - pc) / (1.0 - pc), 1e-6, 1.0 - 1e-6)
+                        hg = np.maximum(mf, held_gap * np.exp(held_gap_sigma * _ndtri(u_f)))
+                    else:
+                        hg = held_gap
+                    r_fail = np.maximum(fe[cidx], m1c + hg)
                     R[cidx, p] = np.where(win, r_succ, r_fail)
                     wi = cidx[win]
                     if wi.size:
@@ -517,7 +633,7 @@ def simulate_grid(
                 prev_start = Tss[:, 0].copy()
                 for p in range(1, d):
                     gap_start = Tss[:, p] - prev_start
-                    new_gap = np.maximum(SC_GAP_S, gap_start * (1.0 - SC_GAP_CLOSURE) + (Fs[:, p] - prev_F))
+                    new_gap = np.maximum(cal.sc_gap_s, gap_start * (1.0 - cal.sc_gap_closure) + (Fs[:, p] - prev_F))
                     cur = np.where(deads[:, p], Fend[scr][:, p], prev_end + new_gap)
                     out[:, p] = cur
                     ok = ~deads[:, p]

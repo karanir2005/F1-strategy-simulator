@@ -10,6 +10,7 @@ from app.core.race_grid_sim import (
     load_interaction_params,
     rank_by_points,
     simulate_grid,
+    GridCalibration,
     LAP1_SPACING_S,
 )
 from app.core.race_simulator import Stint, simulate_race
@@ -55,18 +56,22 @@ def test_no_overtakes_when_gap_is_huge(toy_tire_model, monkeypatch):
     faster: it can close at most 0.5 s a lap."""
     import app.core.race_grid_sim as rgs
 
-    monkeypatch.setattr(rgs, "LAP1_SPACING_S", 100.0)
+    cal = GridCalibration(lap1_spacing_s=100.0)
     cars = [CarSpec("SLO", "A", 1, 0.5, hard(20)), CarSpec("FAS", "B", 2, 0.0, hard(20)), CarSpec("MID", "C", 3, 0.2, hard(20))]
-    r = simulate_grid(cars, BASE, toy_tire_model, 20, n_sims=100, **kw())
+    r = simulate_grid(cars, BASE, toy_tire_model, 20, n_sims=100, **kw(calibration=cal))
     assert r.n_overtakes.sum() == 0
     assert (r.positions == np.array([1, 2, 3])).all() or r.n_overtakes.sum() == 0
 
 
 def test_faster_car_eventually_passes_slower(toy_tire_model):
     cars = [CarSpec("SLO", "A", 1, 0.5, hard(50)), CarSpec("FAS", "B", 2, 0.0, hard(50))]
-    r = simulate_grid(cars, BASE, toy_tire_model, 50, n_sims=400, **kw())
+    # mechanics with the T-034 placeholder calibration (T-060: the fitted calibration makes passing harder, as it is in
+    # the real data, so a 0.5 s/lap faster car passes in ~75-80% of 50-lap runs instead of >95%)
+    r = simulate_grid(cars, BASE, toy_tire_model, 50, n_sims=400, **kw(calibration=GridCalibration()))
     fast_ahead = (r.positions[:, 1] < r.positions[:, 0]).mean()
     assert fast_ahead > 0.95
+    r = simulate_grid(cars, BASE, toy_tire_model, 50, n_sims=400, **kw())  # fitted calibration
+    assert (r.positions[:, 1] < r.positions[:, 0]).mean() > 0.6
     assert r.n_overtakes.mean() > 0.3  # some runs need no pass: the lap-1 shuffle already put the fast car ahead
 
 
@@ -82,7 +87,7 @@ def test_pit_rejoin_at_real_gap(toy_tire_model):
     pit = 60.0
     stopper = [Stint("HARD", 10), Stint("HARD", 40)]
     cars = [CarSpec("STP", "A", 1, 0.0, stopper), CarSpec("RUN", "B", 2, 0.0, hard(50))]
-    r = simulate_grid(cars, BASE, toy_tire_model, 50, n_sims=3, interactions=False, pit_loss_s=pit, **kw())
+    r = simulate_grid(cars, BASE, toy_tire_model, 50, n_sims=3, interactions=False, pit_loss_s=pit, **kw(calibration=GridCalibration()))
     tot = {c.code: simulate_race(c.strategy, BASE, toy_tire_model, pit_loss_seconds=pit).lap_times for c in cars}
     expect = (sum(tot["STP"][1:]) - sum(tot["RUN"][1:])) - LAP1_SPACING_S
     got = r.finish_time_s[0, 0] - r.finish_time_s[0, 1]

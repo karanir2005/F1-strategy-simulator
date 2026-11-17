@@ -1,19 +1,27 @@
 """
-Leave-one-race-out validation of the full-grid simulation (T-034).
+Leave-one-race-out validation of the full-grid simulation (T-034, rebuilt without the known leaks in T-060).
 
-For each 2026 round: build the tyre model WITHOUT that race's laps, take the race's real starting grid and
-qualifying (Q1 times), pace/DNF inputs from EARLIER rounds only (grid_inputs.py), run the grid sim, rank the
-drivers by expected points (the predictor's rule) and compare with the real finishing order:
-  - Spearman correlation (predicted rank vs official finishing position, all drivers incl. retirements)
-  - top-3 hit rate (share of the real podium inside the predicted top 3) and winner hit
-against (a) the grid order and (b) the Plackett-Luce predictor's walk-forward predictions
-(data/jolpica/predictions/walk_forward_2026_drivers.csv, grid mode, already walk-forward).
+For each 2026 round R (2-20) everything the sim uses is rebuilt WITHOUT race R:
+  - tyre model: refit without R's laps (as in T-034);
+  - track entry (base lap, pit loss, stint caps): calibrate_grid_sim.rebuild_track (base lap from R's best Q1 time via a
+    pole-to-race ratio of the other races, pit loss / stints from the same-track 2025 race or the other tracks' median).
+    T-034 used track_params.json, which includes R (leak removed, size measured below);
+  - interaction parameters: overtake logistic + lap-1 table refitted on the other races, R's track offset dropped
+    (T-034 used race_interaction.json, which includes R);
+  - calibration constants (pace scale/shrink/weights, pace noise, SC bunching, lap-1 spacing, strategy mix, held gap):
+    fitted on the other races; the overtake intercept shift is chosen from pass-count / position-change targets that
+    exclude R (calibrate_grid_sim.choose_config);
+  - pace/DNF inputs from earlier rounds only, R's own Q1 times and grid (known before the start).
+The sim ranks drivers by expected points; scored against the official finishing order (Spearman over all drivers,
+top-3 hit rate, winner hit) next to the grid order and the Plackett-Luce predictor (walk-forward, grid mode).
 
-Known leaks (small, listed in the T-034 handoff): track_params.json (base lap time, pit loss, stint caps) was built
-from all 2026 races including the held-out one, so the default strategies and lap-time level see the target
-track. They do not carry driver or car pace.
+Four configurations are scored, see calibrate_grid_sim.evaluate_modes: t034_leaky (as committed), t034_leak_fixed,
+fitted, calibrated (+ calibrated_2d sensitivity). Standard errors are across races (n = 19).
 
-    python validate_grid_sim.py [--n-sims 1000] [--rounds 2-20] [--sweep]
+    python validate_grid_sim.py [--n-sims 2000] [--rounds 2-20] [--table data/scorecard/grid_sim_selection_table.csv]
+
+The pass-calibration table (sim passes / position change per race and (scale, shift)) is read from --table if it
+exists, else recomputed (about 6 minutes; `python calibrate_grid_sim.py` writes it).
 """
 
 from __future__ import annotations
@@ -24,140 +32,70 @@ import sys
 import time
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
-from scipy.stats import spearmanr
 
 ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.core import grid_inputs as G  # noqa: E402
-from app.core import tire_model as tm  # noqa: E402
-from app.core.race_grid_sim import load_interaction_params, rank_by_points, simulate_grid  # noqa: E402
-from app.core.safety_cars import load_params as load_sc  # noqa: E402
+import calibrate_grid_sim as C  # noqa: E402
 
-WF_PATH = ROOT / "data" / "jolpica" / "predictions" / "walk_forward_2026_drivers.csv"
 OUT_PATH = ROOT / "data" / "scorecard" / "grid_sim_validation.json"
-
-
-def round_to_file() -> dict:
-    out = {}
-    for p in (ROOT / "data" / "processed").glob("*_race_info.json"):
-        info = json.loads(p.read_text())
-        if info.get("season") == 2026 and info.get("round"):
-            out[int(info["round"])] = p.name.replace("_race_info.json", "_laps.csv")
-    return out
-
-
-def score_order(pred_rank: np.ndarray, actual_pos: np.ndarray, classified: np.ndarray) -> dict:
-    rho = spearmanr(pred_rank, actual_pos).statistic
-    c = classified.astype(bool)
-    rho_c = spearmanr(pred_rank[c], actual_pos[c]).statistic if c.sum() > 3 else np.nan
-    pred_top3 = set(np.argsort(pred_rank)[:3])
-    act_top3 = set(np.argsort(actual_pos)[:3])
-    return {
-        "spearman": float(rho),
-        "spearman_classified": float(rho_c),
-        "top3_hits": len(pred_top3 & act_top3) / 3.0,
-        "winner": float(np.argmin(pred_rank) == np.argmin(actual_pos)),
-    }
-
-
-def run(rounds, n_sims, race_pace_scale, quali_weight, laps_all, files, hist, verbose=True, overtake_scale=None):
-    rows = []
-    wf = pd.read_csv(WF_PATH)
-    for rnd in rounds:
-        res = hist["results"]
-        r = res[(res["season"] == 2026) & (res["round"] == rnd)]
-        if r.empty:
-            continue
-        cid = r["circuit_id"].iloc[0]
-        track_id = G.CIRCUIT_TO_TRACK.get(cid)
-        if track_id is None:
-            continue
-        f = files.get(rnd)
-        train = laps_all[laps_all["race_file"].str.replace("\\", "/").str.endswith(f)] if f else None
-        laps_train = laps_all if f is None else laps_all[~laps_all["race_file"].str.replace("\\", "/").str.endswith(f)]
-        model = tm.build_tire_model(laps=laps_train)
-        gi = G.build_inputs(track_id, model, rnd=rnd, seed=rnd, hist=hist, race_pace_scale=race_pace_scale, quali_weight=quali_weight)
-        ip = load_interaction_params()
-        sim = simulate_grid(
-            gi.cars, gi.track["base_laptime_s"], model, gi.total_laps, n_sims=n_sims, seed=rnd,
-            pit_loss_s=gi.track["pit_loss_s"], interaction=ip, safety_cars=load_sc(), track_id=track_id,
-        )
-        s = sim.summary()
-        codes = [x["code"] for x in s]
-        pr = rank_by_points([x["exp_points"] for x in s], [x["mean_position"] for x in s])
-        er = r.set_index("code").loc[codes]
-        actual = er["position"].to_numpy(dtype=float)
-        cls = er["classified"].to_numpy()
-        grid = np.array([x["grid"] for x in s])
-        row = {"round": rnd, "track": track_id, "n": len(codes), "overtakes_per_race": float(sim.n_overtakes.mean())}
-        for name, rk in (("sim", pr), ("grid", grid.astype(float))):
-            for k, v in score_order(np.asarray(rk, float), actual, cls).items():
-                row[f"{name}_{k}"] = v
-        w = wf[wf["round"] == rnd].set_index("code")
-        if len(w) == len(codes) and set(w.index) == set(codes):
-            for k, v in score_order(w.loc[codes, "pred_rank"].to_numpy(float), actual, cls).items():
-                row[f"pl_{k}"] = v
-        rows.append(row)
-        if verbose:
-            print(f"R{rnd:>2} {track_id:<12} sim rho {row['sim_spearman']:.2f} grid {row['grid_spearman']:.2f} "
-                  f"pl {row.get('pl_spearman', float('nan')):.2f} | top3 {row['sim_top3_hits']:.2f}/{row['grid_top3_hits']:.2f}/"
-                  f"{row.get('pl_top3_hits', float('nan')):.2f} | passes {row['overtakes_per_race']:.0f}", flush=True)
-    return pd.DataFrame(rows)
-
-
-def summarise(df: pd.DataFrame) -> dict:
-    out = {"n_races": int(len(df))}
-    for m in ("sim", "grid", "pl"):
-        c = f"{m}_spearman"
-        if c in df:
-            d = df[df[c].notna()]
-            out[m] = {
-                "spearman": float(d[c].mean()),
-                "spearman_classified": float(d[f"{m}_spearman_classified"].mean()),
-                "top3_hit_rate": float(d[f"{m}_top3_hits"].mean()),
-                "winner_hit_rate": float(d[f"{m}_winner"].mean()),
-                "n": int(len(d)),
-            }
-    if "sim_spearman" in df:
-        d = df["sim_spearman"] - df["grid_spearman"]
-        out["sim_minus_grid_spearman"] = {"mean": float(d.mean()), "se": float(d.std(ddof=1) / np.sqrt(len(d))), "races_better": int((d > 0).sum())}
-    return out
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--n-sims", type=int, default=1000)
+    ap.add_argument("--n-sims", type=int, default=2000)
     ap.add_argument("--rounds", default="2-20")
-    ap.add_argument("--sweep", action="store_true", help="also try other pace scales / quali weights")
+    ap.add_argument("--table", default=str(C.TABLE_PATH))
     ap.add_argument("--no-write", action="store_true")
+    ap.add_argument("--skip-2025", action="store_true", help="skip the 2025 out-of-sample season")
     a = ap.parse_args()
     lo, hi = (int(x) for x in a.rounds.split("-"))
-    rounds = list(range(lo, hi + 1))
-    hist = G.load_history()
-    laps_all = tm.load_all_laps()
-    files = round_to_file()
     t0 = time.time()
-    configs = [("default", G.RACE_PACE_SCALE, G.QUALI_WEIGHT, True)]
-    if a.sweep:
-        configs += [(f"scale={s},qw={q}", s, q, False) for s, q in [(0.3, 0.5), (1.0, 0.5), (0.6, 1.0), (1.0, 1.0)]]
-    report = {}
-    for name, scale, qw, verbose in configs:
-        print(f"\n== {name} (race_pace_scale={scale}, quali_weight={qw}, n_sims={a.n_sims})")
-        df = run(rounds, a.n_sims, scale, qw, laps_all, files, hist, verbose=verbose)
-        report[name] = {"summary": summarise(df), "per_race": df.to_dict("records")}
-        s = report[name]["summary"]
-        for m in ("sim", "grid", "pl"):
+    real = C.Real()
+    st = C.Study(real, range(lo, hi + 1), verbose=False)
+    tp = Path(a.table)
+    if tp.exists():
+        table = pd.read_csv(tp)
+    else:
+        table = C.selection_table(st)
+        tp.parent.mkdir(parents=True, exist_ok=True)
+        table.to_csv(tp, index=False)
+    res = C.evaluate_modes(st, table, n_sims=a.n_sims)
+    report = {"n_sims": a.n_sims, "rounds": [lo, hi], "modes": {}}
+    for name, df in res["rows"].items():
+        s = C.summarise_rows(df)
+        report["modes"][name] = {"summary": s, "per_race": df.to_dict("records")}
+        print(f"\n== {name}")
+        for m in ("sim", "grid", "pl", "blend50", "blend25", "blend75"):
             if m in s:
-                print(f"  {m:<5} Spearman {s[m]['spearman']:.3f} (classified {s[m]['spearman_classified']:.3f})  "
-                      f"top-3 {s[m]['top3_hit_rate']:.3f}  winner {s[m]['winner_hit_rate']:.3f}  n={s[m]['n']}")
-        print("  sim - grid Spearman:", s["sim_minus_grid_spearman"])
+                x = s[m]
+                print(f"  {m:<5} Spearman {x['spearman']:.3f} +/- {x['spearman_se']:.3f}  top-3 {x['top3_hit_rate']:.3f} +/- {x['top3_se']:.3f}  "
+                      f"winner {x['winner_hit_rate']:.3f} +/- {x['winner_se']:.3f}  n={x['n']}")
+        for k in ("sim_minus_grid_spearman", "sim_minus_pl_spearman", "blend50_minus_pl_spearman", "blend50_minus_grid_spearman",
+                  "passes", "position_change", "prob_scores"):
+            if k in s:
+                print(f"  {k}: {s[k]}")
+    report["chosen_config_per_fold"] = res["chosen"]
+    if not a.skip_2025:
+        r25 = C.evaluate_2025(st, table, n_sims=a.n_sims)
+        s25 = C.summarise_rows(r25["rows"])
+        report["season_2025"] = {"summary": s25, "per_race": r25["rows"].to_dict("records")}
+        print("\n== 2025 season (all-2026 constants, fully out of sample for the sim; PL config was tuned on 2025)")
+        for m in ("sim", "grid", "pl"):
+            if m in s25:
+                x = s25[m]
+                print(f"  {m:<5} Spearman {x['spearman']:.3f} +/- {x['spearman_se']:.3f}  top-3 {x['top3_hit_rate']:.3f} +/- {x['top3_se']:.3f}  "
+                      f"winner {x['winner_hit_rate']:.3f} +/- {x['winner_se']:.3f}  n={x['n']}")
+        for k in ("sim_minus_grid_spearman", "sim_minus_pl_spearman", "position_change"):
+            if k in s25:
+                print(f"  {k}: {s25[k]}")
+        print("  sim passes/race:", float(r25["rows"]["sim_passes"].mean()))
     print(f"\n{time.time() - t0:.0f}s")
     if not a.no_write:
         OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-        OUT_PATH.write_text(json.dumps(report, indent=1))
+        OUT_PATH.write_text(json.dumps(report, indent=1, default=float))
 
 
 if __name__ == "__main__":

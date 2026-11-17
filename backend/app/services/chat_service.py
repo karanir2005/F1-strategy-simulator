@@ -70,6 +70,13 @@ TOOL_SCHEMAS = [
           {"track_id": _S, "round": _I, "n_sims": _I, "forced_sc_lap": _I, "forced_sc_laps": _I,
            "safety_cars": _B, "strategies": {"type": "object", "description": "{CODE: [{compound, laps}]}"},
            "top_n": _I}, ["track_id"]),
+    _tool("optimize_pit_policy",
+          "Best safety-car-reactive pit rule for one driver at a track: 'if an SC/VSC starts between laps a-b and "
+          "tyres are >= k laps old, box for compound C', with expected points gain vs the fixed plan and a 95% "
+          "interval. Takes about 10 seconds. driver defaults to the pole sitter.",
+          {"track_id": _S, "driver": _S, "base_plan": {"type": "array", "description": "[{compound, laps}] optional",
+                                                       "items": {"type": "object"}},
+           "n_sims": _I}, ["track_id"]),
     _tool("query_laps", "Filtered per-lap data for one 2026 race (name fragment, e.g. 'Austin'). Max 200 rows.",
           {"race": _S, "driver": _S, "lap_from": _I, "lap_to": _I, "compound": _S, "green_only": _B,
            "max_rows": _I}, ["race"]),

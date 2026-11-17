@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "fitted_on": [
+    "Australia_2026",
+    "China_2026",
+    "Japan_2026",
+    "Miami_2026",
+    "Canada_2026",
+    "Monaco_2026",
+    "Barcelona_2026",
+    "Austria_2026",
+    "Britain_2026",
+    "Belgium_2026",
+    "Hungary_2026",
+    "Netherlands_2026",
+    "Italy_2026",
+    "Madrid_2026",
+    "Azerbaijan_2026",
+    "Malaysia_2026",
+    "Singapore_2026",
+    "Austin_2026",
+    "Mexico_2026"
+  ],
+  "pace": {
+    "race_pace_scale": 1.2581,
+    "driver_shrink": 0.25,
+    "quali_weight": 0.6237,
+    "team_pace_sd_s": 0.4341,
+    "driver_pace_sd_s": 0.3316,
+    "r2": 0.7341,
+    "resid_sd_s": 0.539,
+    "n_driver_races": 279,
+    "raw_ab": [
+      0.7846,
+      0.4734
+    ]
+  },
+  "sc": {
+    "gap_s": 1.249,
+    "closure": 0.3138,
+    "n_gap_laps": 20,
+    "n_ratios": 5
+  },
+  "lap1_spacing_s": 0.7129,
+  "strategy_mix": {
+    "plan_weights": [
+      0.5201,
+      0.2627,
+      0.2172
+    ],
+    "pit_jitter_laps": 12,
+    "resid_sd_laps": 9.859,
+    "n_drivers": 373
+  },
+  "overtake_calibration": {
+    "pace_delta_scale": 1.0,
+    "intercept_shift": -0.9,
+    "held_gap_s": 0.871,
+    "held_gap_sigma": 0.519,
+    "target_passes_per_race": 23.22,
+    "sim_passes_per_race": 23.36,
+    "target_position_change_sd": 3.807,
+    "sim_position_change_sd": 3.914
+  },
+  "notes": "Fitted 2026-11-16 by calibrate_grid_sim.py (T-060) from the 19 dry 2026 races. pace.* regress real clean-air race pace on the sim's own pace inputs (scale 1): race_pace_scale is the slope, quali_weight the share of the Q1 gap vs the quantile-matched rating order, driver_shrink the pull toward the team mean, *_pace_sd_s the variance components of the residual net of the pace-estimate sampling variance. sc.gap_s / closure: bunching behind the SC (floor and per-lap decay of the median car-to-car gap). lap1_spacing_s: slope of gap-to-leader at the end of lap 1 per position. strategy_mix: share of real strategies nearest to the optimizer's top-3 plans and the half-width of the per-stop jitter. overtake_calibration: pace_delta_scale multiplies the pace delta in the overtake logit, intercept_shift is added to the intercept, held_gap_s is the gap a car is held at after a failed pass (real median); scale/shift chosen to match real passes per race (T-053 definition, all events) and the spread of grid->finish position change."
+}

@@ -455,3 +455,87 @@ export async function fetchPredictionRace(round: number): Promise<PredictionResp
   const response = await call(`/predict/race/${round}`, "Loading the race");
   return response.json();
 }
+
+// ---------------------------------------------------------------------------
+// Safety-car-reactive pit rule (backend/app/api/routes/pit_policy.py, T-055). POST /strategy/policy, ~10-20 s.
+// ---------------------------------------------------------------------------
+
+export interface PolicyRequest {
+  track_id: string;
+  /** Default: the driver on pole. */
+  driver?: string | null;
+  /** The fixed plan the rule is added to; must sum to the race laps. Default: the optimizer's #1 plan. */
+  base_plan?: { compound: Compound; laps: number; start_age?: number }[] | null;
+  /** 200..10000 */
+  n_sims?: number;
+  /** 100..3000 */
+  n_screen?: number;
+  seed?: number;
+  safety_cars?: boolean;
+  field_sensitivity?: boolean;
+  /** 1..100; omit for the track's race distance. */
+  total_laps?: number | null;
+}
+
+export interface PolicyOut {
+  window_lo: number;
+  window_hi: number;
+  min_age: number;
+  compound: Compound;
+  /** "sc" = full safety car only; "sc_or_vsc" */
+  trigger: "sc" | "sc_or_vsc";
+}
+
+export interface PolicyGain {
+  /** Expected points gained vs the fixed plan, over all runs. */
+  points: number;
+  /** Half-width of the 95% interval on `points`. */
+  points_ci95: number;
+  /** Expected finishing positions gained (+ = better). */
+  positions: number;
+  positions_ci95: number;
+  /** 0..1, share of runs in which the rule fired. */
+  fire_rate: number;
+}
+
+export interface PolicyResponse {
+  track_id: string;
+  round: number;
+  total_laps: number;
+  driver: string;
+  team: string;
+  grid: number;
+  base_plan: StintOut[];
+  policy: PolicyOut | null;
+  /** Plain-English rule, with a caveat when it is not reliably better. */
+  rule: string;
+  /** 95% interval of the points gain excludes 0 (positive side). */
+  significant: boolean;
+  gain: PolicyGain | null;
+  points_gain_when_fired: number | null;
+  points_gain_when_fired_ci95: number | null;
+  positions_gain_when_fired: number | null;
+  share_of_fires_better: number | null;
+  share_of_fires_worse: number | null;
+  fire_lap_mean: number | null;
+  base_exp_points: number | null;
+  base_mean_position: number | null;
+  /** Same comparison with every other car also following the rule. */
+  if_field_follows: PolicyGain | null;
+  screen_gain_points: number;
+  n_sims: number;
+  n_screen: number;
+  seed: number;
+  notes: string[];
+  assumptions: string[];
+}
+
+export async function runPitPolicy(request: PolicyRequest): Promise<PolicyResponse> {
+  const response = await call(
+    "/strategy/policy",
+    "Safety-car rule search",
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request) },
+    180_000,
+  );
+  return response.json();
+}

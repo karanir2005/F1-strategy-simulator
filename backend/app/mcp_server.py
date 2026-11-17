@@ -474,10 +474,60 @@ def simulate_grid(
     return _with_caveats(out, CAVEATS_GRID + ([f"A safety car is forced from lap {forced_sc_lap}."] if forced_sc_lap else []))
 
 
+CAVEATS_POLICY = [
+    "The rule is searched on one random seed and its gain is scored on another, with a 95% interval; if `significant` is "
+    "false there is no reliable gain and the rule text says so.",
+    "Scored with the full-grid simulation but every other car keeps a fixed plan (see `if_field_follows` for the case "
+    "where all cars follow the rule). Safety-car timing is the fitted model (26 SC, 30 VSC events), not a forecast.",
+    "Tyre wear and fuel are not reduced under SC/VSC and the tyre-cliff penalties are placeholders, so the value of a "
+    "fresh set late in a stint is model-dependent.",
+]
+
+
+def optimize_pit_policy(
+    track_id: str,
+    driver: str | None = None,
+    base_plan: list[dict] | None = None,
+    n_sims: int = 2000,
+    n_screen: int = 400,
+    seed: int = 0,
+    field_sensitivity: bool = False,
+) -> dict:
+    """Best safety-car-reactive pit rule for one driver at a track (same inputs as POST /strategy/policy): 'if an SC or
+    VSC starts between laps a and b and tyres are at least k laps old, box for compound C, else keep the plan', with
+    the expected points/position gain over the fixed plan and a 95% interval. base_plan = [{"compound": "MEDIUM",
+    "laps": 24}, {"compound": "HARD", "laps": 32}] (default: the optimizer's best plan). Takes ~10 s."""
+    from fastapi import HTTPException
+    from pydantic import ValidationError
+
+    from app.api.routes.pit_policy import PolicyRequest, policy_route
+
+    try:
+        req = PolicyRequest(track_id=track_id, driver=driver, base_plan=base_plan, n_sims=n_sims, n_screen=n_screen,
+                            seed=seed, field_sensitivity=field_sensitivity)
+        with _quiet():
+            resp = policy_route(req)
+    except ValidationError as exc:
+        e = exc.errors()[0]
+        return _err(f"invalid input: {'.'.join(map(str, e['loc']))}: {e['msg']}", CAVEATS_POLICY)
+    except HTTPException as exc:
+        return _err(_http_detail(exc), CAVEATS_POLICY)
+    d = resp.model_dump()
+    d.pop("assumptions", None)
+    d["base_plan"] = [f"{s['compound'][0]}{s['laps']}" for s in d["base_plan"]]
+
+    def rnd(x):
+        if isinstance(x, dict):
+            return {k: rnd(v) for k, v in x.items()}
+        return _round(x, 3) if isinstance(x, float) else x
+
+    return _with_caveats(rnd(d), CAVEATS_POLICY)
+
+
 # ------------------------------------------------------------------ server
 
 TOOLS = [list_tracks, predict_race, get_race_results, optimize_strategy, simulate_strategy, simulate_grid,
-         query_laps, search_project_notes]
+         optimize_pit_policy, query_laps, search_project_notes]
 
 INSTRUCTIONS = (
     "Tools over the user's own F1 strategy simulator and race predictor (2026 season). Always read the `caveats` "

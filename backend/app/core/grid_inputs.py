@@ -17,7 +17,10 @@ Pace (seconds per lap slower than the field's best cars), per car:
   4. Converted to race seconds with RACE_PACE_SCALE x base lap time. Practice long runs (openf1_practice)
      are not used: they are only available for part of the 2026 weekends and the predictor's own test
      of them (use_fp) was not a clear gain.
-All of the constants below are PLACEHOLDERS (judgement, not fitted) and are listed in the T-034 handoff.
+The pace constants below were T-034 PLACEHOLDERs; T-060 fits them (calibrate_grid_sim.py, leave-one-race-out against
+real race pace) into data/sim_params/grid_sim_calibration.json and they are read from there at import, with the old
+placeholder values as the per-key fallback (race_grid_sim.load_grid_calibration). Callers that need other values
+(the validation does it per fold) pass them explicitly.
 """
 
 from __future__ import annotations
@@ -35,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from app.core import predictor as P
 from app.core.optimizer import NoFeasiblePlan, min_stint_laps, optimize
-from app.core.race_grid_sim import CarSpec
+from app.core.race_grid_sim import CarSpec, load_grid_calibration
 from app.core.race_simulator import DEFAULT_PIT_LOSS_SECONDS, Stint
 from app.core.track_params import get_track
 
@@ -43,13 +46,14 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DERIVED = REPO_ROOT / "data" / "jolpica" / "derived"
 SEASON = 2026
 
-# PLACEHOLDER: race-pace spread as a share of the Q1 spread. Quali laps exaggerate gaps (engine modes,
-# low fuel); there is no fit yet. Needs a fit against 2026 race pace (request in the T-034 handoff).
-RACE_PACE_SCALE = 0.6
-# PLACEHOLDER: weight of a driver's own quali gap vs the team mean (1 = no shrinkage).
-DRIVER_SHRINK = 0.5
-# PLACEHOLDER: weight of the quali-based pace vs the earlier-race rating-based pace (1 = quali only).
-QUALI_WEIGHT = 0.5
+_CAL = load_grid_calibration()
+# Race-pace spread as a share of the Q1 spread (T-060: fitted, the placeholder 0.6 was too low: real race pace is
+# spread MORE than the Q1 gaps scaled by 1 in 2026; see grid_sim_calibration.json). Falls back to 0.6.
+RACE_PACE_SCALE = _CAL.race_pace_scale
+# Weight of a driver's own quali gap vs the team mean (1 = no shrinkage). Fitted (T-060), fallback 0.5.
+DRIVER_SHRINK = _CAL.driver_shrink
+# Weight of the quali-based pace vs the earlier-race rating-based pace (1 = quali only). Fitted (T-060), fallback 0.5.
+QUALI_WEIGHT = _CAL.quali_weight
 # Cap on the Q1 gap (percent of lap) so a car with a crashed/no lap does not get an absurd pace.
 MAX_GAP_FRAC = 0.04
 
@@ -234,12 +238,13 @@ def top_plans(track: dict, tire_model: dict, total_laps: Optional[int] = None, n
     return _PLAN_CACHE[key]
 
 
-PLAN_WEIGHTS = (0.6, 0.25, 0.15)  # PLACEHOLDER: share of cars on the optimizer's #1 / #2 / #3 plan
-PIT_JITTER_LAPS = 2  # PLACEHOLDER: per-stop +-laps of per-car variation
+PLAN_WEIGHTS = _CAL.plan_weights  # share of cars on the optimizer's #1 / #2 / #3 plan (T-060 fit, fallback 0.6/0.25/0.15)
+PIT_JITTER_LAPS = _CAL.pit_jitter_laps  # per-stop +-laps of per-car variation (T-060 fit, fallback 2)
 
 
-def vary_plan(plan: List[Stint], rng: np.random.Generator, total_laps: int) -> List[Stint]:
+def vary_plan(plan: List[Stint], rng: np.random.Generator, total_laps: int, jitter: Optional[int] = None) -> List[Stint]:
     """Shift every stop by an integer in [-J, J] laps, keeping each stint >= the optimizer's minimum length."""
+    J = PIT_JITTER_LAPS if jitter is None else int(jitter)
     if len(plan) < 2:
         return [Stint(s.compound, s.laps, s.start_age) for s in plan]
     lo = min_stint_laps(total_laps)
@@ -247,7 +252,7 @@ def vary_plan(plan: List[Stint], rng: np.random.Generator, total_laps: int) -> L
     shifted = []
     prev = 0
     for k, b in enumerate(bounds):
-        nb = int(b + rng.integers(-PIT_JITTER_LAPS, PIT_JITTER_LAPS + 1))
+        nb = int(b + rng.integers(-J, J + 1))
         nb = max(nb, prev + lo)
         nb = min(nb, total_laps - lo * (len(bounds) - k))
         shifted.append(nb)
@@ -257,18 +262,19 @@ def vary_plan(plan: List[Stint], rng: np.random.Generator, total_laps: int) -> L
 
 
 def default_strategies(
-    n_cars: int, track: dict, tire_model: dict, total_laps: Optional[int] = None, seed: int = 0, vary: bool = True
+    n_cars: int, track: dict, tire_model: dict, total_laps: Optional[int] = None, seed: int = 0, vary: bool = True,
+    plan_weights=None, pit_jitter: Optional[int] = None,
 ) -> List[List[Stint]]:
     """One plan per car: the optimizer's top plans assigned by PLAN_WEIGHTS, each with per-stop jitter."""
     total = int(total_laps or track["total_laps"])
     plans = top_plans(track, tire_model, total)
     rng = np.random.default_rng(seed + 7919)
-    w = np.array(PLAN_WEIGHTS[: len(plans)], dtype=float)
+    w = np.array((PLAN_WEIGHTS if plan_weights is None else plan_weights)[: len(plans)], dtype=float)
     w = w / w.sum()
     out = []
     for _ in range(n_cars):
         base = plans[int(rng.choice(len(plans), p=w))] if vary else plans[0]
-        out.append(vary_plan(base, rng, total) if vary else [Stint(s.compound, s.laps, s.start_age) for s in base])
+        out.append(vary_plan(base, rng, total, pit_jitter) if vary else [Stint(s.compound, s.laps, s.start_age) for s in base])
     return out
 
 
@@ -297,10 +303,14 @@ def build_inputs(
     race_pace_scale: float = RACE_PACE_SCALE,
     quali_weight: float = QUALI_WEIGHT,
     vary_strategies: bool = True,
+    driver_shrink: Optional[float] = None,
+    plan_weights=None,
+    pit_jitter: Optional[int] = None,
+    track: Optional[dict] = None,
 ) -> GridInputs:
     """Assemble CarSpecs for a race. `strategies` overrides {driver code: [Stint]} for those cars only."""
     hist = hist or load_history()
-    track = get_track(track_id)
+    track = track if track is not None else get_track(track_id)  # `track`: caller-built entry (validation rebuilds it per fold, T-060)
     if track is None:
         raise KeyError(track_id)
     if rnd is None:
@@ -310,9 +320,12 @@ def build_inputs(
     total = int(total_laps or track["total_laps"])
     base = float(base_laptime_s or track["base_laptime_s"])
     ent = race_entrants(hist, season, rnd, grid)
-    pace = pace_deltas(hist, season, rnd, ent, base, race_pace_scale=race_pace_scale, quali_weight=quali_weight)
+    pace = pace_deltas(
+        hist, season, rnd, ent, base, race_pace_scale=race_pace_scale, quali_weight=quali_weight,
+        driver_shrink=DRIVER_SHRINK if driver_shrink is None else driver_shrink,
+    )
     pdnf = dnf_probs(hist, season, rnd, ent)
-    strats = default_strategies(len(ent), track, tire_model, total, seed, vary_strategies)
+    strats = default_strategies(len(ent), track, tire_model, total, seed, vary_strategies, plan_weights, pit_jitter)
     notes = []
     overrides = {str(k).upper(): v for k, v in (strategies or {}).items()}
     unknown = sorted(set(overrides) - set(ent["code"]))

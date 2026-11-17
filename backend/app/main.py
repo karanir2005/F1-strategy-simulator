@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes.chat import router as chat_router
 from app.api.routes.grid_sim import router as grid_sim_router
+from app.api.routes.pit_policy import router as pit_policy_router
 from app.api.routes.predict import router as predict_router
 from app.api.routes.simulation import router as simulation_router
 from app.api.routes.tracks import router as tracks_router
@@ -40,6 +41,7 @@ app.add_middleware(
 
 app.include_router(simulation_router)
 app.include_router(grid_sim_router)
+app.include_router(pit_policy_router)
 app.include_router(tracks_router)
 app.include_router(predict_router)
 app.include_router(chat_router)
